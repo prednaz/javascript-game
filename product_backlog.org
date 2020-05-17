@@ -1,0 +1,4 @@
+* Spielflaeche
+  Das Spiel findet auf einer zweidimensionalen, gegenueber dem Viewport unbeweglichen Spielflaeche statt.
+* Spielfigur
+  Die Spielfigur kann mit den Tasten W, A, S, D bewegt werden.
