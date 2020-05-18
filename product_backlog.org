@@ -7,16 +7,14 @@
     Gaenge formt, deren Breite der Seitenlaenge von einem Quadrat des
     Rasters entspricht. Die Loecher nehmen die Flaeche von den
     Quadraten des Raster ein, die in folgendem regelmaessigen Muster
-    angeordnet sind, wobei "o" fuer ein Loch steht.
-    +-----------+
-    |           |
-    | o o o o o |
-    |           |
-    | o o o o o |
-    |           |
-    | o o o o o |
-    |           |
-    +-----------+
+    angeordnet sind, wobei "x" fuer ein Loch steht.
+    |   |   |   |   |   |   |   |   |   |
+    |   | x |   | x |   | x |   | x |   |
+    |   |   |   |   |   |   |   |   |   |
+    |   | x |   | x |   | x |   | x |   |
+    |   |   |   |   |   |   |   |   |   |
+    |   | x |   | x |   | x |   | x |   |
+    |   |   |   |   |   |   |   |   |   |
   - Zu Anfang jeder Runde befinden sich auf dem Spielfeld ausser den
     Spielern Bloecke, die jeweils die Flaeche eines Quadrats des
     Rasters einnehmen.
