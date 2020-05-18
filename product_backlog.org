@@ -1,4 +1,62 @@
-* Spielflaeche
-  Das Spiel findet auf einer zweidimensionalen, gegenueber dem Viewport unbeweglichen Spielflaeche statt.
-* Spielfigur
-  Die Spielfigur kann mit den Tasten W, A, S, D bewegt werden.
+- Das Spiel findet auf einer zweidimensionalen, gegenueber dem
+  Viewport unbeweglichen Spielflaeche statt.
+  - Die Spielflaeche ist durch ein Raster in Quadrate aufgeteilt mit
+    einer festen Anzahl von ungefaehr 13 Quadraten pro Zeile und einer
+    festen Anzahl von ungefaehr 11 Quadraten pro Spalte.
+  - Das Spielfeld hat Loecher, sodass das verbleibende Spielfeld
+    Gaenge formt, deren Breite der Seitenlaenge von einem Quadrat des
+    Rasters entspricht. Die Loecher nehmen die Flaeche von den
+    Quadraten des Raster ein, die in folgendem regelmaessigen Muster
+    angeordnet sind, wobei "o" fuer ein Loch steht.
+    +-----------+
+    |           |
+    | o o o o o |
+    |           |
+    | o o o o o |
+    |           |
+    | o o o o o |
+    |           |
+    +-----------+
+  - Zu Anfang jeder Runde befinden sich auf dem Spielfeld ausser den
+    Spielern Bloecke, die jeweils die Flaeche eines Quadrats des
+    Rasters einnehmen.
+- Die Spielfigur kann mit den Tasten W, A, S, D bewegt werden.
+  - Spielerfiguren nehmen genau die Flaeche eines Quadrats des Rasters
+    ein.
+  - Spieler koennen keine Spielfeldloecher betreten.
+  - Es folgt, dass sich Spieler nur entlang der Achsen des Raster
+    bewegen koennen, nicht diagonal.
+  - Spieler koennen keine Bloecke betreten.
+  - Spieler koennen keine Quadrate des Rasters betreten, auf denen
+    Bomben liegen, die noch nicht explodiert sind.
+- Spieler koennen an ihrer aktuellen Position Bomben zurueckenlassen
+  mit einer festgelegten Taste.
+  - Die Bombe bleibt immer genau auf der Mitte des Quadrats des Raster
+    liegen, auf dem sich der Spielermittelpunkt befindet.
+  - Bomben explodieren nach einem festgelgten Zeitraum von ungefaehr
+    2,6 Sekunden fuer eine festgelegte Dauer von ungefaehr 1 Sekunden.
+  - Nach legen einer Bombe, muss ein Spieler bis zu deren Explosion
+    warten, bevor er die naechste ablegen kann.
+  - Wenn die Strecke von einer explodierenden Bombe zu einem Spieler
+    kuerzer als zwei Rasterquadratseitenlaengen ist und nicht durch
+    Spielfaeldloecher unterbrochen ist, verliert dieser Spieler eins
+    von einer festen Anzahl an Leben. Dann haben fuer einen
+    festgelegten Zeitraum von ungefaehr 3 Sekunden Bomben auf diesen
+    Spieler keinen Effekt.
+  - Wenn die Strecke von einer explodierenden Bombe zu einem Block
+    kuerzer als zwei Rasterquadratseitenlaengen ist und nicht durch
+    Spielfaeldloecher unterbrochen ist, verschwindet dieser Block und
+    wird zufaellig durch ein aufsammelbares Power-up ersetzt.
+    - Manche Power-ups steigern die Bewegungsgeschwindigkeit des
+      aufsammelnden Spielers.
+    - Manche Power-ups steigern den Explosionsradius um eine
+      Rasterquadratseitenlaenge der Bomben, die der aufsammelnde
+      Spieler ab dann legt.
+    - Manche Power-ups steigern die Anzahl der Bomben, die von dem
+      aufsammelnden Spieler stammen und gleichzeitig auf der
+      Spielflaeche liegen koennen, bevor sie explodieren.
+    - Manche Power-ups erlauben dem aufsammelnden Spieler Quadrate des
+      Rasters zu betreten, auf denen Bomben liegen, die noch nicht
+      explodiert sind. Die Bombe gleitet dabei in Laufrichtung des
+      Spielers weg, bis sie auf ein Spielflaechenloch oder Block
+      trifft.
