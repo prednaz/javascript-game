@@ -91,17 +91,17 @@ const gameState = {
     },
     snake: [{x: 1, y:2}, 
     {x: 2, y:2},
+    {x: 3, y:2},
     {x: 4, y:2},
-    {x: 5, y:2},
-    {x: 6, y:2}]
+    {x: 5, y:2}]
 }
 
-class apple {
+/*class apple {
     constructor(x, y) {
         this.x = x;
         this.y = y;
     }
-}
+}*/
 
 const canvas = document.getElementById('myCanvas')
 
