@@ -50,7 +50,7 @@
       aufsammelnden Spielers.
     - Manche Power-ups steigern den Explosionsradius um eine
       Rasterquadratseitenlaenge der Bomben, die der aufsammelnde
-      Spieler ab dann legt. Hallo Leon.
+      Spieler ab dann legt.
     - Manche Power-ups steigern die Anzahl der Bomben, die von dem
       aufsammelnden Spieler stammen und gleichzeitig auf der
       Spielflaeche liegen koennen, bevor sie explodieren.
