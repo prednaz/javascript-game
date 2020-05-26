@@ -42,6 +42,7 @@
     von einer festen Anzahl an Leben. Dann haben fuer einen
     festgelegten Zeitraum von ungefaehr 3 Sekunden Bomben auf diesen
     Spieler keinen Effekt.
+  - Test
   - Wenn die Strecke von einer explodierenden Bombe zu einem Block
     kuerzer als zwei Rasterquadratseitenlaengen ist und nicht durch
     Spielfaeldloecher unterbrochen ist, verschwindet dieser Block und
