@@ -21,14 +21,13 @@ document.addEventListener(
 const main =
   timestamp => {
     ++step_count;
-    console.log(step_count);
     if (timestamp_previous !== -1)
       game_state = Game.update(game_state)(Ui.Tick.create(timestamp - timestamp_previous));
     context.clearRect(0, 0, canvas.width, canvas.height);
     Game.draw(game_state)(context)();
     timestamp_previous = timestamp;
-    // if (step_count < 200)
-      requestAnimationFrame(main);
+    // if (step_count < 300)
+    requestAnimationFrame(main);
   };
 
 module.exports = () => requestAnimationFrame(main);

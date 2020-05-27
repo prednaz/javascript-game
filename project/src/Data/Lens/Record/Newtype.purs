@@ -1,12 +1,15 @@
-module Data.Lens.Record.Newtype where
+module Data.Lens.Record.Newtype  where
 
 import Prelude ((<<<))
 import Data.Newtype (class Newtype)
 import Data.Symbol (SProxy (SProxy), class IsSymbol)
 import Prim.Row (class Cons)
 import Data.Lens.Types (Lens)
-import Data.Lens.Iso.Newtype (_Newtype)
-import Data.Lens.Record (prop)
+import Data.Lens.Iso.Newtype as Lens.Iso.Newtype
+import Data.Lens.Record as Lens.Record
+import Control.Semigroupoid as Semigroupoid
+
+infixr 9 Semigroupoid.compose as %
 
 field ::
   forall label s t rowU rowV a b tail.
@@ -17,7 +20,7 @@ field ::
   Cons label b tail rowV =>
   SProxy label ->
   Lens s t a b
-field label = _Newtype <<< prop label
+field label = Lens.Iso.Newtype._Newtype <<< Lens.Record.prop label
 
 _f ::
   forall label s t rowU rowV a b tail.

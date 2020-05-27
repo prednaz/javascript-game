@@ -11,8 +11,7 @@ import Ui (State (State), Event (Tick))
 import Data.HashSet as HashSet
 import Data.Newtype (class Newtype)
 import Data.Lens as L
-import Data.Lens.Record.Newtype (field, _f, l, L)
-import Data.Symbol (SProxy (SProxy))
+import Data.Lens.Record.Newtype (field, (%), _f, l, L)
 
 -- import Effect.Console (log)
 
@@ -39,21 +38,6 @@ initialGameState =
                  x: 100.0,
                  y: 101.0}}}
 
-_x :: L.Lens' GameState Number
-_x =
-  field (SProxy :: SProxy "player") <<<
-  field (SProxy :: SProxy "position") <<<
-  field (SProxy :: SProxy "x")
-
-_y :: L.Lens' GameState Number
-_y = _f(l::L "player") <<< _f(l::L "position") <<< _f(l::L "y")
-
-_runSpeed :: L.Lens' GameState Number
-_runSpeed = _f(l::L "player") <<< _f(l::L "runSpeed")
-
-runSpeedGet :: GameState -> Number
-runSpeedGet = L.view $ _runSpeed
-
 updateGame :: State GameState -> Event -> GameState
 updateGame (State gameState keys) (Tick time)
   | keys == HashSet.singleton "w" =
@@ -64,7 +48,6 @@ updateGame (State gameState keys) (Tick time)
     L.over _y (_ + time * runSpeedGet gameState) gameState
   | keys == HashSet.singleton "d" =
     L.over _x (_ + time * runSpeedGet gameState) gameState
-  | otherwise = gameState
 updateGame (State gameState _keys) _event = gameState
 
 drawGame :: GameState -> C.Context2D -> Effect Unit
@@ -90,3 +73,20 @@ update = U.update updateGame
   
 draw :: State GameState -> C.Context2D -> Effect Unit
 draw (State gameState _) = drawGame gameState
+
+_x :: L.Lens' GameState Number
+_x =
+  field (l::L "player") %
+  field (l::L "position") %
+  field (l::L "x")
+
+_y :: L.Lens' GameState Number
+_y =
+  field (l::L "player") %
+  field (l::L "position") %
+  field (l::L "y")
+
+runSpeedGet :: GameState -> Number
+runSpeedGet =
+  L.view (_f(l::L "player") % _f(l::L "runSpeed") :: L.Lens' GameState Number)
+
