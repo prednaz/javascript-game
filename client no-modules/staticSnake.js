@@ -1,35 +1,57 @@
 let TEST_CELLSIZE;
+function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+  }
 
 window.setInterval(function() {
+    if(gameState.isalive) {
     movePlayer(gameState);
     drawOnCanvas(canvas, gameState);
-}, 1000);
+    }
+}, 500);
 
 
 function movePlayer(gameState) {
-    gameState.snake.shift();
+    const headNew = Object.assign({}, gameState.snake[gameState.snake.length-1]);
+    for (let i; i<gameState.snake.length-1; i++) {
+        if(headNew.x === gameState.snake[i].x  && headNew.y === gameState.snake[i].y){
+            gameState.isalive = false;
+        }
+    }
+    if (!(gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)){
+        gameState.snake.shift();
+    }
+        if ((gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)){    
+            const newApple = {x: 0, y: 0};
+            newApple.x = getRandomInt(8);
+            newApple.y = getRandomInt(8);
+        for (let i; i<gameState.snake.length; i++) {
+            if (newApple.x === gameState.snake[i].x  && newApple.y === gameState.snake[i].y) 
+                newApple.x = getRandomInt(8);
+                newApple.y = getRandomInt(8);
+                i = 0
+                }
+        gameState.apple = newApple;
+    }
+    
     if (gameState.pressedKey === 'ArrowUp') {
-        const headNew = Object.assign({}, gameState.snake[gameState.snake.length-1]);
         headNew.y--;
         gameState.snake.push(headNew);
     } else if (gameState.pressedKey === 'ArrowRight') {
-        const headNew = Object.assign({}, gameState.snake[gameState.snake.length-1]);
         headNew.x++;
         gameState.snake.push(headNew);
     } else if (gameState.pressedKey === 'ArrowDown') {
-        const headNew = Object.assign({}, gameState.snake[gameState.snake.length-1]);
         headNew.y++;
         gameState.snake.push(headNew);
     } else if (gameState.pressedKey === 'ArrowLeft') {
-        const headNew = Object.assign({}, gameState.snake[gameState.snake.length-1]);
         headNew.x--;
         gameState.snake.push(headNew);
     }
 }
 
 document.addEventListener('keyup', event => {
-    gameState.pressedKey = event.code;
-    console.log(event.code);
+    gameState.pressedKey = event.key;
+    console.log(event.key);
 });
 
 function drawLine(x1, y1, x2, y2, context) {
@@ -103,8 +125,11 @@ const gameState = {
     {x: 2, y:2},
     {x: 3, y:2},
     {x: 4, y:2},
-    {x: 5, y:2}]
-}
+    {x: 5, y:2}],
+
+    isalive: true,
+   }
+    
 
 /*class apple {
     constructor(x, y) {
