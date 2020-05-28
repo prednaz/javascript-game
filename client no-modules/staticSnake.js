@@ -12,7 +12,7 @@ document.addEventListener('keyup', event => {
 function movePlayer(gameState) {
     gameState.snake.shift();
     if (gameState.pressedKey === 'ArrowUp') {
-        const headNew = gameState.snake[gameState.snake.length-1];
+        const headNew = Object.assign({}, gameState.snake[gameState.snake.length-1]);
         headNew.y--;
         gameState.snake.push(headNew);
     } else if (gameState.pressedKey === 'ArrowRight') {
