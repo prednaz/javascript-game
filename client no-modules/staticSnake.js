@@ -10,14 +10,15 @@ document.addEventListener('keyup', event => {
 });
 
 function movePlayer(gameState) {
+    gameState.snake.shift();
     if (gameState.pressedKey === 'ArrowUp') {
-        gameState.playerPosition.y -= 1;
+        gameState.snake.push(gameState.snake[gameState.snake.length-1].y--);
     } else if (gameState.pressedKey === 'ArrowRight') {
-        gameState.playerPosition.x += 1;
+        gameState.snake.push(gameState.snake[gameState.snake.length-1].x++);
     } else if (gameState.pressedKey === 'ArrowDown') {
-        gameState.playerPosition.y += 1;
+        gameState.snake.push(gameState.snake[gameState.snake.length-1].y++);
     } else if (gameState.pressedKey === 'ArrowLeft') {
-        gameState.playerPosition.x -= 1;
+        gameState.snake.push(gameState.snake[gameState.snake.length-1].x--);
     }
 }
 
