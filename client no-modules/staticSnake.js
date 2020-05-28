@@ -8,31 +8,12 @@ window.setInterval(function() {
     movePlayer(gameState);
     drawOnCanvas(canvas, gameState);
     }
-}, 500);
+}, 200);
 
 
 function movePlayer(gameState) {
     const headNew = Object.assign({}, gameState.snake[gameState.snake.length-1]);
-    for (let i; i<gameState.snake.length-1; i++) {
-        if(headNew.x === gameState.snake[i].x  && headNew.y === gameState.snake[i].y){
-            gameState.isalive = false;
-        }
-    }
-    if (!(gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)){
-        gameState.snake.shift();
-    }
-        if ((gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)){    
-            const newApple = {x: 0, y: 0};
-            newApple.x = getRandomInt(8);
-            newApple.y = getRandomInt(8);
-        for (let i; i<gameState.snake.length; i++) {
-            if (newApple.x === gameState.snake[i].x  && newApple.y === gameState.snake[i].y) 
-                newApple.x = getRandomInt(8);
-                newApple.y = getRandomInt(8);
-                i = 0
-                }
-        gameState.apple = newApple;
-    }
+        
     
     if (gameState.pressedKey === 'ArrowUp') {
         headNew.y--;
@@ -47,7 +28,32 @@ function movePlayer(gameState) {
         headNew.x--;
         gameState.snake.push(headNew);
     }
+    for (let i=0; i<gameState.snake.length-1; i++) {
+        if(headNew.x === gameState.snake[i].x  && headNew.y === gameState.snake[i].y){
+            gameState.isalive = false;
+        }
+    }
+    if (!(gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)){
+        gameState.snake.shift();
+    }
+    if ((gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)){    
+        const newApple = {x: 0, y: 0};
+        newApple.x = getRandomInt(8);
+        newApple.y = getRandomInt(8);
+    for (let i=0; i<gameState.snake.length; i++) {
+        if (newApple.x === gameState.snake[i].x  && newApple.y === gameState.snake[i].y) {
+            newApple.x = getRandomInt(8);
+            newApple.y = getRandomInt(8);
+            i = 0;
+            }
+    }        
+    gameState.apple = newApple;
 }
+    if (headNew.x < 0 || headNew.x > 7 || headNew.y < 0 || headNew.y > 7){
+        gameState.isalive = false;
+    }
+}
+
 
 document.addEventListener('keyup', event => {
     gameState.pressedKey = event.key;
