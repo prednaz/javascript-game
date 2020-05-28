@@ -16,11 +16,17 @@ function movePlayer(gameState) {
         gameState.snake[gameState.snake.length-1].y--;
         gameState.snake.push(headNew);
     } else if (gameState.pressedKey === 'ArrowRight') {
-        gameState.snake.push(gameState.snake[gameState.snake.length-1].x++);
+        const headNew = gameState.snake[gameState.snake.length-1];
+        gameState.snake[gameState.snake.length-1].x++;
+        gameState.snake.push(headNew);
     } else if (gameState.pressedKey === 'ArrowDown') {
-        gameState.snake.push(gameState.snake[gameState.snake.length-1].y++);
+        const headNew = gameState.snake[gameState.snake.length-1];
+        gameState.snake[gameState.snake.length-1].y++;
+        gameState.snake.push(headNew);
     } else if (gameState.pressedKey === 'ArrowLeft') {
-        gameState.snake.push(gameState.snake[gameState.snake.length-1].x--);
+        const headNew = gameState.snake[gameState.snake.length-1];
+        gameState.snake[gameState.snake.length-1].x--;
+        gameState.snake.push(headNew);
     }
 }
 
