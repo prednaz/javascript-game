@@ -5,9 +5,6 @@ window.setInterval(function() {
     drawOnCanvas(canvas, gameState);
 }, 1000);
 
-document.addEventListener('keyup', event => {
-    gameState.pressedKey = event.code;
-});
 
 function movePlayer(gameState) {
     gameState.snake.shift();
@@ -16,20 +13,23 @@ function movePlayer(gameState) {
         headNew.y--;
         gameState.snake.push(headNew);
     } else if (gameState.pressedKey === 'ArrowRight') {
-        const headNew = gameState.snake[gameState.snake.length-1];
+        const headNew = Object.assign({}, gameState.snake[gameState.snake.length-1]);
         headNew.x++;
         gameState.snake.push(headNew);
     } else if (gameState.pressedKey === 'ArrowDown') {
-        const headNew = gameState.snake[gameState.snake.length-1];
+        const headNew = Object.assign({}, gameState.snake[gameState.snake.length-1]);
         headNew.y++;
         gameState.snake.push(headNew);
     } else if (gameState.pressedKey === 'ArrowLeft') {
-        const headNew = gameState.snake[gameState.snake.length-1];
+        const headNew = Object.assign({}, gameState.snake[gameState.snake.length-1]);
         headNew.x--;
         gameState.snake.push(headNew);
     }
 }
 
+document.addEventListener('keyup', event => {
+    gameState.pressedKey = event.code;
+});
 
 function drawLine(x1, y1, x2, y2, context) {
     context.beginPath();
