@@ -1,22 +1,23 @@
-let TEST_CELLSIZE;
+// to-do. Bug: Pressing the space key causes the snake to stop and shrink.
+
 function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
-  }
+}
+
+const canvas = document.getElementById('myCanvas')
 
 window.setInterval(function() {
-    if(gameState.isalive) {
-    movePlayer(gameState);
-    drawOnCanvas(canvas, gameState);
+    if(gameState.isalive) { // to-do. Can we clear the interval altogether?
+        movePlayer(gameState);
+        drawOnCanvas(canvas, gameState);
     }
 }, 200);
 
-
 function movePlayer(gameState) {
     const headNew = Object.assign({}, gameState.snake[gameState.snake.length-1]);
-    
     if (gameState.pressedKey === 'ArrowUp') {
         headNew.y--;
-        gameState.snake.push(headNew);
+        gameState.snake.push(headNew); // to-do. Is this statement always executed? In that case it might better be outside any if branches and only once.
     } else if (gameState.pressedKey === 'ArrowRight') {
         headNew.x++;
         gameState.snake.push(headNew);
@@ -28,27 +29,27 @@ function movePlayer(gameState) {
         gameState.snake.push(headNew);
     }
     for (let i=0; i<gameState.snake.length-1; i++) {
-        if(headNew.x === gameState.snake[i].x  && headNew.y === gameState.snake[i].y){
+        if (headNew.x === gameState.snake[i].x && headNew.y === gameState.snake[i].y) {
             gameState.isalive = false;
         }
     }
-    if (!(gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)){
+    if (!(gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)) {
         gameState.snake.shift();
     }
-    if ((gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)){    
+    if ((gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)) { // to-do. Could this be an else branch?
         const newApple = {x: 0, y: 0};
         newApple.x = getRandomInt(8);
         newApple.y = getRandomInt(8);
-    for (let i=0; i<gameState.snake.length; i++) {
-        if (newApple.x === gameState.snake[i].x  && newApple.y === gameState.snake[i].y) {
-            newApple.x = getRandomInt(8);
-            newApple.y = getRandomInt(8);
-            i = 0;
+        for (let i=0; i<gameState.snake.length; i++) {
+            if (newApple.x === gameState.snake[i].x  && newApple.y === gameState.snake[i].y) {
+                newApple.x = getRandomInt(8);
+                newApple.y = getRandomInt(8);
+                i = 0;
             }
-    }        
-    gameState.apple = newApple;
-}
-    if (headNew.x < 0 || headNew.x > 7 || headNew.y < 0 || headNew.y > 7){
+        }
+        gameState.apple = newApple;
+    }
+    if (headNew.x < 0 || headNew.x > 7 || headNew.y < 0 || headNew.y > 7) { // to-do. use "gameState.extent" instead of "7"
         gameState.isalive = false;
     }
 }
@@ -73,7 +74,7 @@ function drawSquare(x, y, cellSize, color, context) {
 
 function drawOnCanvas(canvas, gameState) {
     const context = canvas.getContext('2d');
-    
+
     context.clearRect(0, 0, canvas.width, canvas.height)
 
     const cellSize = canvas.width / gameState.extent;
@@ -101,7 +102,7 @@ function drawOnCanvas(canvas, gameState) {
                 gameState.snake[i].y,
                 cellSize,
                 'black',
-                context 
+                context
             );
         }
     }
@@ -126,23 +127,12 @@ const gameState = {
         x: 4,
         y: 5
     },
-    snake: [{x: 1, y:2}, 
-    {x: 2, y:2},
-    {x: 3, y:2},
-    {x: 4, y:2},
-    {x: 5, y:2}],
-
+    snake: [
+        {x: 1, y:2},
+        {x: 2, y:2},
+        {x: 3, y:2},
+        {x: 4, y:2},
+        {x: 5, y:2}
+    ],
     isalive: true,
-   }
-    
-
-/*class apple {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-    }
-}*/
-
-const canvas = document.getElementById('myCanvas')
-
-drawOnCanvas(canvas, gameState);
+}
