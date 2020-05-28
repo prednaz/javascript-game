@@ -13,31 +13,6 @@ window.setInterval(function() {
 
 function movePlayer(gameState) {
     const headNew = Object.assign({}, gameState.snake[gameState.snake.length-1]);
-<<<<<<< HEAD
-        
-=======
-    for (let i; i<gameState.snake.length-1; i++) {
-        if(headNew.x === gameState.snake[i].x  && headNew.y === gameState.snake[i].y){
-            gameState.isalive = false;
-        }
-    }
-    if (!(gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)){
-        gameState.snake.shift();
-    }
-        if ((gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)){    
-            const newApple = {x: 0, y: 0};
-            newApple.x = getRandomInt(8);
-            newApple.y = getRandomInt(8);
-        for (let i; i<gameState.snake.length; i++) {
-            if (newApple.x === gameState.snake[i].x  && newApple.y === gameState.snake[i].y) {
-                newApple.x = getRandomInt(8);
-                newApple.y = getRandomInt(8);
-                i = 0
-            }
-        } 
-        gameState.apple = newApple;
-    }
->>>>>>> 93c036ed43294fb0f993704faa5bbc055753fc45
     
     if (gameState.pressedKey === 'ArrowUp') {
         headNew.y--;
