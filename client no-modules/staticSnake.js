@@ -29,6 +29,7 @@ function movePlayer(gameState) {
 
 document.addEventListener('keyup', event => {
     gameState.pressedKey = event.code;
+    console.log(event.code);
 });
 
 function drawLine(x1, y1, x2, y2, context) {
