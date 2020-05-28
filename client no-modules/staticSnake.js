@@ -26,11 +26,12 @@ function movePlayer(gameState) {
             newApple.x = getRandomInt(8);
             newApple.y = getRandomInt(8);
         for (let i; i<gameState.snake.length; i++) {
-            if (newApple.x === gameState.snake[i].x  && newApple.y === gameState.snake[i].y) 
+            if (newApple.x === gameState.snake[i].x  && newApple.y === gameState.snake[i].y) {
                 newApple.x = getRandomInt(8);
                 newApple.y = getRandomInt(8);
                 i = 0
-                }
+            }
+        } 
         gameState.apple = newApple;
     }
     
