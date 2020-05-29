@@ -89,7 +89,18 @@ function draw(canvas, gameState) {
 
     for (let i = 0; i < gameState.snake.length; i++) {
         if (i === gameState.snake.length -1) {
-            drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 0, 0, cellSizeImage, context);
+            if (gameState.pressedKey === "ArrowUp"){
+                drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 0, 0, cellSizeImage, context);
+            }
+            else if (gameState.pressedKey === "ArrowRight"){
+                drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 1, 0, cellSizeImage, context);
+            }
+            else if (gameState.pressedKey === "ArrowDown") {
+                drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 2, 0, cellSizeImage, context);
+            }
+            else if (gameState.pressedKey === "ArrowLeft"){
+                drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 3, 0, cellSizeImage, context);
+            }
         }
         else {
             drawSquare(
