@@ -82,7 +82,13 @@ function draw(canvas, gameState) {
 
     TEST_CELLSIZE = cellSize; // to-do. Do we still need that?
 
-    for (let i = 1; i <= gameState.extent; i++) {
+    for (let i = 0; i < gameState.extent; ++i) {
+        for (let j = 0; j < gameState.extent; ++j) {
+            drawImageSquare(i, j, cellSize, 3, 3, cellSizeImage, context);
+        }
+    }
+
+    for (let i = 1; i < gameState.extent; i++) {
         drawLine(i * cellSize, 0, i * cellSize, canvas.height, context);
         drawLine(0, i * cellSize, canvas.width, i * cellSize, context);
     }
