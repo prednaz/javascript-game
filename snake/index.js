@@ -102,6 +102,20 @@ function draw(canvas, gameState) {
                 drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 3, 0, cellSizeImage, context);
             }
         }
+        else if (i === 0) {
+                if (gameState.snake[0].x === gameState.snake[1].x && gameState.snake[0].y === gameState.snake[1].y + 1) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 0, 1, cellSizeImage, context);
+                }
+                if (gameState.snake[0].x === gameState.snake[1].x && gameState.snake[0].y === gameState.snake[1].y - 1) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 2, 1, cellSizeImage, context);
+                }
+                if (gameState.snake[0].x + 1 === gameState.snake[1].x && gameState.snake[0].y === gameState.snake[1].y) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 1, 1, cellSizeImage, context);
+                }
+                if (gameState.snake[0].x - 1 === gameState.snake[1].x && gameState.snake[0].y === gameState.snake[1].y) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 3, 1, cellSizeImage, context);
+                }
+            }
         else {
             drawSquare(
                 gameState.snake[i].x,
