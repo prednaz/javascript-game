@@ -117,13 +117,50 @@ function draw(canvas, gameState) {
                 }
             }
         else {
-            drawSquare(
-                gameState.snake[i].x,
-                gameState.snake[i].y,
-                cellSize,
-                'black',
-                context
-            );
+            if (gameState.snake[i].x === gameState.snake[i+1].x && gameState.snake[i].y - 1 === gameState.snake[i+1].y) {
+                if (gameState.snake[i].x - 1 === gameState.snake[i-1].x  && gameState.snake[i].y === gameState.snake[i-1].y) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 3, 2, cellSizeImage, context);
+                }
+                if (gameState.snake[i].x + 1=== gameState.snake[i-1].x && gameState.snake[i].y === gameState.snake[i-1].y) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 0, 2, cellSizeImage, context);
+                }
+                if (gameState.snake[i].x === gameState.snake[i-1].x  && gameState.snake[i].y + 1 === gameState.snake[i-1].y) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 0, 3, cellSizeImage, context);
+                }
+            }
+            else if (gameState.snake[i].x === gameState.snake[i+1].x && gameState.snake[i].y + 1 === gameState.snake[i+1].y) {
+                if (gameState.snake[i].x - 1 === gameState.snake[i-1].x && gameState.snake[i].y === gameState.snake[i-1].y) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 2, 2, cellSizeImage, context);
+                }
+                if (gameState.snake[i].x + 1 === gameState.snake[i-1].x && gameState.snake[i].y === gameState.snake[i-1].y) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 1, 2, cellSizeImage, context);
+                }
+                if (gameState.snake[i].x === gameState.snake[i-1].x  && gameState.snake[i].y - 1 === gameState.snake[i-1].y) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 0, 3, cellSizeImage, context);
+                }
+            }
+            else if (gameState.snake[i].x - 1 === gameState.snake[i+1].x && gameState.snake[i].y === gameState.snake[i+1].y) {
+                if (gameState.snake[i].x + 1 === gameState.snake[i-1].x && gameState.snake[i].y === gameState.snake[i-1].y) {
+                   drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 1, 3, cellSizeImage, context);
+                }
+                if (gameState.snake[i].x === gameState.snake[i-1].x  && gameState.snake[i].y - 1 === gameState.snake[i-1].y) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 3, 2, cellSizeImage, context);
+                }
+                if (gameState.snake[i].x === gameState.snake[i-1].x  && gameState.snake[i].y + 1 === gameState.snake[i-1].y) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 2, 2, cellSizeImage, context);
+                }
+            }
+            else if (gameState.snake[i].x + 1 === gameState.snake[i+1].x && gameState.snake[i].y === gameState.snake[i+1].y) {
+                if (gameState.snake[i].x - 1 === gameState.snake[i-1].x && gameState.snake[i].y === gameState.snake[i-1].y) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 1, 3, cellSizeImage, context);
+                }
+                if (gameState.snake[i].x === gameState.snake[i-1].x && gameState.snake[i].y - 1 === gameState.snake[i-1].y) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 0, 2, cellSizeImage, context);
+                }
+                if (gameState.snake[i].x === gameState.snake[i-1].x  && gameState.snake[i].y + 1 === gameState.snake[i-1].y) {
+                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 1, 2, cellSizeImage, context);
+                }
+            }
         }
     }
 
