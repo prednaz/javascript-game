@@ -25,13 +25,6 @@ const gameState = {
     isalive: true,
 }
 
-window.setInterval(function() {
-    if(gameState.isalive) { // to-do. Can we clear the interval altogether?
-        update(gameState);
-        draw(canvas, gameState);
-    }
-}, 500);
-
 document.addEventListener('keyup', event => {
     gameState.pressedKey = event.key;
     console.log(event.key); // to-do. Do we still need this?
@@ -137,3 +130,47 @@ function drawSquare(x, y, cellSize, color, context) {
 function getRandomInt(max) {
     return Math.floor(Math.random() * Math.floor(max));
 }
+
+class AssetLoader {
+    loadAsset(name, url) {
+      return new Promise((resolve, reject) => {
+        const image = new Image();
+        image.src = url;
+        image.addEventListener('load', function() {
+          return resolve({ name, image: this });
+        });
+      });
+    }
+  
+    loadAssets(assetsToLoad) {
+      return Promise.all(
+        assetsToLoad.map(asset => this.loadAsset(asset.name, asset.url))
+      )
+        .then(assets =>
+          assets.reduceRight(
+            (acc, elem) => ({ ...acc, [elem.name]: elem.image }),
+            {}
+          )
+        )
+        .catch(error => {
+          throw new Error('Not all assets could be loaded.');
+        });
+    }
+  }
+
+let assets;
+
+new AssetLoader()
+    .loadAssets([{
+        name: 'snake',
+        url: '/snake.png'
+    }])
+    .then(assetsNew => {
+        assets = assetsNew;
+        window.setInterval(function() {
+            if(gameState.isalive) { // to-do. Can we clear the interval altogether?
+                update(gameState);
+                draw(canvas, gameState);
+            }
+        }, 500);        
+    });
