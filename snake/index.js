@@ -27,8 +27,10 @@ const gameState = {
 }
 
 document.addEventListener('keyup', event => {
-    gameState.pressedKey = event.key;
-    console.log(event.key); // to-do. Do we still need this?
+    if (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "ArrowLeft" || event.key === "ArrowRight"){
+        gameState.pressedKey = event.key;
+        console.log(event.key); // to-do. Do we still need this?
+    }
 });
 
 function update(gameState) {
