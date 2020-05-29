@@ -1,19 +1,43 @@
 // to-do. Bug: Pressing the space key causes the snake to stop and shrink.
 
-function getRandomInt(max) {
-    return Math.floor(Math.random() * Math.floor(max));
-}
+let TEST_CELLSIZE; // to-do. Do we still need that?
 
 const canvas = document.getElementById('myCanvas')
 
+const gameState = {
+    pressedKey: 'ArrowRight',
+    extent: 8,
+    playerPosition: {
+        x: 2,
+        y: 3
+    },
+    apple: {
+        x: 4,
+        y: 5
+    },
+    snake: [
+        {x: 1, y:2},
+        {x: 2, y:2},
+        {x: 3, y:2},
+        {x: 4, y:2},
+        {x: 5, y:2}
+    ],
+    isalive: true,
+}
+
 window.setInterval(function() {
     if(gameState.isalive) { // to-do. Can we clear the interval altogether?
-        movePlayer(gameState);
-        drawOnCanvas(canvas, gameState);
+        update(gameState);
+        draw(canvas, gameState);
     }
-}, 200);
+}, 500);
 
-function movePlayer(gameState) {
+document.addEventListener('keyup', event => {
+    gameState.pressedKey = event.key;
+    console.log(event.key); // to-do. Do we still need this?
+});
+
+function update(gameState) {
     const headNew = Object.assign({}, gameState.snake[gameState.snake.length-1]);
     if (gameState.pressedKey === 'ArrowUp') {
         headNew.y--;
@@ -38,12 +62,12 @@ function movePlayer(gameState) {
     }
     if ((gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)) { // to-do. Could this be an else branch?
         const newApple = {x: 0, y: 0};
-        newApple.x = getRandomInt(8);
-        newApple.y = getRandomInt(8);
+        newApple.x = getRandomInt(8); // to-do. use "gameState.extent" instead of "8"
+        newApple.y = getRandomInt(8); // to-do. use "gameState.extent" instead of "8"
         for (let i=0; i<gameState.snake.length; i++) {
             if (newApple.x === gameState.snake[i].x  && newApple.y === gameState.snake[i].y) {
-                newApple.x = getRandomInt(8);
-                newApple.y = getRandomInt(8);
+                newApple.x = getRandomInt(8); // to-do. use "gameState.extent" instead of "8"
+                newApple.y = getRandomInt(8); // to-do. use "gameState.extent" instead of "8"
                 i = 0;
             }
         }
@@ -54,32 +78,14 @@ function movePlayer(gameState) {
     }
 }
 
-
-document.addEventListener('keyup', event => {
-    gameState.pressedKey = event.key;
-    console.log(event.key);
-});
-
-function drawLine(x1, y1, x2, y2, context) {
-    context.beginPath();
-    context.moveTo(x1, y1);
-    context.lineTo(x2, y2);
-    context.stroke();
-}
-
-function drawSquare(x, y, cellSize, color, context) {
-    context.fillStyle = color;
-    context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-}
-
-function drawOnCanvas(canvas, gameState) {
+function draw(canvas, gameState) {
     const context = canvas.getContext('2d');
 
     context.clearRect(0, 0, canvas.width, canvas.height)
 
     const cellSize = canvas.width / gameState.extent;
 
-    TEST_CELLSIZE = cellSize;
+    TEST_CELLSIZE = cellSize; // to-do. Do we still need that?
 
     for (let i = 1; i <= gameState.extent; i++) {
         drawLine(i * cellSize, 0, i * cellSize, canvas.height, context);
@@ -116,23 +122,18 @@ function drawOnCanvas(canvas, gameState) {
     );
 }
 
-const gameState = {
-    pressedKey: 'ArrowRight',
-    extent: 8,
-    playerPosition: {
-        x: 2,
-        y: 3
-    },
-    apple: {
-        x: 4,
-        y: 5
-    },
-    snake: [
-        {x: 1, y:2},
-        {x: 2, y:2},
-        {x: 3, y:2},
-        {x: 4, y:2},
-        {x: 5, y:2}
-    ],
-    isalive: true,
+function drawLine(x1, y1, x2, y2, context) {
+    context.beginPath();
+    context.moveTo(x1, y1);
+    context.lineTo(x2, y2);
+    context.stroke();
+}
+
+function drawSquare(x, y, cellSize, color, context) {
+    context.fillStyle = color;
+    context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+}
+
+function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
 }
