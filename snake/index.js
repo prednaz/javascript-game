@@ -46,11 +46,6 @@ function update(gameState) {
         headNew.x--;
         gameState.snake.push(headNew);
     }
-    for (let i=0; i<gameState.snake.length-1; i++) {
-        if (headNew.x === gameState.snake[i].x && headNew.y === gameState.snake[i].y) {
-            gameState.isalive = false;
-        }
-    }
     if (!(gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)) {
         gameState.snake.shift();
     }
@@ -66,6 +61,11 @@ function update(gameState) {
             }
         }
         gameState.apple = newApple;
+    }
+    for (let i=0; i<gameState.snake.length-1; i++) {
+        if (headNew.x === gameState.snake[i].x && headNew.y === gameState.snake[i].y) {
+            gameState.isalive = false;
+        }
     }
     if (headNew.x < 0 || headNew.x > 7 || headNew.y < 0 || headNew.y > 7) { // to-do. use "gameState.extent" instead of "7"
         gameState.isalive = false;
@@ -87,7 +87,7 @@ function draw(canvas, gameState) {
         drawLine(0, i * cellSize, canvas.width, i * cellSize, context);
     }
 
-    for (let i = 1; i < gameState.snake.length; i++) {
+    for (let i = 0; i < gameState.snake.length; i++) {
         if (i === gameState.snake.length -1) {
             drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 0, 0, cellSizeImage, context);
         }
