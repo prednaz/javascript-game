@@ -164,13 +164,7 @@ function draw(canvas, gameState) {
         }
     }
 
-    drawSquare(
-        gameState.apple.x,
-        gameState.apple.y,
-        cellSize,
-        'red',
-        context
-    );
+    drawImageSquare(gameState.apple.x, gameState.apple.y, cellSize, 2, 3, cellSizeImage, context);
 }
 
 function drawImageSquare(xCanvas, yCanvas, cellSizeCanvas, xImage, yImage, cellSizeImage, context) {
