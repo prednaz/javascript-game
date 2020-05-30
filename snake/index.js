@@ -1,208 +1,226 @@
-// to-do. Bug: Pressing the space key causes the snake to stop and shrink.
+"use strict";
 
 let TEST_CELLSIZE; // to-do. Do we still need that?
 
 const canvas = document.getElementById('myCanvas')
 
-const gameState = {
-    pressedKey: 'ArrowRight',
-    extent: 8,
-    playerPosition: {
-        x: 2,
-        y: 3
-    },
-    apple: {
-        x: 4,
-        y: 5
-    },
-    snake: [
-        {x: 1, y:2},
-        {x: 2, y:2},
-        {x: 3, y:2},
-        {x: 4, y:2},
-        {x: 5, y:2}
-    ],
-    isalive: true,
-    assets: null
+class Game {
+    constructor(assets) {
+        this.pressedKey = "ArrowRight";
+        this.extent = 8;
+        this.playerPosition = {x: 2, y: 3}; // to-do. Do we still need this?
+        this.apple = new Apple(4, 5);
+        this.snake = new Snake(
+            [
+                {x: 1, y:2},
+                {x: 2, y:2},
+                {x: 3, y:2},
+                {x: 4, y:2},
+                {x: 5, y:2}
+            ]
+        );
+        this.game_over = false;
+        this.assets = assets;
+        document.addEventListener('keyup', event => {
+            if (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "ArrowLeft" || event.key === "ArrowRight") {
+                this.pressedKey = event.key;
+                console.log(event.key); // to-do. Do we still need this?
+            }
+        });
+        window.setInterval(() => {
+            if(!this.game_over) { // to-do. Can we clear the interval altogether?
+                this.update();
+                this.draw();
+            }
+        }, 500);
+    }
+    update() {
+        this.snake.update(this.pressedKey, this.apple);
+        this.game_over = !this.snake.isalive;
+        this.apple.update(this.snake.positions);
+    }
+    draw() {
+        const context = canvas.getContext('2d');
+
+        context.clearRect(0, 0, canvas.width, canvas.height)
+
+        const cellSize = canvas.width / this.extent;
+        const cellSizeImage = 32;
+
+        TEST_CELLSIZE = cellSize; // to-do. Do we still need that?
+
+        for (let i = 0; i < this.extent; ++i) {
+            for (let j = 0; j < this.extent; ++j) {
+                this.drawImageSquare(i, j, cellSize, 3, 3, cellSizeImage, context);
+            }
+        }
+
+        for (let i = 1; i < this.extent; i++) {
+            drawLine(i * cellSize, 0, i * cellSize, canvas.height, context);
+            drawLine(0, i * cellSize, canvas.width, i * cellSize, context);
+        }
+
+        this.snake.draw(this.pressedKey, context, cellSize, cellSizeImage, this.drawImageSquare.bind(this));
+
+        this.apple.draw(context, cellSize, cellSizeImage, this.drawImageSquare.bind(this));
+    }
+    drawImageSquare(xCanvas, yCanvas, cellSizeCanvas, xImage, yImage, cellSizeImage, context) {
+        context.drawImage(
+            this.assets.snake,
+            xImage * cellSizeImage,
+            yImage * cellSizeImage,
+            cellSizeImage,
+            cellSizeImage,
+            xCanvas * cellSizeCanvas,
+            yCanvas * cellSizeCanvas,
+            cellSizeCanvas,
+            cellSizeCanvas
+        );
+    }
 }
 
-document.addEventListener('keyup', event => {
-    if (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "ArrowLeft" || event.key === "ArrowRight"){
-        gameState.pressedKey = event.key;
-        console.log(event.key); // to-do. Do we still need this?
+class Apple {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.eaten = false;
     }
-});
-
-function update(gameState) {
-    const headNew = Object.assign({}, gameState.snake[gameState.snake.length-1]);
-    if (gameState.pressedKey === 'ArrowUp') {
-        headNew.y--;
-        gameState.snake.push(headNew); // to-do. Is this statement always executed? In that case it might better be outside any if branches and only once.
-    } else if (gameState.pressedKey === 'ArrowRight') {
-        headNew.x++;
-        gameState.snake.push(headNew);
-    } else if (gameState.pressedKey === 'ArrowDown') {
-        headNew.y++;
-        gameState.snake.push(headNew);
-    } else if (gameState.pressedKey === 'ArrowLeft') {
-        headNew.x--;
-        gameState.snake.push(headNew);
+    eat() {
+        this.eaten = true;
     }
-    if (!(gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)) {
-        gameState.snake.shift();
-    }
-    if ((gameState.apple.x === headNew.x && gameState.apple.y === headNew.y)) { // to-do. Could this be an else branch?
-        const newApple = {x: 0, y: 0};
-        newApple.x = getRandomInt(8); // to-do. use "gameState.extent" instead of "8"
-        newApple.y = getRandomInt(8); // to-do. use "gameState.extent" instead of "8"
-        for (let i=0; i<gameState.snake.length; i++) {
-            if (newApple.x === gameState.snake[i].x  && newApple.y === gameState.snake[i].y) {
-                newApple.x = getRandomInt(8); // to-do. use "gameState.extent" instead of "8"
-                newApple.y = getRandomInt(8); // to-do. use "gameState.extent" instead of "8"
+    update(snake_positions) {
+        if (!this.eaten) {
+            return;
+        }
+        this.eaten = false;
+        this.x = getRandomInt(8); // to-do. use "Game::extent" instead of "8"
+        this.y = getRandomInt(8); // to-do. use "Game::extent" instead of "8"
+        for (let i=0; i<snake_positions.length; i++) {
+            if (this.x === snake_positions[i].x  && this.y === snake_positions[i].y) {
+                this.x = getRandomInt(8); // to-do. use "Game::extent" instead of "8"
+                this.y = getRandomInt(8); // to-do. use "Game::extent" instead of "8"
                 i = 0;
             }
         }
-        gameState.apple = newApple;
     }
-    for (let i=0; i<gameState.snake.length-1; i++) {
-        if (headNew.x === gameState.snake[i].x && headNew.y === gameState.snake[i].y) {
-            gameState.isalive = false;
-        }
-    }
-    if (headNew.x < 0 || headNew.x > 7 || headNew.y < 0 || headNew.y > 7) { // to-do. use "gameState.extent" instead of "7"
-        gameState.isalive = false;
+    draw(context, cellSize, cellSizeImage, drawImageSquare) {
+        drawImageSquare(this.x, this.y, cellSize, 2, 3, cellSizeImage, context);
     }
 }
 
-function draw(canvas, gameState) {
-    const context = canvas.getContext('2d');
-
-    context.clearRect(0, 0, canvas.width, canvas.height)
-
-    const cellSize = canvas.width / gameState.extent;
-    const cellSizeImage = 32;
-
-    TEST_CELLSIZE = cellSize; // to-do. Do we still need that?
-
-    for (let i = 0; i < gameState.extent; ++i) {
-        for (let j = 0; j < gameState.extent; ++j) {
-            drawImageSquare(i, j, cellSize, 3, 3, cellSizeImage, context);
+class Snake {
+    constructor(positions) {
+        this.positions = positions;
+        this.isalive = true;
+    }
+    update(pressedKey, apple) {
+        const headNew = Object.assign({}, this.positions[this.positions.length-1]);
+        if (pressedKey === 'ArrowUp') {
+            headNew.y--;
+            this.positions.push(headNew); // to-do. Is this statement always executed? In that case it might better be outside any if branches and only once.
+        } else if (pressedKey === 'ArrowRight') {
+            headNew.x++;
+            this.positions.push(headNew);
+        } else if (pressedKey === 'ArrowDown') {
+            headNew.y++;
+            this.positions.push(headNew);
+        } else if (pressedKey === 'ArrowLeft') {
+            headNew.x--;
+            this.positions.push(headNew);
         }
-    }
-
-    for (let i = 1; i < gameState.extent; i++) {
-        drawLine(i * cellSize, 0, i * cellSize, canvas.height, context);
-        drawLine(0, i * cellSize, canvas.width, i * cellSize, context);
-    }
-
-    for (let i = 0; i < gameState.snake.length; i++) {
-        if (i === gameState.snake.length -1) {
-            if (gameState.pressedKey === "ArrowUp"){
-                drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 0, 0, cellSizeImage, context);
-            }
-            else if (gameState.pressedKey === "ArrowRight"){
-                drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 1, 0, cellSizeImage, context);
-            }
-            else if (gameState.pressedKey === "ArrowDown") {
-                drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 2, 0, cellSizeImage, context);
-            }
-            else if (gameState.pressedKey === "ArrowLeft"){
-                drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 3, 0, cellSizeImage, context);
+        if (!(apple.x === headNew.x && apple.y === headNew.y)) {
+            this.positions.shift();
+        }
+        if ((apple.x === headNew.x && apple.y === headNew.y)) { // to-do. Could this be an else branch?
+            apple.eat();
+        }
+        for (let i=0; i<this.positions.length-1; i++) {
+            if (headNew.x === this.positions[i].x && headNew.y === this.positions[i].y) {
+                this.isalive = false; // to-do. Do we really have to continue with the loop at this point?
             }
         }
-        else if (i === 0) {
-                if (gameState.snake[0].x === gameState.snake[1].x && gameState.snake[0].y === gameState.snake[1].y + 1) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 0, 1, cellSizeImage, context);
+        if (headNew.x < 0 || headNew.x > 7 || headNew.y < 0 || headNew.y > 7) { // to-do. use "Game::extent" instead of "7"
+            this.isalive = false;
+        }
+    }
+    draw(pressedKey, context, cellSize, cellSizeImage, drawImageSquare) {
+        for (let i = 0; i < this.positions.length; i++) {
+            if (i === this.positions.length -1) {
+                if (pressedKey === "ArrowUp"){
+                    drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 0, 0, cellSizeImage, context);
                 }
-                if (gameState.snake[0].x === gameState.snake[1].x && gameState.snake[0].y === gameState.snake[1].y - 1) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 2, 1, cellSizeImage, context);
+                else if (pressedKey === "ArrowRight"){
+                    drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 1, 0, cellSizeImage, context);
                 }
-                if (gameState.snake[0].x + 1 === gameState.snake[1].x && gameState.snake[0].y === gameState.snake[1].y) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 1, 1, cellSizeImage, context);
+                else if (pressedKey === "ArrowDown") {
+                    drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 2, 0, cellSizeImage, context);
                 }
-                if (gameState.snake[0].x - 1 === gameState.snake[1].x && gameState.snake[0].y === gameState.snake[1].y) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 3, 1, cellSizeImage, context);
-                }
-            }
-        else {
-            if (gameState.snake[i].x === gameState.snake[i+1].x && gameState.snake[i].y - 1 === gameState.snake[i+1].y) {
-                if (gameState.snake[i].x - 1 === gameState.snake[i-1].x  && gameState.snake[i].y === gameState.snake[i-1].y) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 3, 2, cellSizeImage, context);
-                }
-                if (gameState.snake[i].x + 1=== gameState.snake[i-1].x && gameState.snake[i].y === gameState.snake[i-1].y) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 0, 2, cellSizeImage, context);
-                }
-                if (gameState.snake[i].x === gameState.snake[i-1].x  && gameState.snake[i].y + 1 === gameState.snake[i-1].y) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 0, 3, cellSizeImage, context);
+                else if (pressedKey === "ArrowLeft"){
+                    drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 3, 0, cellSizeImage, context);
                 }
             }
-            else if (gameState.snake[i].x === gameState.snake[i+1].x && gameState.snake[i].y + 1 === gameState.snake[i+1].y) {
-                if (gameState.snake[i].x - 1 === gameState.snake[i-1].x && gameState.snake[i].y === gameState.snake[i-1].y) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 2, 2, cellSizeImage, context);
+            else if (i === 0) {
+                    if (this.positions[0].x === this.positions[1].x && this.positions[0].y === this.positions[1].y + 1) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 0, 1, cellSizeImage, context);
+                    }
+                    if (this.positions[0].x === this.positions[1].x && this.positions[0].y === this.positions[1].y - 1) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 2, 1, cellSizeImage, context);
+                    }
+                    if (this.positions[0].x + 1 === this.positions[1].x && this.positions[0].y === this.positions[1].y) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 1, 1, cellSizeImage, context);
+                    }
+                    if (this.positions[0].x - 1 === this.positions[1].x && this.positions[0].y === this.positions[1].y) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 3, 1, cellSizeImage, context);
+                    }
                 }
-                if (gameState.snake[i].x + 1 === gameState.snake[i-1].x && gameState.snake[i].y === gameState.snake[i-1].y) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 1, 2, cellSizeImage, context);
+            else {
+                if (this.positions[i].x === this.positions[i+1].x && this.positions[i].y - 1 === this.positions[i+1].y) {
+                    if (this.positions[i].x - 1 === this.positions[i-1].x  && this.positions[i].y === this.positions[i-1].y) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 3, 2, cellSizeImage, context);
+                    }
+                    if (this.positions[i].x + 1=== this.positions[i-1].x && this.positions[i].y === this.positions[i-1].y) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 0, 2, cellSizeImage, context);
+                    }
+                    if (this.positions[i].x === this.positions[i-1].x  && this.positions[i].y + 1 === this.positions[i-1].y) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 0, 3, cellSizeImage, context);
+                    }
                 }
-                if (gameState.snake[i].x === gameState.snake[i-1].x  && gameState.snake[i].y - 1 === gameState.snake[i-1].y) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 0, 3, cellSizeImage, context);
+                else if (this.positions[i].x === this.positions[i+1].x && this.positions[i].y + 1 === this.positions[i+1].y) {
+                    if (this.positions[i].x - 1 === this.positions[i-1].x && this.positions[i].y === this.positions[i-1].y) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 2, 2, cellSizeImage, context);
+                    }
+                    if (this.positions[i].x + 1 === this.positions[i-1].x && this.positions[i].y === this.positions[i-1].y) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 1, 2, cellSizeImage, context);
+                    }
+                    if (this.positions[i].x === this.positions[i-1].x  && this.positions[i].y - 1 === this.positions[i-1].y) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 0, 3, cellSizeImage, context);
+                    }
                 }
-            }
-            else if (gameState.snake[i].x - 1 === gameState.snake[i+1].x && gameState.snake[i].y === gameState.snake[i+1].y) {
-                if (gameState.snake[i].x + 1 === gameState.snake[i-1].x && gameState.snake[i].y === gameState.snake[i-1].y) {
-                   drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 1, 3, cellSizeImage, context);
+                else if (this.positions[i].x - 1 === this.positions[i+1].x && this.positions[i].y === this.positions[i+1].y) {
+                    if (this.positions[i].x + 1 === this.positions[i-1].x && this.positions[i].y === this.positions[i-1].y) {
+                       drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 1, 3, cellSizeImage, context);
+                    }
+                    if (this.positions[i].x === this.positions[i-1].x  && this.positions[i].y - 1 === this.positions[i-1].y) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 3, 2, cellSizeImage, context);
+                    }
+                    if (this.positions[i].x === this.positions[i-1].x  && this.positions[i].y + 1 === this.positions[i-1].y) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 2, 2, cellSizeImage, context);
+                    }
                 }
-                if (gameState.snake[i].x === gameState.snake[i-1].x  && gameState.snake[i].y - 1 === gameState.snake[i-1].y) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 3, 2, cellSizeImage, context);
-                }
-                if (gameState.snake[i].x === gameState.snake[i-1].x  && gameState.snake[i].y + 1 === gameState.snake[i-1].y) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 2, 2, cellSizeImage, context);
-                }
-            }
-            else if (gameState.snake[i].x + 1 === gameState.snake[i+1].x && gameState.snake[i].y === gameState.snake[i+1].y) {
-                if (gameState.snake[i].x - 1 === gameState.snake[i-1].x && gameState.snake[i].y === gameState.snake[i-1].y) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 1, 3, cellSizeImage, context);
-                }
-                if (gameState.snake[i].x === gameState.snake[i-1].x && gameState.snake[i].y - 1 === gameState.snake[i-1].y) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 0, 2, cellSizeImage, context);
-                }
-                if (gameState.snake[i].x === gameState.snake[i-1].x  && gameState.snake[i].y + 1 === gameState.snake[i-1].y) {
-                    drawImageSquare(gameState.snake[i].x, gameState.snake[i].y, cellSize, 1, 2, cellSizeImage, context);
+                else if (this.positions[i].x + 1 === this.positions[i+1].x && this.positions[i].y === this.positions[i+1].y) {
+                    if (this.positions[i].x - 1 === this.positions[i-1].x && this.positions[i].y === this.positions[i-1].y) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 1, 3, cellSizeImage, context);
+                    }
+                    if (this.positions[i].x === this.positions[i-1].x && this.positions[i].y - 1 === this.positions[i-1].y) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 0, 2, cellSizeImage, context);
+                    }
+                    if (this.positions[i].x === this.positions[i-1].x  && this.positions[i].y + 1 === this.positions[i-1].y) {
+                        drawImageSquare(this.positions[i].x, this.positions[i].y, cellSize, 1, 2, cellSizeImage, context);
+                    }
                 }
             }
         }
     }
-
-    drawImageSquare(gameState.apple.x, gameState.apple.y, cellSize, 2, 3, cellSizeImage, context);
-}
-
-function drawImageSquare(xCanvas, yCanvas, cellSizeCanvas, xImage, yImage, cellSizeImage, context) {
-    context.drawImage(
-        gameState.assets.snake,
-        xImage * cellSizeImage,
-        yImage * cellSizeImage,
-        cellSizeImage,
-        cellSizeImage,
-        xCanvas * cellSizeCanvas,
-        yCanvas * cellSizeCanvas,
-        cellSizeCanvas,
-        cellSizeCanvas
-    );
-}
-
-function drawLine(x1, y1, x2, y2, context) {
-    context.beginPath();
-    context.moveTo(x1, y1);
-    context.lineTo(x2, y2);
-    context.stroke();
-}
-
-function drawSquare(x, y, cellSize, color, context) {
-    context.fillStyle = color;
-    context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-}
-
-function getRandomInt(max) {
-    return Math.floor(Math.random() * Math.floor(max));
 }
 
 class AssetLoader {
@@ -237,12 +255,20 @@ new AssetLoader()
         name: 'snake',
         url: 'snake.png'
     }])
-    .then(assetsNew => {
-        gameState.assets = assetsNew;
-        window.setInterval(function() {
-            if(gameState.isalive) { // to-do. Can we clear the interval altogether?
-                update(gameState);
-                draw(canvas, gameState);
-            }
-        }, 500);        
-    });
+    .then(assetsNew => {new Game(assetsNew);});
+
+function drawLine(x1, y1, x2, y2, context) {
+    context.beginPath();
+    context.moveTo(x1, y1);
+    context.lineTo(x2, y2);
+    context.stroke();
+}
+
+function drawSquare(x, y, cellSize, color, context) {
+    context.fillStyle = color;
+    context.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
+}
+
+function getRandomInt(max) {
+    return Math.floor(Math.random() * Math.floor(max));
+}
