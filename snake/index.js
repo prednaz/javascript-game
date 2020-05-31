@@ -19,7 +19,6 @@ class Game {
                 {x: 5, y:2}
             ]
         );
-        this.game_over = false;
         this.assets = assets;
         document.addEventListener('keyup', event => {
             if (event.key === "ArrowUp" || event.key === "ArrowDown" || event.key === "ArrowLeft" || event.key === "ArrowRight") {
@@ -28,7 +27,7 @@ class Game {
             }
         });
         window.setInterval(() => {
-            if(!this.game_over) { // to-do. Can we clear the interval altogether?
+            if(this.snake.isalive) { // to-do. Can we clear the interval altogether?
                 this.update();
                 this.draw();
             }
@@ -36,7 +35,6 @@ class Game {
     }
     update() {
         this.snake.update(this.pressedKey, this.apple);
-        this.game_over = !this.snake.isalive;
         this.apple.update(this.snake.positions);
     }
     draw() {
