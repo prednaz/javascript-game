@@ -72,14 +72,15 @@
 * Weitere erwartete Herausforderungen
 - Die Spielfigur bewegt sich nicht auf einer stetigen Kurve sondern
   macht kleine Spruenge von einer Weite h.
-  - Wie schaffen wir es, dass der Spieler bis ganz an eine
+  - Wie schaffen wir es, dass ein Spieler bis ganz an eine
     Spielfeldgrenze heranlaufen kann, wenn er bereits mit einer
     Distanz von weniger als h von ihr entfernt steht? Ein Schritt in
-    Richtung Spielfeldgrenze ist dann nicht zulaessig, da dieser mit
-    einer Laenge von h in der Wand enden wuerde.
+    Richtung Spielfeldgrenze ist dann nicht zulaessig, da dieser eine
+    Laenge von h haette und damit hinter der Spielfeldgrenze enden
+    wuerde.
   - Um abzubiegen, muss eine Spielfigur punktgenau neben dem
     abzweigenden Durchgang stehen. Das ist kein Problem mit der
     Stuerung wegen des oben beschriebenen Ableitens zum Durchgang
-    hin. Aber es ist eben eine Herausforderung, weil die Spielfigur
-    sich nicht auf einer stetigen Kurve bewegt sondern kleine Spruenge
+    hin. Aber es ist eine Herausforderung, weil die Spielfigur sich
+    nicht auf einer stetigen Kurve bewegt sondern kleine Spruenge
     macht.
