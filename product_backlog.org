@@ -28,6 +28,11 @@
   - Spieler koennen keine Bloecke betreten.
   - Spieler koennen keine Quadrate des Rasters betreten, auf denen
     Bomben liegen, die noch nicht explodiert sind.
+  - Wenn ein Spieler gegen die Grenze eines Spielfeldloechs gesteuert
+    werden und ein freier Durchgang entlang der Steuerungsrichtung
+    weniger als eine halbe Rasterquadratseitenlaenge entfernt ist,
+    gleitet der Spieler orthogonal zur Steuerungsrichtung entlang der
+    Spielfeldloechgrenze auf den Durchgang zu.
 - Spieler koennen an ihrer aktuellen Position Bomben zurueckenlassen
   mit einer festgelegten Taste.
   - Die Bombe bleibt immer genau auf der Mitte des Quadrats des Raster
@@ -42,6 +47,10 @@
     von einer festen Anzahl an Leben. Dann haben fuer einen
     festgelegten Zeitraum von ungefaehr 3 Sekunden Bomben auf diesen
     Spieler keinen Effekt.
+  - Wenn die Strecke von einer explodierenden Bombe zu einer zweiten
+    Bombe kuerzer als zwei Rasterquadratseitenlaengen ist und nicht
+    durch Spielfaeldloecher unterbrochen ist, explodiert die zweite
+    Bombe sofort mit.
   - Wenn die Strecke von einer explodierenden Bombe zu einem Block
     kuerzer als zwei Rasterquadratseitenlaengen ist und nicht durch
     Spielfaeldloecher unterbrochen ist, verschwindet dieser Block und
