@@ -1,4 +1,4 @@
-module Game where
+module Game (initialState, update, draw, GameState) where
 
 import Prelude
 
@@ -31,7 +31,7 @@ initialGameState =
       player:
         Player
           {
-            runSpeed: 1.0,
+            runSpeed: 0.5,
             position:
               Position
                {
@@ -65,15 +65,6 @@ drawPlayer (Player {position: Position {x: x, y: y}}) context =
         {x: round x, y: round y, radius: 5.0, start: 0.0, end: Math.tau})
 
 
-initialState :: State GameState
-initialState = U.initialState initialGameState
-
-update :: State GameState -> Event -> State GameState
-update = U.update updateGame
-  
-draw :: State GameState -> C.Context2D -> Effect Unit
-draw (State gameState _) = drawGame gameState
-
 _x :: L.Lens' GameState Number
 _x =
   field (l::L "player") %
@@ -90,3 +81,11 @@ runSpeedGet :: GameState -> Number
 runSpeedGet =
   L.view (_f(l::L "player") % _f(l::L "runSpeed") :: L.Lens' GameState Number)
 
+initialState :: State GameState
+initialState = U.initialState initialGameState
+
+update :: State GameState -> Event -> State GameState
+update = U.update updateGame
+
+draw :: State GameState -> C.Context2D -> Effect Unit
+draw (State gameState _) = drawGame gameState

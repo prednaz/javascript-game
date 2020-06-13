@@ -46,7 +46,7 @@ var runSpeedGet = Data_Lens_Getter.view((function (dictStrong) {
 })(Data_Lens_Internal_Forget.strongForget));
 var initialGameState = {
     player: {
-        runSpeed: 1.0,
+        runSpeed: 0.5,
         position: {
             x: 100.0,
             y: 101.0
@@ -128,20 +128,7 @@ var updateGame = function (v) {
 };
 var update = Ui.update(updateGame);
 module.exports = {
-    Position: Position,
-    Player: Player,
-    GameState: GameState,
-    initialGameState: initialGameState,
-    updateGame: updateGame,
-    drawGame: drawGame,
-    drawPlayer: drawPlayer,
     initialState: initialState,
     update: update,
-    draw: draw,
-    "_x": _x,
-    "_y": _y,
-    runSpeedGet: runSpeedGet,
-    newtypePosition: newtypePosition,
-    newtypePlayer: newtypePlayer,
-    newtypeGameState: newtypeGameState
+    draw: draw
 };
