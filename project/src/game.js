@@ -49,17 +49,12 @@ class Game {
 
 let step_count = 0;
 
-// type Row = 0 | 1 | 2 | 3 | 4 | 5;
-// type RowPosition = {mode: "row", x: number, row: Row};
-// type Column = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-// type ColumnPosition = {mode: "column", column: 0 | 1 | 2 | 3 | 4 | 5 | 6, y: number};
-
 class RowPosition {
-    x: number;
     row: number;
-    constructor(x: number, row: number): void {
-        this.x = x;
+    x: number;
+    constructor(row: number, x: number): void {
         this.row = row; // to-do. validate
+        this.x = x;
     }
     stepRow(difference: number): void {
         this.x += difference;
@@ -94,7 +89,7 @@ class Player {
     step_count_since_turn: number;
     run_speed: number;
     constructor() {
-        this.position = new RowPosition(1.5, 0);
+        this.position = new RowPosition(4, 5.75);
         this.run_speed = .01;
         this.step_count_since_turn = 2;
     }
@@ -164,7 +159,7 @@ class Player {
                     const row_direction = Math.sign(row_difference);
                     const row_distance = Math.abs(row_difference);
                     if (row_distance < 1.5 * step_distance && this.step_count_since_turn >= 2) {
-                        this.position = new RowPosition(position.column, row);
+                        this.position = new RowPosition(row, position.column);
                         position = this.position;
                         position.stepRow((keys.has("a") ? -1 : 1) * Math.max(0, step_distance - row_distance));
                         this.step_count_since_turn = -1;
