@@ -7,7 +7,7 @@ const {last} = require("./utilities.js");
 let step_count: number = 0;
 const game_state: Game = new Game();
 let timestamp_previous: number = -1;
-let keys_pressed: Array<Key> = [];
+let keys_pressed: Array<Key> = []; // to-do. Set?
 
 document.addEventListener(
     "keydown",
@@ -27,17 +27,18 @@ document.addEventListener(
 );
 
 const main =
-      (timestamp: number): void => {
-          ++step_count;
-          if (timestamp_previous !== -1)
-              game_state.update(
-                  {type: "tick", time: timestamp - timestamp_previous},
-                  keys_pressed
-              );
-          game_state.draw();
-          timestamp_previous = timestamp;
-          if (step_count < 300)
-              requestAnimationFrame(main);
-      };
+    (timestamp: number): void => {
+        ++step_count;
+        if (timestamp_previous !== -1) {
+            game_state.update(
+                {type: "tick", time: timestamp - timestamp_previous},
+                keys_pressed
+            );
+        }
+        game_state.draw();
+        timestamp_previous = timestamp;
+        // if (step_count < 300)
+        requestAnimationFrame(main);
+    };
 
 module.exports = (): AnimationFrameID => requestAnimationFrame(main);
