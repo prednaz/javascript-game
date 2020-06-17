@@ -1,6 +1,6 @@
 // @flow
 
-const {last} = require("./utilities.js");
+const {Int, round, multiply_int} = require("./utilities.js");
 
 // to-do. Move to main
 const canvas = (document.getElementById("canvas"): any);
@@ -50,10 +50,10 @@ class Game {
 let step_count = 0;
 
 class RowPosition {
-    row: number;
+    row: Int;
     x: number;
-    constructor(row: number, x: number): void {
-        this.row = row; // to-do. validate
+    constructor(row: Int, x: number): void {
+        this.row = row;
         this.x = x;
     }
     stepRow(difference: number): void {
@@ -67,10 +67,10 @@ class RowPosition {
     }
 }
 class ColumnPosition {
-    column: number;
+    column: Int;
     y: number;
-    constructor(column: number, y: number): void {
-        this.column = column; // to-do. validate
+    constructor(column: Int, y: number): void {
+        this.column = column;
         this.y = y;
     }
     stepColumn(difference: number): void {
@@ -89,7 +89,7 @@ class Player {
     step_count_since_turn: number;
     run_speed: number;
     constructor() {
-        this.position = new RowPosition(4, 5.75);
+        this.position = new RowPosition(new Int(4), 5.75);
         this.run_speed = .01;
         this.step_count_since_turn = 2;
     }
@@ -100,10 +100,10 @@ class Player {
         let y: number;
         if (this.position instanceof RowPosition) {
             x = coordinate_scale * this.position.x + coordinate_scale * 1;
-            y = coordinate_scale * this.position.row + coordinate_scale * 1;
+            y = coordinate_scale * this.position.row.number + coordinate_scale * 1;
         }
         else if (this.position instanceof ColumnPosition) {
-            x = coordinate_scale * this.position.column + coordinate_scale * 1;
+            x = coordinate_scale * this.position.column.number + coordinate_scale * 1;
             y = coordinate_scale * this.position.y + coordinate_scale * 1;
         }
         context.fillRect(x, y, coordinate_scale, coordinate_scale);
@@ -131,12 +131,12 @@ class Player {
             // to-do. refactor
             if (position instanceof RowPosition) {
                 if (keys.has("w") || keys.has("s")) {
-                    const column = Math.round(position.x / 2) * 2; // round to the nearest mutliple of 2
-                    const column_difference = column - position.x;
+                    const column = multiply_int(round(position.x / 2), new Int(2)); // round to the nearest mutliple of 2
+                    const column_difference = column.number - position.x;
                     const column_direction = Math.sign(column_difference);
                     const column_distance = Math.abs(column_difference);
                     if (column_distance < 1.5 * step_distance && this.step_count_since_turn >= 2) {
-                        this.position = new ColumnPosition(column, position.row);
+                        this.position = new ColumnPosition(column, position.row.number);
                         position = this.position;
                         position.stepColumn((keys.has("w") ? -1 : 1) * Math.max(0, step_distance - column_distance));
                         this.step_count_since_turn = -1;
@@ -154,12 +154,12 @@ class Player {
             }
             else if (position instanceof ColumnPosition) {
                 if (keys.has("a") || keys.has("d")) {
-                    const row = Math.round(position.y / 2) * 2; // round to the nearest mutliple of 2
-                    const row_difference = row - position.y;
+                    const row = multiply_int(round(position.y / 2), new Int(2)); // round to the nearest mutliple of 2
+                    const row_difference = row.number - position.y;
                     const row_direction = Math.sign(row_difference);
                     const row_distance = Math.abs(row_difference);
                     if (row_distance < 1.5 * step_distance && this.step_count_since_turn >= 2) {
-                        this.position = new RowPosition(row, position.column);
+                        this.position = new RowPosition(row, position.column.number);
                         position = this.position;
                         position.stepRow((keys.has("a") ? -1 : 1) * Math.max(0, step_distance - row_distance));
                         this.step_count_since_turn = -1;
