@@ -4,11 +4,15 @@
     <meta charset="utf-8">
     <style>
       .resource {visibility: hidden;} /* to-do. Is there a better way? display: none? */
+      #canvas {
+          display: block;
+          margin: 0 auto;
+      }
     </style>
   </head>
   <body>
     <img class="resource" id="hole" src="resources/0183.png">
-    <canvas id="canvas" width="450" height="390"></canvas>
+    <canvas id="canvas" width="450" height="390"></canvas> <!-- to-do. Should the size be set through CSS too? -->
     <script src="index.js"></script>
   </body>
 </html>

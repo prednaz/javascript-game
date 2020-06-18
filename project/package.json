@@ -17,5 +17,9 @@
     "@babel/preset-flow": "^7.10.1",
     "flow-bin": "^0.127.0",
     "parcel": "^1.12.4"
+  },
+  "dependencies": {
+    "player.js": "^0.1.0",
+    "ramda": "^0.27.0"
   }
 }

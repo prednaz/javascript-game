@@ -1,182 +1,54 @@
 // @flow
 
-const {Int, round, multiply_int} = require("./utilities.js");
-
-// to-do. Move to main
-const canvas = (document.getElementById("canvas"): any);
-const context = canvas.getContext("2d"); // to-do. Is there a better type for this than any?
-const hole = document.getElementById("hole");
-const coordinate_scale = 30;
-
-type Event =
-    {type: "key_down", key: Key} |
-    {type: "key_up", key: Key} |
-    {type: "tick", time: number};
-export type Key = string;
+import type {Key, Event} from "./player";
+const Player = require("./player.js");
+const R = require("ramda");
 
 class Game {
-    player: Array<Player>;
+    +player: Array<Player>;
+    +coordinate_maximum: {
+        +x: number,
+        +y: number,
+    };
     constructor(): void {
         this.player = [new Player()];
+        this.coordinate_maximum = {x: 12, y: 10};
     }
     update(event: Event, keys_pressed: Array<Key>): void {
-        this.player.forEach(
-            player_current => player_current.update(event, keys_pressed)
+        R.forEach(
+            player_current => player_current.update(event, keys_pressed, this.coordinate_maximum),
+            this.player
         );
     }
-    draw(): void {
+    draw(canvas: {width: number, height: number, context: any, resources: Map<string, HTMLElement>,...}): void {
          // to-do. refactor
-         // to-do. magic numbers
          // to-do. seperate background canvas
-        context.clearRect(0, 0, canvas.width, canvas.height);
-        this.player.forEach(player_current => player_current.draw());
-        for (let i=2; i < 14; i += 2) {
-            for (let j=2; j < 12; j += 2){
-                context.drawImage(hole, i * coordinate_scale, j * coordinate_scale);
+        canvas.context.clearRect(0, 0, canvas.width, canvas.height);
+        // to-do. cache these
+        const grid_length = {
+            x: this.coordinate_maximum.x + 3, // two walls + one zero index
+            y: this.coordinate_maximum.y + 3, // two walls + one zero index
+        };
+        const grid_scale = canvas.width / grid_length.x;
+        if (grid_scale !== canvas.height / grid_length.y) {
+            throw new RangeError(
+                "The canvas has got the required aspect ratio of " + grid_length.x + ":" + grid_length.y + "."
+            );
+        }
+        for (let x = 2; x < grid_length.x-2; x += 2) {
+            for (let y = 2; y < grid_length.y-2; y += 2) {
+                canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * x, grid_scale * y);
             }
         }
-        for (let i = 0; i < 15; i++) {
-            context.drawImage(hole, i * coordinate_scale, 0);
-            context.drawImage(hole, i * coordinate_scale, 12 * coordinate_scale);
-        for (let j = 1; j < 12; j++) {
-            context.drawImage(hole, 0, j * coordinate_scale);
-            context.drawImage(hole, 14 * coordinate_scale, j * coordinate_scale);
+        for (let x = 0; x < grid_length.x; ++x) {
+            canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * x, 0);
+            canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * x, grid_scale * (grid_length.y-1));
+        for (let y = 1; y < grid_length.y-1; ++y) {
+            canvas.context.drawImage(canvas.resources.get("hole"), 0, grid_scale * y);
+            canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * (grid_length.x-1), grid_scale * y);
             }
         }
-        
-    }
-}
-
-let step_count = 0;
-
-class RowPosition {
-    row: Int;
-    x: number;
-    constructor(row: Int, x: number): void {
-        this.row = row;
-        this.x = x;
-    }
-    stepRow(difference: number): void {
-        this.x += difference;
-        if (this.x < 0) {
-            this.x = 0;
-        }
-        else if (this.x > 12) { // to-do. magic number
-            this.x = 12;
-        }
-    }
-}
-class ColumnPosition {
-    column: Int;
-    y: number;
-    constructor(column: Int, y: number): void {
-        this.column = column;
-        this.y = y;
-    }
-    stepColumn(difference: number): void {
-        this.y += difference;
-        if (this.y < 0) {
-            this.y = 0;
-        }
-        else if (this.y > 10) { // to-do. magic number
-            this.y = 10;
-        }
-    }
-};
-
-class Player {
-    position: RowPosition | ColumnPosition;
-    step_count_since_turn: number;
-    run_speed: number;
-    constructor() {
-        this.position = new RowPosition(new Int(4), 5.75);
-        this.run_speed = .01;
-        this.step_count_since_turn = 2;
-    }
-    draw(): void {
-        context.beginPath();
-        context.fillStyle = "green";
-        let x: number;
-        let y: number;
-        if (this.position instanceof RowPosition) {
-            x = coordinate_scale * this.position.x + coordinate_scale * 1;
-            y = coordinate_scale * this.position.row.number + coordinate_scale * 1;
-        }
-        else if (this.position instanceof ColumnPosition) {
-            x = coordinate_scale * this.position.column.number + coordinate_scale * 1;
-            y = coordinate_scale * this.position.y + coordinate_scale * 1;
-        }
-        context.fillRect(x, y, coordinate_scale, coordinate_scale);
-    }
-    update(event: Event, keys_pressed: Array<Key>): void {
-        if (event.type === "tick") {
-            const keys = new Set(keys_pressed.filter(key => ["w", "a", "s", "d"].includes(key)));
-
-            // opposed keys cancel each other out
-            if (keys.has("w") && keys.has("s")) {
-                keys.delete("w");
-                keys.delete("s");
-            }
-            if (keys.has("a") && keys.has("d")) {
-                keys.delete("a");
-                keys.delete("d");
-            }
-
-            if (keys.size === 0) {
-                return;
-            }
-
-            const step_distance = this.run_speed * event.time;
-            let position = this.position; // I do as Flow guides.
-            // to-do. refactor
-            if (position instanceof RowPosition) {
-                if (keys.has("w") || keys.has("s")) {
-                    const column = multiply_int(round(position.x / 2), new Int(2)); // round to the nearest mutliple of 2
-                    const column_difference = column.number - position.x;
-                    const column_direction = Math.sign(column_difference);
-                    const column_distance = Math.abs(column_difference);
-                    if (column_distance < 1.5 * step_distance && this.step_count_since_turn >= 2) {
-                        this.position = new ColumnPosition(column, position.row.number);
-                        position = this.position;
-                        position.stepColumn((keys.has("w") ? -1 : 1) * Math.max(0, step_distance - column_distance));
-                        this.step_count_since_turn = -1;
-                    }
-                    else if (keys.has("a") || keys.has("d")) {
-                        position.stepRow((keys.has("a") ? -1 : 1) * step_distance);
-                    }
-                    else {
-                        position.stepRow(column_direction * step_distance);
-                    }
-                }
-                else {
-                    position.stepRow((keys.has("a") ? -1 : 1) * step_distance);
-                }
-            }
-            else if (position instanceof ColumnPosition) {
-                if (keys.has("a") || keys.has("d")) {
-                    const row = multiply_int(round(position.y / 2), new Int(2)); // round to the nearest mutliple of 2
-                    const row_difference = row.number - position.y;
-                    const row_direction = Math.sign(row_difference);
-                    const row_distance = Math.abs(row_difference);
-                    if (row_distance < 1.5 * step_distance && this.step_count_since_turn >= 2) {
-                        this.position = new RowPosition(row, position.column.number);
-                        position = this.position;
-                        position.stepRow((keys.has("a") ? -1 : 1) * Math.max(0, step_distance - row_distance));
-                        this.step_count_since_turn = -1;
-                    }
-                    else if (keys.has("w") || keys.has("s")) {
-                        position.stepColumn((keys.has("w") ? -1 : 1) * step_distance);
-                    }
-                    else {
-                        position.stepColumn(row_direction * step_distance);
-                    }
-                }
-                else {
-                    position.stepColumn((keys.has("w") ? -1 : 1) * step_distance);
-                }
-            }
-            ++this.step_count_since_turn;
-        }
+        R.forEach(player_current => player_current.draw(canvas, grid_scale), this.player);
     }
 }
 
