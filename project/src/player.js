@@ -1,12 +1,9 @@
 // @flow
 
 const {Int, round, multiply_int} = require("./utilities.js");
+const {KeyDownEvent, KeyUpEvent, TickEvent} = require("./ui_types");
+import type {Event} from "./ui_types";
 
-export type Event =
-    {type: "key_down", key: Key} |
-    {type: "key_up", key: Key} |
-    {type: "tick", time: number};
-export type Key = string;
 type CoordinateMaximum = {
     +x: number,
     +y: number,
@@ -71,8 +68,8 @@ class Player {
         }
         canvas.context.fillRect(x, y, grid_scale, grid_scale);
     }
-    update(event: Event, keys_pressed: Array<Key>, coordinate_maximum: CoordinateMaximum): void {
-        if (event.type === "tick") {
+    update(event: Event, keys_pressed: Array<string>, coordinate_maximum: CoordinateMaximum): void {
+        if (event instanceof TickEvent) {
             const keys = new Set(keys_pressed.filter(key => ["w", "a", "s", "d"].includes(key)));
 
             // opposed keys cancel each other out

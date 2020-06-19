@@ -1,8 +1,8 @@
 // @flow
 
-import type {Key, Event} from "./player";
 const Player = require("./player.js");
 const R = require("ramda");
+import type {Event} from "./ui_types";
 
 class Game {
     +player: Array<Player>;
@@ -14,7 +14,7 @@ class Game {
         this.player = [new Player()];
         this.coordinate_maximum = {x: 12, y: 10};
     }
-    update(event: Event, keys_pressed: Array<Key>): void {
+    update(event: Event, keys_pressed: Array<string>): void {
         R.forEach(
             player_current => player_current.update(event, keys_pressed, this.coordinate_maximum),
             this.player
