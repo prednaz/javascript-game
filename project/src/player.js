@@ -1,7 +1,9 @@
 // @flow
 
+const Bomb = require("./bomb");
 const {Int, round, multiply_int} = require("./utilities.js");
 const {KeyDownEvent, KeyUpEvent, TickEvent} = require("./ui_types");
+const {ColumnRowPosition} = require("./game_types");
 import type {Event} from "./ui_types";
 
 type CoordinateMaximum = {
@@ -48,12 +50,15 @@ class Player {
     position: RowPosition | ColumnPosition;
     step_count_since_turn: number;
     run_speed: number;
+    bombs: Map<ColumnRowPosition, Bomb>;
     constructor() {
         this.position = new RowPosition(new Int(0), 0);
         this.run_speed = .01;
         this.step_count_since_turn = 2;
+        this.bombs = new Map();
     }
-    draw(canvas: {width: number, height: number, context: any, resources: Map<string, HTMLElement>,...}, grid_scale: number): void {
+    draw(canvas: {context: any, resources: Map<string, HTMLElement>,...}, grid_scale: number): void {
+        this.bombs.forEach((bomb, position) => bomb.draw(canvas, grid_scale, position));
         canvas.context.beginPath();
         canvas.context.fillStyle = "green";
         let x: number;
@@ -69,7 +74,20 @@ class Player {
         canvas.context.fillRect(x, y, grid_scale, grid_scale);
     }
     update(event: Event, keys_pressed: Array<string>, coordinate_maximum: CoordinateMaximum): void {
-        if (event instanceof TickEvent) {
+        let position = this.position; // I do as Flow guides.
+        if (event instanceof KeyDownEvent && event.key === " ") {
+            let bomb_position: ColumnRowPosition;
+            if (position instanceof RowPosition) {
+                bomb_position = new ColumnRowPosition(round(position.x), position.row);
+            }
+            else { // this.position instanceof ColumnPosition
+                bomb_position = new ColumnRowPosition(position.column, round(position.y));
+            }
+            this.bombs.set(bomb_position, new Bomb());
+        }
+        else if (event instanceof TickEvent) {
+            this.bombs.forEach(bomb => bomb.update(event));
+
             const keys = new Set(keys_pressed.filter(key => ["w", "a", "s", "d"].includes(key)));
 
             // opposed keys cancel each other out
@@ -87,7 +105,6 @@ class Player {
             }
 
             const step_distance = this.run_speed * event.time;
-            let position = this.position; // I do as Flow guides.
             // to-do. refactor
             if (position instanceof RowPosition) {
                 if (keys.has("w") || keys.has("s")) {
