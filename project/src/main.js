@@ -3,7 +3,6 @@
 const Game = require("./game");
 const {last, resources_get} = require("./utilities.js");
 const {KeyDownEvent, KeyUpEvent, TickEvent} = require("./ui_types");
-const R = require("ramda");
 
 const game_state: Game = new Game();
 let timestamp_previous: number = -1;
@@ -18,18 +17,18 @@ const canvas = {
 
 document.addEventListener(
     "keydown",
-    (event: KeyboardEvent): void => {
+    (event: KeyboardEvent) => {
         if (last(keys_pressed) === event.key)
             return;
-        game_state.update(new KeyDownEvent(event.key), keys_pressed);
         keys_pressed.push(event.key);
+        game_state.update(new KeyDownEvent(event.key), keys_pressed);
     }
 );
 document.addEventListener(
     "keyup",
-    (event: KeyboardEvent): void => {
-        game_state.update(new KeyUpEvent(event.key), keys_pressed);
+    (event: KeyboardEvent) => {
         keys_pressed = keys_pressed.filter(key => key !== event.key);
+        game_state.update(new KeyUpEvent(event.key), keys_pressed);
     }
 );
 

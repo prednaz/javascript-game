@@ -12,7 +12,7 @@ type CoordinateMaximum = {
 }
 
 class RowPosition {
-    row: Int;
+    +row: Int;
     x: number;
     constructor(row: Int, x: number): void {
         this.row = row;
@@ -29,7 +29,7 @@ class RowPosition {
     }
 }
 class ColumnPosition {
-    column: Int;
+    +column: Int;
     y: number;
     constructor(column: Int, y: number): void {
         this.column = column;
@@ -57,33 +57,15 @@ class Player {
         this.step_count_since_turn = 2;
         this.bombs = new Map();
     }
-    draw(canvas: {context: any, resources: Map<string, HTMLElement>,...}, grid_scale: number): void {
-        this.bombs.forEach((bomb, position) => bomb.draw(canvas, grid_scale, position));
-        canvas.context.beginPath();
-        canvas.context.fillStyle = "green";
-        let x: number;
-        let y: number;
-        if (this.position instanceof RowPosition) {
-            x = grid_scale * this.position.x + grid_scale * 1;
-            y = grid_scale * this.position.row.number + grid_scale * 1;
-        }
-        else if (this.position instanceof ColumnPosition) {
-            x = grid_scale * this.position.column.number + grid_scale * 1;
-            y = grid_scale * this.position.y + grid_scale * 1;
-        }
-        canvas.context.fillRect(x, y, grid_scale, grid_scale);
-    }
     update(event: Event, keys_pressed: Array<string>, coordinate_maximum: CoordinateMaximum): void {
         let position = this.position; // I do as Flow guides.
         if (event instanceof KeyDownEvent && event.key === " ") {
-            let bomb_position: ColumnRowPosition;
-            if (position instanceof RowPosition) {
-                bomb_position = new ColumnRowPosition(round(position.x), position.row);
-            }
-            else { // this.position instanceof ColumnPosition
-                bomb_position = new ColumnRowPosition(position.column, round(position.y));
-            }
-            this.bombs.set(bomb_position, new Bomb());
+            this.bombs.set(
+                position instanceof RowPosition
+                    ? new ColumnRowPosition(round(position.x), position.row)
+                    : new ColumnRowPosition(position.column, round(position.y)),
+                new Bomb()
+            );
         }
         else if (event instanceof TickEvent) {
             this.bombs.forEach(bomb => bomb.update(event));
@@ -141,7 +123,7 @@ class Player {
                     );
                 }
             }
-            else if (position instanceof ColumnPosition) {
+            else { // position instanceof ColumnPosition
                 if (keys.has("a") || keys.has("d")) {
                     const row = multiply_int(round(position.y / 2), new Int(2)); // round to the nearest mutliple of 2
                     const row_difference = row.number - position.y;
@@ -178,6 +160,21 @@ class Player {
             }
             ++this.step_count_since_turn;
         }
+    }
+    draw(canvas: {context: any, resources: Map<string, HTMLElement>,...}, grid_scale: number): void {
+        this.bombs.forEach((bomb, position) => bomb.draw(canvas, grid_scale, position));
+        canvas.context.beginPath();
+        canvas.context.fillStyle = "green";
+        canvas.context.fillRect(
+            this.position instanceof RowPosition
+                ? grid_scale * this.position.x + grid_scale * 1
+                : grid_scale * this.position.column.number + grid_scale * 1,
+            this.position instanceof RowPosition
+                ? grid_scale * this.position.row.number + grid_scale * 1
+                : grid_scale * this.position.y + grid_scale * 1,
+            grid_scale,
+            grid_scale
+        );
     }
 }
 
