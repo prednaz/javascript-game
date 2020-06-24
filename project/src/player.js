@@ -1,9 +1,11 @@
 // @flow
 
 const Bomb = require("./bomb");
-const {Int, round, multiply_int} = require("./utilities.js");
 const {KeyDownEvent, KeyUpEvent, TickEvent} = require("./ui_types");
 const {ColumnRowPosition} = require("./game_types");
+const {Int, round, multiply_int} = require("./utilities.js");
+const MapValueIndexed = require("./map_value_indexed.js");
+
 import type {Event} from "./ui_types";
 
 type CoordinateMaximum = {
@@ -50,12 +52,12 @@ class Player {
     position: RowPosition | ColumnPosition;
     step_count_since_turn: number;
     run_speed: number;
-    bombs: Map<ColumnRowPosition, Bomb>;
+    bombs: MapValueIndexed<ColumnRowPosition, Bomb>;
     constructor() {
         this.position = new RowPosition(new Int(0), 0);
         this.run_speed = .01;
         this.step_count_since_turn = 2;
-        this.bombs = new Map();
+        this.bombs = new MapValueIndexed();
     }
     update(event: Event, keys_pressed: Array<string>, coordinate_maximum: CoordinateMaximum): void {
         let position = this.position; // I do as Flow guides.

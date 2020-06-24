@@ -33,4 +33,18 @@ const resources_get: Array<string> => Map<string, HTMLElement> =
         })
     );
 
-module.exports = {last, Int, round, multiply_int, map_of_pairs, resources_get};
+const pairing_function =
+    (n1: number, n2: number): number =>
+        n1 < n2
+            ? n2 * n2 + n1
+            : n1 * n1 + n1 + n2 ;
+
+module.exports = {
+    last,
+    Int,
+    round,
+    multiply_int,
+    map_of_pairs,
+    resources_get,
+    pairing_function
+};
