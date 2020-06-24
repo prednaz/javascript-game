@@ -6,7 +6,7 @@ const R = require("ramda");
 const last = <T>(array: Array<T>): T => array[array.length - 1];
 
 class Int {
-    number: number;
+    +number: number;
     constructor(number: number): void {
         if (!Number.isInteger(number)) {
             throw new RangeError("The argument must be an integer between -2^53 and 2^53.");

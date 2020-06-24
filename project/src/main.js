@@ -40,7 +40,7 @@ const main =
         }
         game_state.draw(canvas);
         timestamp_previous = timestamp;
-        // if (step_count < 300)
+        if (step_count < 300)
         requestAnimationFrame(main);
         // if (step_count % 100 === 0)
         //     console.log(keys_pressed);
