@@ -54,11 +54,13 @@ class ColumnPosition {
 ColumnPosition[immerable] = true;
 
 class Player {
+    keys_pressed: Array<string>;
     position: RowPosition | ColumnPosition;
     step_count_since_turn: number;
     run_speed: number;
     bombs: MapValueIndexed<ColumnRowPosition, Bomb>;
     constructor() {
+        this.keys_pressed = [];
         this.position = new RowPosition(new Int(0), 0);
         this.run_speed = .01;
         this.step_count_since_turn = 2;
