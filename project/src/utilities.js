@@ -1,6 +1,7 @@
 // @flow
 
 const R = require("ramda");
+const {immerable} = require("immer");
 
 // argument must not be empty
 const last = <T>(array: Array<T>): T => array[array.length - 1];
@@ -14,6 +15,8 @@ class Int {
         this.number = number;
     }
 }
+// $FlowFixMe https://github.com/facebook/flow/issues/3258
+Int[immerable] = true;
 
 const round = (number: number): Int => new Int(Math.round(number));
 

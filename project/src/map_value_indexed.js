@@ -1,5 +1,7 @@
 // @flow
 
+const {immerable} = require("immer");
+
 export interface HasId {
     +id: number;
 }
@@ -17,5 +19,7 @@ class MapValueIndexed<Key: HasId, Value> {
         return this.map.forEach(([key, value], id) => callback(value, key));
     }
 }
+// $FlowFixMe https://github.com/facebook/flow/issues/3258
+MapValueIndexed[immerable] = true;
 
 module.exports = MapValueIndexed;

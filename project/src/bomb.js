@@ -2,6 +2,7 @@
 
 const {TickEvent} = require("./ui_types");
 const {ColumnRowPosition} = require("./game_types");
+const {immerable} = require("immer");
 
 class Bomb {
     fuse: number;
@@ -18,5 +19,7 @@ class Bomb {
         // canvas.context.drawImage(canvas.resources.get("bomb"), grid_scale * this.position.row.number, grid_scale * this.position.row.number);
     }
 }
+// $FlowFixMe https://github.com/facebook/flow/issues/3258
+Bomb[immerable] = true;
 
 module.exports = Bomb;

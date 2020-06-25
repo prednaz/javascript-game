@@ -7,6 +7,7 @@ const {Int, round, multiply_int} = require("./utilities.js");
 const MapValueIndexed = require("./map_value_indexed.js");
 
 import type {Event} from "./ui_types";
+const {immerable} = require("immer");
 
 type CoordinateMaximum = {
     +x: number,
@@ -30,6 +31,8 @@ class RowPosition {
         }
     }
 }
+// $FlowFixMe https://github.com/facebook/flow/issues/3258
+RowPosition[immerable] = true;
 class ColumnPosition {
     +column: Int;
     y: number;
@@ -47,6 +50,8 @@ class ColumnPosition {
         }
     }
 }
+// $FlowFixMe https://github.com/facebook/flow/issues/3258
+ColumnPosition[immerable] = true;
 
 class Player {
     position: RowPosition | ColumnPosition;
@@ -179,5 +184,7 @@ class Player {
         );
     }
 }
+// $FlowFixMe https://github.com/facebook/flow/issues/3258
+Player[immerable] = true;
 
 module.exports = Player;

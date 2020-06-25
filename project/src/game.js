@@ -2,6 +2,7 @@
 
 const Player = require("./player.js");
 import type {Event} from "./ui_types";
+const {immerable} = require("immer");
 
 class Game {
     +player: Array<Player>;
@@ -49,5 +50,7 @@ class Game {
         this.player.forEach(player_current => player_current.draw(canvas, grid_scale));
     }
 }
+// $FlowFixMe https://github.com/facebook/flow/issues/3258
+Game[immerable] = true;
 
 module.exports = Game;

@@ -19,6 +19,7 @@
     "parcel": "^1.12.4"
   },
   "dependencies": {
+    "immer": "^7.0.5",
     "ramda": "^0.27.0"
   }
 }
