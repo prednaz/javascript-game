@@ -1,6 +1,6 @@
 // @flow
 
-const socket = io();
+const socket = require("socket.io-client")();
 
 socket.emit("message", "hi");
 
