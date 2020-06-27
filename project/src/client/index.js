@@ -3,14 +3,29 @@
 const socket = require("socket.io-client")();
 
 const {last, resources_get} = require("../utilities.js");
-const {KeyDownEvent, KeyUpEvent} = require("../ui_types");
 const {Game, draw} = require("../game");
+const {Accelerate, Decelerate, PlantBomb} = require("../game_types.js");
 const immer = require("immer");
 immer.enablePatches();
 immer.enableMapSet();
 immer.setAutoFreeze(true);
 
-let keys_pressed: Array<string> = []; // to-do. Set
+const controls = {
+    down: {
+        "w": new Accelerate("up"),
+        "a": new Accelerate("left"),
+        "s": new Accelerate("down"),
+        "d": new Accelerate("right"),
+        " ": new PlantBomb()
+    },
+    up: {
+        "w": new Decelerate("up"),
+        "a": new Decelerate("left"),
+        "s": new Decelerate("down"),
+        "d": new Decelerate("right")
+    }
+};
+let keys_pressed: Array<string> = []; // to-do. Just remember the last.
 let game_state: Game;
 const canvas_dom = (document.getElementById("canvas"): any);
 const canvas = {
@@ -26,14 +41,18 @@ document.addEventListener(
         if (last(keys_pressed) === event.key)
             return;
         keys_pressed.push(event.key);
-        socket.emit("input", new KeyDownEvent(event.key));
+        if (event.key in controls.down) {
+            socket.emit("user command", controls.down[event.key]);
+        }
     }
 );
 document.addEventListener(
     "keyup",
     (event: KeyboardEvent) => {
         keys_pressed = keys_pressed.filter(key => key !== event.key);
-        socket.emit("input", new KeyUpEvent(event.key));
+        if (event.key in controls.up) {
+            socket.emit("user command", controls.up[event.key]);
+        }
     }
 );
 

@@ -1,7 +1,6 @@
 // @flow
 
-const {TickEvent} = require("./ui_types");
-const {ColumnRowPosition} = require("./game_types");
+const {ColumnRowPosition, Tick} = require("./game_types.js");
 const {immerable} = require("immer");
 
 class Bomb {
@@ -9,7 +8,7 @@ class Bomb {
     constructor(): void {
         this.fuse = 2600;
     }
-    update(event: TickEvent): void {
+    update(event: Tick): void {
         this.fuse -= event.time;
     }
 }

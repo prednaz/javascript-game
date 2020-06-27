@@ -2,7 +2,7 @@
 
 const player = require("./player.js");
 const Player = player.Player;
-import type {Event} from "./ui_types";
+import type {Event} from "./game_types.js";
 const {immerable} = require("immer");
 
 class Game {
@@ -16,6 +16,7 @@ class Game {
         this.coordinate_maximum = {x: 12, y: 10};
     }
     update(event: Event): void {
+        // to-do. allocate UserCommandEvents to the according player only
         this.player.forEach(
             player_current => player_current.update(event, this.coordinate_maximum)
         );

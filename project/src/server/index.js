@@ -12,7 +12,7 @@ http.listen(1234, () => {
 
 const {performance} = require('perf_hooks');
 const {Game} = require("../game");
-const {KeyDownEvent, KeyUpEvent, TickEvent} = require("../ui_types");
+const {UserCommandEvent, Tick} = require("../game_types.js");
 const immer = require("immer");
 immer.enablePatches();
 immer.enableMapSet();
@@ -29,7 +29,7 @@ const loop =
             let patches;
             // $FlowFixMe https://github.com/immerjs/immer/pull/632
             [game_state, patches] = immer.produceWithPatches(game_state, draft => {
-                draft.update(new TickEvent(timestamp - timestamp_previous));
+                draft.update(new Tick(timestamp - timestamp_previous));
             });
             io.emit("update", patches);
             if (step_count % 100 === 0) {
@@ -47,29 +47,12 @@ setInterval(loop, 50);
 
 io.on("connection", socket => {
     socket.emit("state", game_state);
-    socket.on("input", input => {
-        switch (input.type) {
-        case "KeyDownEvent": {
-            let patches;
-            // $FlowFixMe https://github.com/immerjs/immer/pull/632
-            [game_state, patches] = immer.produceWithPatches(game_state, draft => {
-                draft.player[0].keys_pressed.push(input.key);
-                draft.update(new KeyDownEvent(input.key));
-            });
-            io.emit("update", patches);
-            break;
-        }
-        case "KeyUpEvent": {
-            let patches;
-            // $FlowFixMe https://github.com/immerjs/immer/pull/632
-            [game_state, patches] = immer.produceWithPatches(game_state, draft => {
-                draft.player[0].keys_pressed =
-                    draft.player[0].keys_pressed.filter(key => key !== input.key);
-                draft.update(new KeyUpEvent(input.key));
-            });
-            io.emit("update", patches);
-            break;
-        }
-        }
+    socket.on("user command", command => {
+        let patches;
+        // $FlowFixMe https://github.com/immerjs/immer/pull/632
+        [game_state, patches] = immer.produceWithPatches(game_state, draft => {
+            draft.update(new UserCommandEvent(0, command)); // to-do. Assign the correct user id.
+        });
+        io.emit("update", patches);
     });
 });
