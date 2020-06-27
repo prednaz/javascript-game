@@ -4,8 +4,9 @@ const bomb = require("./bomb");
 const Bomb = bomb.Bomb;
 const {KeyDownEvent, KeyUpEvent, TickEvent} = require("./ui_types");
 const {ColumnRowPosition} = require("./game_types");
-const {Int, round, multiply_int} = require("./utilities.js");
-const MapValueIndexed = require("./map_value_indexed.js");
+const {Int, round, multiply_int} = require("./utilities");
+const map_value_indexed = require("./map_value_indexed");
+const MapValueIndexed = map_value_indexed.MapValueIndexed;
 
 import type {Event} from "./ui_types";
 const {immerable} = require("immer");
@@ -93,15 +94,16 @@ class Player {
     update(event: Event, coordinate_maximum: CoordinateMaximum): void {
         let position = this.position; // I do as Flow guides.
         if (event instanceof KeyDownEvent && event.key === " ") {
-            this.bombs.set(
+            map_value_indexed.insert(
                 position instanceof RowPosition
                     ? new ColumnRowPosition(round(position.x), position.row)
                     : new ColumnRowPosition(position.column, round(position.y)),
-                new Bomb()
+                new Bomb(),
+                this.bombs
             );
         }
         else if (event instanceof TickEvent) {
-            this.bombs.forEach(bomb => bomb.update(event));
+            map_value_indexed.traverse_(bomb => bomb.update(event), this.bombs);
 
             const keys = new Set(this.keys_pressed.filter(key => ["w", "a", "s", "d"].includes(key)));
 
@@ -199,7 +201,10 @@ class Player {
 Player[immerable] = true;
 
 const draw = (player: Player, canvas: {context: any, resources: Map<string, HTMLElement>,...}, grid_scale: number): void => {
-    player.bombs.forEach((bomb_current, position) => bomb.draw(canvas, grid_scale, position));
+    map_value_indexed.traverse_(
+        (bomb_current, position) => bomb.draw(canvas, grid_scale, position),
+        player.bombs
+    );
     canvas.context.beginPath();
     canvas.context.fillStyle = "green";
     canvas.context.fillRect(
