@@ -74,16 +74,16 @@ class Player {
     }
     update(event: Event, coordinate_maximum: CoordinateMaximum): void {
         let position = this.position; // I do as Flow guides.
-        if (event instanceof KeyDownEvent && event.key === " ") {
+        if (event.type === "KeyDownEvent" && event.key === " ") {
             map_value_indexed.insert(
-                position instanceof RowPosition
+                position.type === "RowPosition"
                     ? new ColumnRowPosition(round(position.x), position.row)
                     : new ColumnRowPosition(position.column, round(position.y)),
                 new Bomb(),
                 this.bombs
             );
         }
-        else if (event instanceof TickEvent) {
+        else if (event.type === "TickEvent") {
             map_value_indexed.traverse_(bomb => bomb.update(event), this.bombs);
 
             const keys = new Set(this.keys_pressed.filter(key => ["w", "a", "s", "d"].includes(key)));
@@ -104,7 +104,7 @@ class Player {
 
             const step_distance = this.run_speed * event.time;
             // to-do. refactor
-            if (position instanceof RowPosition) {
+            if (position.type === "RowPosition") {
                 if (keys.has("w") || keys.has("s")) {
                     const column = multiply_int(round(position.x / 2), new Int(2)); // round to the nearest mutliple of 2
                     const column_difference = column.number - position.x;
@@ -139,7 +139,7 @@ class Player {
                     );
                 }
             }
-            else { // position instanceof ColumnPosition
+            else { // position.type === "ColumnPosition"
                 if (keys.has("a") || keys.has("d")) {
                     const row = multiply_int(round(position.y / 2), new Int(2)); // round to the nearest mutliple of 2
                     const row_difference = row.number - position.y;
