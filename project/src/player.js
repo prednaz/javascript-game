@@ -65,31 +65,12 @@ class Player {
     step_count_since_turn: number;
     run_speed: number;
     bombs: MapValueIndexed<ColumnRowPosition, Bomb>;
-    constructor(json: any) {
-        if (json === undefined) {
-            this.keys_pressed = [];
-            this.position = new RowPosition(new Int(0), 0);
-            this.run_speed = .01;
-            this.step_count_since_turn = 2;
-            this.bombs = new MapValueIndexed();
-        }
-        else { // unmarshalling
-            this.keys_pressed = json.keys_pressed;
-            if ("row" in json.position) {
-                this.position =
-                    new RowPosition(new Int(json.position.row.number), json.position.x);
-            }
-            else { // ("column" in json.position)
-                this.position =
-                    new ColumnPosition(
-                        new Int(json.position.column.number),
-                        json.position.y
-                    );
-            }
-            this.run_speed = json.run_speed;
-            this.step_count_since_turn = json.step_count_since_turn;
-            this.bombs = new MapValueIndexed();
-        }
+    constructor() {
+        this.keys_pressed = [];
+        this.position = new RowPosition(new Int(0), 0);
+        this.run_speed = .01;
+        this.step_count_since_turn = 2;
+        this.bombs = new MapValueIndexed();
     }
     update(event: Event, coordinate_maximum: CoordinateMaximum): void {
         let position = this.position; // I do as Flow guides.

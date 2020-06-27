@@ -11,18 +11,9 @@ class Game {
         +x: number,
         +y: number,
     };
-    constructor(json: any): void {
-        if (json === undefined) {
-            this.player = [new Player()];
-            this.coordinate_maximum = {x: 12, y: 10};
-        }
-        else { // unmarshalling
-            this.player = [];
-            for (const player of json.player) {
-                this.player.push(new Player(player));
-            }
-            this.coordinate_maximum = json.coordinate_maximum;
-        }
+    constructor(): void {
+        this.player = [new Player()];
+        this.coordinate_maximum = {x: 12, y: 10};
     }
     update(event: Event): void {
         this.player.forEach(

@@ -49,7 +49,7 @@ const loop =
     };
 
 socket.on("state", state => {
-    game_state = new Game(state);
+    game_state = state;
     requestAnimationFrame(loop);
 });
 
