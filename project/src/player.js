@@ -77,23 +77,24 @@ class Player {
                 map_value_indexed.traverse_(bomb => bomb.update(event), this.bombs);
 
                 // opposed directions cancel each other out
-                if ("up" in this.direction_move && "down" in this.direction_move) {
-                    delete this.direction_move["up"];
-                    delete this.direction_move["down"];
+                const direction_move = Object.assign({}, this.direction_move);
+                if ("up" in direction_move && "down" in direction_move) {
+                    delete direction_move["up"];
+                    delete direction_move["down"];
                 }
-                if ("left" in this.direction_move && "right" in this.direction_move) {
-                    delete this.direction_move["left"];
-                    delete this.direction_move["right"];
+                if ("left" in direction_move && "right" in direction_move) {
+                    delete direction_move["left"];
+                    delete direction_move["right"];
                 }
 
-                if (Object.keys(this.direction_move).length === 0) {
+                if (Object.keys(direction_move).length === 0) {
                     return;
                 }
 
                 const step_distance = this.run_speed * event.time;
                 // to-do. refactor
                 if (position.type === "RowPosition") {
-                    if ("up" in this.direction_move || "down" in this.direction_move) {
+                    if ("up" in direction_move || "down" in direction_move) {
                         const column = multiply_int(round(position.x / 2), new Int(2)); // round to the nearest mutliple of 2
                         const column_difference = column.number - position.x;
                         const column_direction = Math.sign(column_difference);
@@ -102,14 +103,14 @@ class Player {
                             this.position = new ColumnPosition(column, position.row.number);
                             position = this.position;
                             position.stepColumn(
-                                ("up" in this.direction_move ? -1 : 1) * Math.max(0, step_distance - column_distance),
+                                ("up" in direction_move ? -1 : 1) * Math.max(0, step_distance - column_distance),
                                 coordinate_maximum
                             );
                             this.tick_count_since_turn = -1;
                         }
-                        else if ("left" in this.direction_move || "right" in this.direction_move) {
+                        else if ("left" in direction_move || "right" in direction_move) {
                             position.stepRow(
-                                ("left" in this.direction_move ? -1 : 1) * step_distance,
+                                ("left" in direction_move ? -1 : 1) * step_distance,
                                 coordinate_maximum
                             );
                         }
@@ -122,13 +123,13 @@ class Player {
                     }
                     else {
                         position.stepRow(
-                            ("left" in this.direction_move ? -1 : 1) * step_distance,
+                            ("left" in direction_move ? -1 : 1) * step_distance,
                             coordinate_maximum
                         );
                     }
                 }
                 else { // position.type === "ColumnPosition"
-                    if ("left" in this.direction_move || "right" in this.direction_move) {
+                    if ("left" in direction_move || "right" in direction_move) {
                         const row = multiply_int(round(position.y / 2), new Int(2)); // round to the nearest mutliple of 2
                         const row_difference = row.number - position.y;
                         const row_direction = Math.sign(row_difference);
@@ -137,14 +138,14 @@ class Player {
                             this.position = new RowPosition(row, position.column.number);
                             position = this.position;
                             position.stepRow(
-                                ("left" in this.direction_move ? -1 : 1) * Math.max(0, step_distance - row_distance),
+                                ("left" in direction_move ? -1 : 1) * Math.max(0, step_distance - row_distance),
                                 coordinate_maximum
                             );
                             this.tick_count_since_turn = -1;
                         }
-                        else if ("up" in this.direction_move || "down" in this.direction_move) {
+                        else if ("up" in direction_move || "down" in direction_move) {
                             position.stepColumn(
-                                ("up" in this.direction_move ? -1 : 1) * step_distance,
+                                ("up" in direction_move ? -1 : 1) * step_distance,
                                 coordinate_maximum
                             );
                         }
@@ -157,7 +158,7 @@ class Player {
                     }
                     else {
                         position.stepColumn(
-                            ("up" in this.direction_move ? -1 : 1) * step_distance,
+                            ("up" in direction_move ? -1 : 1) * step_distance,
                             coordinate_maximum
                         );
                     }
