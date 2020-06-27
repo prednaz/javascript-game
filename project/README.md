@@ -6,13 +6,15 @@ Run
 ```shell
 npm install
 npm run build
+node js/server/index.js
 ```
-. Deploy the files in `dist` to a server.
+.
 
 ## Develop
-Build. Then run
+
+In Visual Studio Code, search for the extension matching `@builtin typescript-language-features` and disable it. Then install the extension [Flow Language Support](https://marketplace.visualstudio.com/items?itemName=flowtype.flow-for-vscode). Run
 ```shell
 npm run babel
 npm run parcel
 ```
-. In Visual Studio Code, search for extension matching `@builtin typescript-language-features` and disable it. Then install the extension [Flow Language Support](https://marketplace.visualstudio.com/items?itemName=flowtype.flow-for-vscode).
+. Stop a running server and restart it running `node js/server/index.js` on every change to the server.
