@@ -4,8 +4,14 @@ const R = require("ramda");
 const {immerable} = require("immer");
 
 export interface HasId {
-    +id: number;
+    +id: number; // to-do. This should be a string. Use toString.
 }
+
+const pairing_function_integer =
+    (n1: number, n2: number): number =>
+        n1 < n2
+            ? n2 * n2 + n1
+            : n1 * n1 + n1 + n2 ;
 
 class MapValueIndexed<Key: HasId, Value> {
     content: {[number]: [Key, Value]};
@@ -24,4 +30,4 @@ const traverse_ =
     <Key: HasId, Value>(f: (Value, Key) => mixed, map: MapValueIndexed<Key, Value>): void =>
     {R.forEachObjIndexed(([key, value]) => f(value, key), map.content);}
 
-module.exports = {MapValueIndexed, insert, traverse_};
+module.exports = {pairing_function_integer, MapValueIndexed, insert, traverse_};

@@ -1,11 +1,11 @@
 // @flow
 
-const bomb = require("./bomb");
+const bomb = require("./bomb.js");
 const Bomb = bomb.Bomb;
-const {ColumnRowPosition} = require("./game_types");
-const {Int, round, multiply_int} = require("./utilities");
-const map_value_indexed = require("./map_value_indexed");
+const {Int, round, multiply_int} = require("./utilities.js");
+const map_value_indexed = require("./map_value_indexed.js");
 const MapValueIndexed = map_value_indexed.MapValueIndexed;
+const {ColumnRowPosition} = require("./game_types.js");
 import type {Direction, Event} from "./game_types.js";
 const {immerable} = require("immer");
 
@@ -60,14 +60,14 @@ ColumnPosition[immerable] = true;
 class Player {
     direction_move: {[Direction]: true};
     position: RowPosition | ColumnPosition;
-    step_count_since_turn: number;
+    tick_count_since_turn: number;
     run_speed: number;
     bombs: MapValueIndexed<ColumnRowPosition, Bomb>;
     constructor() {
         this.direction_move = {};
         this.position = new RowPosition(new Int(0), 0);
         this.run_speed = .01;
-        this.step_count_since_turn = 2;
+        this.tick_count_since_turn = 2;
         this.bombs = new MapValueIndexed();
     }
     update(event: Event, coordinate_maximum: CoordinateMaximum): void {
@@ -98,14 +98,14 @@ class Player {
                         const column_difference = column.number - position.x;
                         const column_direction = Math.sign(column_difference);
                         const column_distance = Math.abs(column_difference);
-                        if (column_distance < 1.5 * step_distance && this.step_count_since_turn >= 2) {
+                        if (column_distance < 1.5 * step_distance && this.tick_count_since_turn >= 2) {
                             this.position = new ColumnPosition(column, position.row.number);
                             position = this.position;
                             position.stepColumn(
                                 ("up" in this.direction_move ? -1 : 1) * Math.max(0, step_distance - column_distance),
                                 coordinate_maximum
                             );
-                            this.step_count_since_turn = -1;
+                            this.tick_count_since_turn = -1;
                         }
                         else if ("left" in this.direction_move || "right" in this.direction_move) {
                             position.stepRow(
@@ -133,14 +133,14 @@ class Player {
                         const row_difference = row.number - position.y;
                         const row_direction = Math.sign(row_difference);
                         const row_distance = Math.abs(row_difference);
-                        if (row_distance < 1.5 * step_distance && this.step_count_since_turn >= 2) {
+                        if (row_distance < 1.5 * step_distance && this.tick_count_since_turn >= 2) {
                             this.position = new RowPosition(row, position.column.number);
                             position = this.position;
                             position.stepRow(
                                 ("left" in this.direction_move ? -1 : 1) * Math.max(0, step_distance - row_distance),
                                 coordinate_maximum
                             );
-                            this.step_count_since_turn = -1;
+                            this.tick_count_since_turn = -1;
                         }
                         else if ("up" in this.direction_move || "down" in this.direction_move) {
                             position.stepColumn(
@@ -162,7 +162,7 @@ class Player {
                         );
                     }
                 }
-                ++this.step_count_since_turn;
+                ++this.tick_count_since_turn;
                 break;
             }
             case "UserCommandEvent": {

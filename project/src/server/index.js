@@ -1,22 +1,16 @@
 // @flow
 
-const express = require("express");
-const app = express();
-const http = require("http").createServer(app);
-const io = require("socket.io")(http, {serveClient: false});
-app.use(express.static("dist"));
-
-http.listen(1234, () => {
-    console.log("listening on *:1234");
-});
-
-const {performance} = require('perf_hooks');
-const {Game} = require("../game");
+const {Game} = require("../game.js");
 const {UserCommandEvent, Tick} = require("../game_types.js");
+const {performance} = require('perf_hooks');
 const immer = require("immer");
 immer.enablePatches();
 immer.enableMapSet();
 immer.setAutoFreeze(true);
+const express = require("express");
+const app = express();
+const http = require("http").createServer(app);
+const io = require("socket.io")(http, {serveClient: false});
 
 let game_state: Game = new Game();
 let timestamp_previous: number = -1;
@@ -55,4 +49,10 @@ io.on("connection", socket => {
         });
         io.emit("update", patches);
     });
+});
+
+app.use(express.static("dist"));
+
+http.listen(1234, () => {
+    console.log("listening on *:1234");
 });

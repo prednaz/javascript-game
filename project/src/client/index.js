@@ -1,14 +1,13 @@
 // @flow
 
-const socket = require("socket.io-client")();
-
-const {last, resources_get} = require("../utilities.js");
-const {Game, draw} = require("../game");
+const {Game, draw} = require("../game.js");
 const {Accelerate, Decelerate, PlantBomb} = require("../game_types.js");
+const {last, resources_get} = require("../utilities.js");
 const immer = require("immer");
 immer.enablePatches();
 immer.enableMapSet();
 immer.setAutoFreeze(true);
+const socket = require("socket.io-client")();
 
 const controls = {
     down: {
