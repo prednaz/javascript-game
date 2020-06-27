@@ -1,6 +1,7 @@
 // @flow
 
-const Bomb = require("./bomb");
+const bomb = require("./bomb");
+const Bomb = bomb.Bomb;
 const {KeyDownEvent, KeyUpEvent, TickEvent} = require("./ui_types");
 const {ColumnRowPosition} = require("./game_types");
 const {Int, round, multiply_int} = require("./utilities.js");
@@ -17,9 +18,11 @@ type CoordinateMaximum = {
 class RowPosition {
     +row: Int;
     x: number;
+    +type: "RowPosition";
     constructor(row: Int, x: number): void {
         this.row = row;
         this.x = x;
+        this.type = "RowPosition";
     }
     stepRow(difference: number, coordinate_maximum: CoordinateMaximum): void {
         this.x += difference;
@@ -36,9 +39,11 @@ RowPosition[immerable] = true;
 class ColumnPosition {
     +column: Int;
     y: number;
+    +type: "ColumnPosition";
     constructor(column: Int, y: number): void {
         this.column = column;
         this.y = y;
+        this.type = "ColumnPosition";
     }
     stepColumn(difference: number, coordinate_maximum: CoordinateMaximum): void {
         this.y += difference;
@@ -59,14 +64,33 @@ class Player {
     step_count_since_turn: number;
     run_speed: number;
     bombs: MapValueIndexed<ColumnRowPosition, Bomb>;
-    constructor() {
-        this.keys_pressed = [];
-        this.position = new RowPosition(new Int(0), 0);
-        this.run_speed = .01;
-        this.step_count_since_turn = 2;
-        this.bombs = new MapValueIndexed();
+    constructor(json: any) {
+        if (json === undefined) {
+            this.keys_pressed = [];
+            this.position = new RowPosition(new Int(0), 0);
+            this.run_speed = .01;
+            this.step_count_since_turn = 2;
+            this.bombs = new MapValueIndexed();
+        }
+        else { // unmarshalling
+            this.keys_pressed = json.keys_pressed;
+            if ("row" in json.position) {
+                this.position =
+                    new RowPosition(new Int(json.position.row.number), json.position.x);
+            }
+            else { // ("column" in json.position)
+                this.position =
+                    new ColumnPosition(
+                        new Int(json.position.column.number),
+                        json.position.y
+                    );
+            }
+            this.run_speed = json.run_speed;
+            this.step_count_since_turn = json.step_count_since_turn;
+            this.bombs = new MapValueIndexed();
+        }
     }
-    update(event: Event, keys_pressed: Array<string>, coordinate_maximum: CoordinateMaximum): void {
+    update(event: Event, coordinate_maximum: CoordinateMaximum): void {
         let position = this.position; // I do as Flow guides.
         if (event instanceof KeyDownEvent && event.key === " ") {
             this.bombs.set(
@@ -79,7 +103,7 @@ class Player {
         else if (event instanceof TickEvent) {
             this.bombs.forEach(bomb => bomb.update(event));
 
-            const keys = new Set(keys_pressed.filter(key => ["w", "a", "s", "d"].includes(key)));
+            const keys = new Set(this.keys_pressed.filter(key => ["w", "a", "s", "d"].includes(key)));
 
             // opposed keys cancel each other out
             if (keys.has("w") && keys.has("s")) {
@@ -170,23 +194,25 @@ class Player {
             ++this.step_count_since_turn;
         }
     }
-    draw(canvas: {context: any, resources: Map<string, HTMLElement>,...}, grid_scale: number): void {
-        this.bombs.forEach((bomb, position) => bomb.draw(canvas, grid_scale, position));
-        canvas.context.beginPath();
-        canvas.context.fillStyle = "green";
-        canvas.context.fillRect(
-            this.position instanceof RowPosition
-                ? grid_scale * this.position.x + grid_scale * 1
-                : grid_scale * this.position.column.number + grid_scale * 1,
-            this.position instanceof RowPosition
-                ? grid_scale * this.position.row.number + grid_scale * 1
-                : grid_scale * this.position.y + grid_scale * 1,
-            grid_scale,
-            grid_scale
-        );
-    }
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
 Player[immerable] = true;
 
-module.exports = Player;
+const draw = (player: Player, canvas: {context: any, resources: Map<string, HTMLElement>,...}, grid_scale: number): void => {
+    player.bombs.forEach((bomb_current, position) => bomb.draw(canvas, grid_scale, position));
+    canvas.context.beginPath();
+    canvas.context.fillStyle = "green";
+    canvas.context.fillRect(
+        player.position.type === "RowPosition"
+            ? grid_scale * player.position.x + grid_scale * 1
+            : grid_scale * player.position.column.number + grid_scale * 1,
+        player.position.type === "RowPosition"
+            ? grid_scale * player.position.row.number + grid_scale * 1
+            : grid_scale * player.position.y + grid_scale * 1,
+        grid_scale,
+        grid_scale
+    );
+}
+
+
+module.exports = {Player, draw};

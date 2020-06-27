@@ -2,11 +2,13 @@
 
 class KeyDownEvent {
     +key: string;
-    constructor(key: string): void {this.key = key;}
+    +type: "KeyDownEvent";
+    constructor(key: string): void {this.key = key; this.type = "KeyDownEvent";}
 }
 class KeyUpEvent {
     +key: string;
-    constructor(key: string): void {this.key = key;}
+    +type: "KeyUpEvent";
+    constructor(key: string): void {this.key = key; this.type = "KeyUpEvent";}
 }
 class TickEvent {
     +time: number;
