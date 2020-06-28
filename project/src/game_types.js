@@ -45,7 +45,7 @@ class PlantBomb {
     }
 }
 
-export type UserCommand = Accelerate | PlantBomb;
+export type UserCommand = Accelerate | Decelerate | PlantBomb;
 
 class Tick {
     +time: number;
@@ -54,16 +54,20 @@ class Tick {
 }
 
 class UserCommandEvent {
-    +user: number;
+    +player: PlayerId;
     +command: UserCommand;
     +type: "UserCommandEvent";
-    constructor(user: number, command: UserCommand) {
-        this.user = user;
+    constructor(player: PlayerId, command: UserCommand) {
+        this.player = player;
         this.command = command;
         this.type = "UserCommandEvent";
     }
 }
-    
+
 export type Event = Tick | UserCommandEvent;
 
-module.exports = {ColumnRowPosition, Accelerate, Decelerate, PlantBomb, Tick, UserCommandEvent};
+export type PlayerId = "top left" | "bottom right" | "bottom left" | "top right";
+
+const player_id_range: Array<PlayerId> = ["top left", "bottom right", "bottom left", "top right"];
+
+module.exports = {ColumnRowPosition, Accelerate, Decelerate, PlantBomb, Tick, UserCommandEvent, player_id_range};

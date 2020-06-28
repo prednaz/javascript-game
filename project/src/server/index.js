@@ -2,6 +2,7 @@
 
 const {Game} = require("../game.js");
 const {UserCommandEvent, Tick} = require("../game_types.js");
+import type {PlayerId} from "../game_types.js";
 const {performance} = require('perf_hooks');
 const immer = require("immer");
 immer.enablePatches();
@@ -41,11 +42,30 @@ setInterval(loop, 50);
 
 io.on("connection", socket => {
     socket.emit("state", game_state);
+    let player_id_new: PlayerId | null = null;
+    let patches; // to-do. type signature
+    // $FlowFixMe https://github.com/immerjs/immer/pull/632
+    [game_state, patches] = immer.produceWithPatches(game_state, draft => {
+        player_id_new = draft.addPlayer();
+    });
+    const player_id_new_copy = player_id_new; // I do as Flow guides.
+    if (player_id_new_copy === null) {
+        return; // to-do. Notify the client of the game being full.
+    }
+    io.emit("update", patches);
     socket.on("user command", command => {
         let patches;
         // $FlowFixMe https://github.com/immerjs/immer/pull/632
         [game_state, patches] = immer.produceWithPatches(game_state, draft => {
-            draft.update(new UserCommandEvent(0, command)); // to-do. Assign the correct user id.
+            draft.update(new UserCommandEvent(player_id_new_copy, command));
+        });
+        io.emit("update", patches);
+    });
+    socket.on('disconnect', () => {
+        let patches;
+        // $FlowFixMe https://github.com/immerjs/immer/pull/632
+        [game_state, patches] = immer.produceWithPatches(game_state, draft => {
+            draft.deletePlayer(player_id_new_copy);
         });
         io.emit("update", patches);
     });

@@ -6,7 +6,7 @@ const {Int, round, multiply_int} = require("./utilities.js");
 const map_value_indexed = require("./map_value_indexed.js");
 const MapValueIndexed = map_value_indexed.MapValueIndexed;
 const {ColumnRowPosition} = require("./game_types.js");
-import type {Direction, Event} from "./game_types.js";
+import type {Direction, UserCommand, Event} from "./game_types.js";
 const {immerable} = require("immer");
 
 type CoordinateMaximum = {
@@ -63,12 +63,35 @@ class Player {
     tick_count_since_turn: number;
     run_speed: number;
     bombs: MapValueIndexed<ColumnRowPosition, Bomb>;
-    constructor() {
+    constructor(position: RowPosition | ColumnPosition) {
         this.direction_move = {};
-        this.position = new RowPosition(new Int(0), 0);
+        this.position = position;
         this.run_speed = .01;
         this.tick_count_since_turn = 2;
         this.bombs = new MapValueIndexed();
+    }
+    user_command(command: UserCommand): void {
+        switch (command.type) {
+            case "Accelerate": {
+                this.direction_move[command.direction] = true;
+                break;
+            }
+            case "Decelerate": {
+                delete this.direction_move[command.direction];
+                break;
+            }
+            case "PlantBomb": {
+                let position = this.position; // I do as Flow guides.
+                map_value_indexed.insert(
+                    position.type === "RowPosition"
+                        ? new ColumnRowPosition(round(position.x), position.row)
+                        : new ColumnRowPosition(position.column, round(position.y)),
+                    new Bomb(),
+                    this.bombs
+                );
+                break;
+            }
+        }
     }
     update(event: Event, coordinate_maximum: CoordinateMaximum): void {
         let position = this.position; // I do as Flow guides.
@@ -166,29 +189,6 @@ class Player {
                 ++this.tick_count_since_turn;
                 break;
             }
-            case "UserCommandEvent": {
-                switch (event.command.type) {
-                    case "Accelerate": {
-                        this.direction_move[event.command.direction] = true;
-                        break;
-                    }
-                    case "Decelerate": {
-                        delete this.direction_move[event.command.direction];
-                        break;
-                    }
-                    case "PlantBomb": {
-                        map_value_indexed.insert(
-                            position.type === "RowPosition"
-                                ? new ColumnRowPosition(round(position.x), position.row)
-                                : new ColumnRowPosition(position.column, round(position.y)),
-                            new Bomb(),
-                            this.bombs
-                        );
-                        break;
-                    }
-                }
-                break;
-            }
         }
     }
 }
@@ -215,4 +215,4 @@ const draw = (player: Player, canvas: {context: any, resources: Map<string, HTML
 }
 
 
-module.exports = {Player, draw};
+module.exports = {Player, draw, RowPosition, ColumnPosition};

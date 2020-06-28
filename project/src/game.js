@@ -2,24 +2,46 @@
 
 const player = require("./player.js");
 const Player = player.Player;
-import type {Event} from "./game_types.js";
+const {player_id_range} = require("./game_types.js");
+import type {Event, PlayerId} from "./game_types.js";
+const {Int, round} = require("./utilities.js");
+const R = require("ramda");
 const {immerable} = require("immer");
 
 class Game {
-    +player: Array<Player>;
+    +player: {[PlayerId]: Player};
     +coordinate_maximum: {
         +x: number,
         +y: number,
     };
     constructor(): void {
-        this.player = [new Player()];
+        this.player = {};
         this.coordinate_maximum = {x: 12, y: 10};
     }
     update(event: Event): void {
-        // to-do. allocate UserCommandEvents to the according player only
-        this.player.forEach(
-            player_current => player_current.update(event, this.coordinate_maximum)
-        );
+        if (event.type === "UserCommandEvent") {
+            this.player[event.player].user_command(event.command);
+        }
+        else {
+            R.forEachObjIndexed(
+                player_current => player_current.update(event, this.coordinate_maximum),
+                this.player
+            );
+        }
+    }
+    addPlayer(): PlayerId | null {
+        const player_id_new = player_id_range.find(player_id => !(player_id in this.player));
+        if (player_id_new === undefined) {
+            return null;
+        }
+        const [y_word, x_word] = player_id_new.split(" ");
+        const y = y_word === "top" ? new Int(0) : round(this.coordinate_maximum.y);
+        const x = x_word === "left" ? 0 : this.coordinate_maximum.x;
+        this.player[player_id_new] = new Player(new player.RowPosition(y, x));
+        return player_id_new;
+    }
+    deletePlayer(player_id: PlayerId) {
+        delete this.player[player_id];
     }
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
@@ -53,7 +75,10 @@ const draw = (game: Game, canvas: {width: number, height: number, context: any, 
         canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * (grid_length.x-1), grid_scale * y);
         }
     }
-    game.player.forEach(player_current => player.draw(player_current, canvas, grid_scale));
+    R.forEachObjIndexed(
+        player_current => player.draw(player_current, canvas, grid_scale),
+        game.player
+    );
 };
 
 module.exports = {Game, draw};
