@@ -1,8 +1,7 @@
 // @flow
 
-const bomb = require("./bomb.js");
-const Bomb = bomb.Bomb;
-const {Int, round, multiply_int} = require("./utilities.js");
+const {Bomb} = require("./bomb.js");
+const {Int, round, multiply_int} = require("./int.js");
 const map_value_indexed = require("./map_value_indexed.js");
 const MapValueIndexed = map_value_indexed.MapValueIndexed;
 const {ColumnRowPosition} = require("./game_types.js");
@@ -58,11 +57,11 @@ class ColumnPosition {
 ColumnPosition[immerable] = true;
 
 class Player {
-    direction_move: {[Direction]: true};
+    +direction_move: {[Direction]: true};
     position: RowPosition | ColumnPosition;
-    tick_count_since_turn: number;
     run_speed: number;
-    bombs: MapValueIndexed<ColumnRowPosition, Bomb>;
+    tick_count_since_turn: number;
+    +bombs: MapValueIndexed<ColumnRowPosition, Bomb>;
     constructor(position: RowPosition | ColumnPosition) {
         this.direction_move = {};
         this.position = position;
@@ -195,24 +194,26 @@ class Player {
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
 Player[immerable] = true;
 
-const draw = (player: Player, canvas: {context: any, resources: Map<string, HTMLElement>,...}, grid_scale: number): void => {
-    map_value_indexed.traverse_(
-        (bomb_current, position) => bomb.draw(canvas, grid_scale, position),
-        player.bombs
-    );
-    canvas.context.beginPath();
-    canvas.context.fillStyle = "green";
-    canvas.context.fillRect(
-        player.position.type === "RowPosition"
-            ? grid_scale * player.position.x + grid_scale * 1
-            : grid_scale * player.position.column.number + grid_scale * 1,
-        player.position.type === "RowPosition"
-            ? grid_scale * player.position.row.number + grid_scale * 1
-            : grid_scale * player.position.y + grid_scale * 1,
-        grid_scale,
-        grid_scale
-    );
-}
+const draw =
+    (
+        player: Player,
+        canvas: {context: any, resources: Map<string, HTMLElement>,...},
+        grid_scale: number
+    ): void =>
+    {
+        canvas.context.beginPath();
+        canvas.context.fillStyle = "green";
+        canvas.context.fillRect(
+            player.position.type === "RowPosition"
+                ? grid_scale * player.position.x + grid_scale * 1
+                : grid_scale * player.position.column.number + grid_scale * 1,
+            player.position.type === "RowPosition"
+                ? grid_scale * player.position.row.number + grid_scale * 1
+                : grid_scale * player.position.y + grid_scale * 1,
+            grid_scale,
+            grid_scale
+        );
+    };
 
 
 module.exports = {Player, draw, RowPosition, ColumnPosition};

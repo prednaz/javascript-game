@@ -1,6 +1,6 @@
 // @flow
 
-const {Int} = require("./utilities.js");
+const {Int} = require("./int.js");
 const {pairing_function_integer} = require("./map_value_indexed.js");
 import type {HasId} from "./map_value_indexed.js";
 const {immerable} = require("immer");
@@ -8,12 +8,13 @@ const {immerable} = require("immer");
 class ColumnRowPosition implements HasId {
     +column: Int;
     +row: Int;
-    +id: number;
+    +id_cache: string;
     constructor(column: Int, row: Int): void {
         this.column = column;
         this.row = row;
-        this.id = pairing_function_integer(this.column.number, this.row.number); // make id a function if you make the fields writable
+        this.id_cache = pairing_function_integer(this.column.number, this.row.number).toString(); // caching the idea is possible as long as the others fields are read-only too
     }
+    id(): string {return this.id_cache;}
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
 ColumnRowPosition[immerable] = true;
@@ -54,11 +55,11 @@ class Tick {
 }
 
 class UserCommandEvent {
-    +player: PlayerId;
+    +player_id: PlayerId;
     +command: UserCommand;
     +type: "UserCommandEvent";
-    constructor(player: PlayerId, command: UserCommand) {
-        this.player = player;
+    constructor(player_id: PlayerId, command: UserCommand) {
+        this.player_id = player_id;
         this.command = command;
         this.type = "UserCommandEvent";
     }
@@ -68,6 +69,4 @@ export type Event = Tick | UserCommandEvent;
 
 export type PlayerId = "top left" | "bottom right" | "bottom left" | "top right";
 
-const player_id_range: Array<PlayerId> = ["top left", "bottom right", "bottom left", "top right"];
-
-module.exports = {ColumnRowPosition, Accelerate, Decelerate, PlantBomb, Tick, UserCommandEvent, player_id_range};
+module.exports = {ColumnRowPosition, Accelerate, Decelerate, PlantBomb, Tick, UserCommandEvent};

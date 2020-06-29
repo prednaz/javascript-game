@@ -2,9 +2,10 @@
 
 const player = require("./player.js");
 const Player = player.Player;
-const {player_id_range} = require("./game_types.js");
+const bomb = require("./bomb.js");
+const {Int, round} = require("./int.js");
+const map_value_indexed = require("./map_value_indexed.js");
 import type {Event, PlayerId} from "./game_types.js";
-const {Int, round} = require("./utilities.js");
 const R = require("ramda");
 const {immerable} = require("immer");
 
@@ -20,7 +21,7 @@ class Game {
     }
     update(event: Event): void {
         if (event.type === "UserCommandEvent") {
-            this.player[event.player].user_command(event.command);
+            this.player[event.player_id].user_command(event.command);
         }
         else {
             R.forEachObjIndexed(
@@ -30,6 +31,8 @@ class Game {
         }
     }
     addPlayer(): PlayerId | null {
+        const player_id_range: Array<PlayerId> =
+            ["top left", "bottom right", "bottom left", "top right"];
         const player_id_new = player_id_range.find(player_id => !(player_id in this.player));
         if (player_id_new === undefined) {
             return null;
@@ -47,7 +50,12 @@ class Game {
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
 Game[immerable] = true;
 
-const draw = (game: Game, canvas: {width: number, height: number, context: any, resources: Map<string, HTMLElement>,...}): void => {
+const draw =
+    (
+        game: Game,
+        canvas: {width: number, height: number, context: any, resources: Map<string, HTMLElement>,...}
+    ): void =>
+    {
      // to-do. refactor
      // to-do. seperate background canvas
     canvas.context.clearRect(0, 0, canvas.width, canvas.height);
@@ -76,7 +84,16 @@ const draw = (game: Game, canvas: {width: number, height: number, context: any, 
         }
     }
     R.forEachObjIndexed(
-        player_current => player.draw(player_current, canvas, grid_scale),
+        player_current => {
+            map_value_indexed.traverse_(
+                (bomb_current, position) => bomb.draw(canvas, grid_scale, position),
+                player_current.bombs
+            );
+        },
+        game.player
+    );
+    R.forEachObjIndexed(
+        player_current => {player.draw(player_current, canvas, grid_scale)},
         game.player
     );
 };

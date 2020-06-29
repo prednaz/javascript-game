@@ -8,6 +8,7 @@ const immer = require("immer");
 immer.enablePatches();
 immer.enableMapSet();
 immer.setAutoFreeze(true);
+import type {Patch} from "../../node_modules/immer/dist/index.js";
 const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
@@ -18,18 +19,15 @@ let timestamp_previous: number = -1;
 
 let step_count: number = 0; // to-do. remove
 const loop =
-    (): void => {
+    (): void =>
+    {
         const timestamp = performance.now();
         if (timestamp_previous !== -1) {
-            let patches;
-            // $FlowFixMe https://github.com/immerjs/immer/pull/632
-            [game_state, patches] = immer.produceWithPatches(game_state, draft => {
+            game_state = update_and_synchronize(game_state, draft => {
                 draft.update(new Tick(timestamp - timestamp_previous));
             });
-            io.emit("update", patches);
             if (step_count % 100 === 0) {
                 console.log(timestamp - timestamp_previous);
-                console.log(JSON.stringify(patches));
             }
         }
         timestamp_previous = timestamp;
@@ -43,7 +41,7 @@ setInterval(loop, 50);
 io.on("connection", socket => {
     socket.emit("state", game_state);
     let player_id_new: PlayerId | null = null;
-    let patches; // to-do. type signature
+    let patches: Array<Patch>;
     // $FlowFixMe https://github.com/immerjs/immer/pull/632
     [game_state, patches] = immer.produceWithPatches(game_state, draft => {
         player_id_new = draft.addPlayer();
@@ -54,20 +52,14 @@ io.on("connection", socket => {
     }
     io.emit("update", patches);
     socket.on("user command", command => {
-        let patches;
-        // $FlowFixMe https://github.com/immerjs/immer/pull/632
-        [game_state, patches] = immer.produceWithPatches(game_state, draft => {
+        game_state = update_and_synchronize(game_state, draft => {
             draft.update(new UserCommandEvent(player_id_new_copy, command));
         });
-        io.emit("update", patches);
     });
     socket.on('disconnect', () => {
-        let patches;
-        // $FlowFixMe https://github.com/immerjs/immer/pull/632
-        [game_state, patches] = immer.produceWithPatches(game_state, draft => {
+        game_state = update_and_synchronize(game_state, draft => {
             draft.deletePlayer(player_id_new_copy);
         });
-        io.emit("update", patches);
     });
 });
 
@@ -76,3 +68,16 @@ app.use(express.static("dist"));
 http.listen(1234, () => {
     console.log("listening on *:1234");
 });
+
+const update_and_synchronize =
+    (game_state_parameter: Game, update: (draft: Game) => void): Game =>
+    {
+        const [game_state_new: Game, patches: Array<Patch>] =
+            // $FlowFixMe https://github.com/immerjs/immer/pull/632
+            immer.produceWithPatches(game_state_parameter, update);
+        io.emit("update", patches);
+        if (step_count % 100 === 0) {
+            console.log(JSON.stringify(patches));
+        }
+        return game_state_new;
+    };

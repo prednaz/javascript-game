@@ -2,7 +2,7 @@
 
 const {Game, draw} = require("../game.js");
 const {Accelerate, Decelerate, PlantBomb} = require("../game_types.js");
-const {last, resources_get} = require("../utilities.js");
+const {resources_get} = require("../utilities.js");
 const immer = require("immer");
 immer.enablePatches();
 immer.enableMapSet();
@@ -24,7 +24,7 @@ const controls = {
         "d": new Decelerate("right")
     }
 };
-let keys_pressed: Array<string> = []; // to-do. Just remember the last.
+let key_pressed_last: string | null = null;
 let game_state: Game;
 const canvas_dom = (document.getElementById("canvas"): any);
 const canvas = {
@@ -37,9 +37,9 @@ const canvas = {
 document.addEventListener(
     "keydown",
     (event: KeyboardEvent) => {
-        if (last(keys_pressed) === event.key)
+        if (event.key === key_pressed_last)
             return;
-        keys_pressed.push(event.key);
+        key_pressed_last = event.key;
         if (event.key in controls.down) {
             socket.emit("user command", controls.down[event.key]);
         }
@@ -48,7 +48,7 @@ document.addEventListener(
 document.addEventListener(
     "keyup",
     (event: KeyboardEvent) => {
-        keys_pressed = keys_pressed.filter(key => key !== event.key);
+        key_pressed_last = null;
         if (event.key in controls.up) {
             socket.emit("user command", controls.up[event.key]);
         }
@@ -57,7 +57,8 @@ document.addEventListener(
 
 let step_count: number = 0; // to-do. remove
 const loop =
-    (): void => {
+    (): void =>
+    {
         draw(game_state, canvas);
         // if (step_count < 300)
         requestAnimationFrame(loop);

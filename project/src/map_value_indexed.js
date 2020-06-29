@@ -4,7 +4,7 @@ const R = require("ramda");
 const {immerable} = require("immer");
 
 export interface HasId {
-    +id: number; // to-do. This should be a string. Use toString.
+    id(): string;
 }
 
 const pairing_function_integer =
@@ -14,7 +14,7 @@ const pairing_function_integer =
             : n1 * n1 + n1 + n2 ;
 
 class MapValueIndexed<Key: HasId, Value> {
-    content: {[number]: [Key, Value]};
+    content: {[string]: [Key, Value]};
     constructor() {
         this.content = {};
     }
@@ -24,7 +24,7 @@ MapValueIndexed[immerable] = true;
 
 const insert =
     <Key: HasId, Value>(key: Key, value: Value, map: MapValueIndexed<Key, Value>): void =>
-    {map.content[key.id] = [key, value];}
+    {map.content[key.id()] = [key, value];}
 
 const traverse_ =
     <Key: HasId, Value>(f: (Value, Key) => mixed, map: MapValueIndexed<Key, Value>): void =>
