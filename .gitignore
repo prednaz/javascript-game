@@ -1,6 +1,10 @@
-*~
 /*/.cache/
 .vscode/
 /*/dist/
-/*/js/
 node_modules/
+/*/js/*
+
+# re-include project/js/client/index.html
+!/project/js/client/
+/project/js/client/*
+!/project/js/client/index.html
