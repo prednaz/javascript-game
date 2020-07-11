@@ -96,8 +96,6 @@ class Player {
         let position = this.position; // I do as Flow guides.
         switch (event.type) {
             case "Tick": {
-                map_value_indexed.traverse_(bomb => bomb.update(event), this.bombs);
-
                 // opposed directions cancel each other out
                 const direction_move = Object.assign({}, this.direction_move);
                 if ("up" in direction_move && "down" in direction_move) {

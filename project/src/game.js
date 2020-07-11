@@ -3,8 +3,10 @@
 const player = require("./player.js");
 const Player = player.Player;
 const bomb = require("./bomb.js");
+const Bomb = bomb.Bomb;
 const {Int, round} = require("./int.js");
 const map_value_indexed = require("./map_value_indexed.js");
+const {ColumnRowPosition} = require("./game_types.js");
 import type {Event, PlayerId} from "./game_types.js";
 const R = require("ramda");
 const {immerable} = require("immer");
@@ -28,12 +30,31 @@ class Game {
                 player_current => player_current.update(event, this.coordinate_maximum),
                 this.player
             );
+            R.forEachObjIndexed(
+                player_current => {
+                    const exploding_bombs: Array<ColumnRowPosition> = [];
+                    map_value_indexed.traverse_(
+                        (bomb: Bomb, position: ColumnRowPosition) => {
+                            if (bomb.update(event) === "exploding") {
+                                exploding_bombs.push(position);
+                            }
+                        },
+                        player_current.bombs
+                    );
+                    exploding_bombs.forEach(
+                        position =>
+                        map_value_indexed.remove(position, player_current.bombs)
+                    );
+                },
+                this.player
+            );
         }
     }
     addPlayer(): PlayerId | null {
         const player_id_range: Array<PlayerId> =
             ["top left", "bottom right", "bottom left", "top right"];
-        const player_id_new = player_id_range.find(player_id => !(player_id in this.player));
+        const player_id_new =
+            player_id_range.find(player_id => !(player_id in this.player));
         if (player_id_new === undefined) {
             return null;
         }

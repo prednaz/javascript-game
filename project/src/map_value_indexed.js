@@ -24,10 +24,14 @@ MapValueIndexed[immerable] = true;
 
 const insert =
     <Key: HasId, Value>(key: Key, value: Value, map: MapValueIndexed<Key, Value>): void =>
-    {map.content[key.id()] = [key, value];}
+    {map.content[key.id()] = [key, value];};
+
+const remove =
+    <Key: HasId, Value>(key: Key, map: MapValueIndexed<Key, Value>): void =>
+    {delete map.content[key.id()];};
 
 const traverse_ =
     <Key: HasId, Value>(f: (Value, Key) => mixed, map: MapValueIndexed<Key, Value>): void =>
-    {R.forEachObjIndexed(([key, value]) => f(value, key), map.content);}
+    {R.forEachObjIndexed(([key, value]: [Key, Value]) => f(value, key), map.content);};
 
-module.exports = {pairing_function_integer, MapValueIndexed, insert, traverse_};
+module.exports = {pairing_function_integer, MapValueIndexed, insert, remove, traverse_};
