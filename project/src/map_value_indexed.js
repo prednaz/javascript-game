@@ -34,4 +34,8 @@ const traverse_ =
     <Key: HasId, Value>(f: (Value, Key) => mixed, map: MapValueIndexed<Key, Value>): void =>
     {R.forEachObjIndexed(([key, value]: [Key, Value]) => f(value, key), map.content);};
 
+const itraverse_ =
+    <Key: HasId, Value>(f: ([Key, Value]) => mixed, map: MapValueIndexed<Key, Value>): void =>
+    {R.forEachObjIndexed((tuple: [Key, Value]) => f(tuple), map.content);};
+
 module.exports = {pairing_function_integer, MapValueIndexed, insert, remove, traverse_};
