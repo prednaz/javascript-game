@@ -41,9 +41,9 @@ class Game {
                         },
                         player_current.bombs
                     );
-                    exploding_bombs.forEach(
-                        position =>
-                        map_value_indexed.remove(position, player_current.bombs)
+                    R.forEach(
+                        position => map_value_indexed.remove(position, player_current.bombs),
+                        exploding_bombs
                     );
                 },
                 this.player
