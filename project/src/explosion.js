@@ -8,9 +8,11 @@ const {immerable} = require("immer");
 type HasFaded = "faded" | "present";
 
 class Explosion {
+    +center: ColumnRowPosition;
     +radius: Int;
     progress: number;
-    constructor(radius: Int): void {
+    constructor(center: ColumnRowPosition, radius: Int): void {
+        this.center = center;
         this.radius = radius;
         this.progress = 1000;
     }
@@ -24,7 +26,7 @@ Explosion[immerable] = true;
 
 const draw =
     (
-        [position, explosion]: [ColumnRowPosition, Explosion],
+        explosion: Explosion,
         canvas: {context: any, resources: Map<string, HTMLElement>,...},
         grid_scale: number
     ): void =>
@@ -32,26 +34,26 @@ const draw =
         canvas.context.fillStyle = "blue";
         canvas.context.beginPath();
         canvas.context.fillRect(
-            grid_scale * position.column.number + grid_scale * 1,
-            grid_scale * position.row.number + grid_scale * 1,
+            grid_scale * explosion.center.column.number + grid_scale * 1,
+            grid_scale * explosion.center.row.number + grid_scale * 1,
             grid_scale,
             grid_scale
         );
-        if (position.column.number % 2 === 0) {
+        if (explosion.center.column.number % 2 === 0) {
             R.forEach(
                 (radius: number) => {
                     ++radius;
                     canvas.context.beginPath();
                     canvas.context.fillRect(
-                        grid_scale * position.column.number + grid_scale * 1,
-                        grid_scale * (position.row.number + radius) + grid_scale * 1,
+                        grid_scale * explosion.center.column.number + grid_scale * 1,
+                        grid_scale * (explosion.center.row.number + radius) + grid_scale * 1,
                         grid_scale,
                         grid_scale
                     );
                     canvas.context.beginPath();
                     canvas.context.fillRect(
-                        grid_scale * position.column.number + grid_scale * 1,
-                        grid_scale * (position.row.number - radius) + grid_scale * 1,
+                        grid_scale * explosion.center.column.number + grid_scale * 1,
+                        grid_scale * (explosion.center.row.number - radius) + grid_scale * 1,
                         grid_scale,
                         grid_scale
                     );
@@ -59,21 +61,21 @@ const draw =
                 R.range(0, explosion.radius.number)
             );
         }
-        if (position.row.number % 2 === 0) {
+        if (explosion.center.row.number % 2 === 0) {
             R.forEach(
                 (radius: number) => {
                     ++radius;
                     canvas.context.beginPath();
                     canvas.context.fillRect(
-                        grid_scale * (position.column.number + radius) + grid_scale * 1,
-                        grid_scale * position.row.number + grid_scale * 1,
+                        grid_scale * (explosion.center.column.number + radius) + grid_scale * 1,
+                        grid_scale * explosion.center.row.number + grid_scale * 1,
                         grid_scale,
                         grid_scale
                     );
                     canvas.context.beginPath();
                     canvas.context.fillRect(
-                        grid_scale * (position.column.number - radius) + grid_scale * 1,
-                        grid_scale * position.row.number + grid_scale * 1,
+                        grid_scale * (explosion.center.column.number - radius) + grid_scale * 1,
+                        grid_scale * explosion.center.row.number + grid_scale * 1,
                         grid_scale,
                         grid_scale
                     );

@@ -4,6 +4,8 @@ const player = require("./player.js");
 const Player = player.Player;
 const bomb = require("./bomb.js");
 const Bomb = bomb.Bomb;
+const explosion = require("./explosion.js");
+const Explosion = explosion.Explosion;
 const {Int, round} = require("./int.js");
 const map_value_indexed = require("./map_value_indexed.js");
 const {ColumnRowPosition} = require("./game_types.js");
@@ -13,12 +15,14 @@ const {immerable} = require("immer");
 
 class Game {
     +player: {[PlayerId]: Player};
+    +explosions: Array<Explosion>;
     +coordinate_maximum: {
         +x: number,
         +y: number,
     };
     constructor(): void {
         this.player = {};
+        this.explosions = [];
         this.coordinate_maximum = {x: 12, y: 10};
     }
     update(event: Event): void {
@@ -26,17 +30,37 @@ class Game {
             this.player[event.player_id].user_command(event.command);
         }
         else {
+            // update player forwarding event to them
             R.forEachObjIndexed(
-                player_current => player_current.update(event, this.coordinate_maximum),
+                (player_current: Player) => player_current.update(event, this.coordinate_maximum),
                 this.player
             );
+            // have the player take damage from bombs
             R.forEachObjIndexed(
-                player_current => {
+                (player_current: Player) => player_current.take_damage(this.explosions), // to-do. add type annotations for lambdas in ramdas
+                this.player
+            );
+            // remove faded explosions
+            const faded_explosions: Array<number> = [];
+            this.explosions.forEach(
+                (explosion_current: Explosion, index: number) => {
+                    if (explosion_current.update(event) === "faded") {
+                        faded_explosions.push(index);
+                    }
+                }
+            );
+            R.forEach((index: number) => {this.explosions.splice(index, 1);}, faded_explosions);
+            // turn exploding bombs into explosions
+            R.forEachObjIndexed(
+                (player_current: Player) => {
                     const exploding_bombs: Array<ColumnRowPosition> = [];
                     map_value_indexed.traverse_(
                         (bomb: Bomb, position: ColumnRowPosition) => {
                             if (bomb.update(event) === "exploding") {
                                 exploding_bombs.push(position);
+                                this.explosions.push(
+                                    new Explosion(position, player_current.bomb_strength)
+                                );
                             }
                         },
                         player_current.bombs
@@ -96,6 +120,12 @@ const draw =
             canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * x, grid_scale * y);
         }
     }
+    R.forEach(
+        explosion_current => {
+            explosion.draw(explosion_current, canvas, grid_scale);
+        },
+        game.explosions
+    );
     for (let x = 0; x < grid_length.x; ++x) {
         canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * x, 0);
         canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * x, grid_scale * (grid_length.y-1));

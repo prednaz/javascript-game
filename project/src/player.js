@@ -1,12 +1,15 @@
 // @flow
 
 const {Bomb} = require("./bomb.js");
+const explosion = require("./explosion.js");
+const Explosion = explosion.Explosion;
 const int = require("./int.js");
 const Int = int.Int;
 const map_value_indexed = require("./map_value_indexed.js");
 const MapValueIndexed = map_value_indexed.MapValueIndexed;
 const {ColumnRowPosition} = require("./game_types.js");
 import type {Direction, UserCommand, Event} from "./game_types.js";
+const R = require("ramda");
 const {immerable} = require("immer");
 
 type CoordinateMaximum = {
@@ -60,13 +63,20 @@ ColumnPosition[immerable] = true;
 class Player {
     +direction_move: {[Direction]: true};
     position: RowPosition | ColumnPosition;
+    lives: Int;
     run_speed: number;
+    bomb_strength: Int;
+    time_since_damage: number;
     tick_count_since_turn: number;
     +bombs: MapValueIndexed<ColumnRowPosition, Bomb>;
     constructor(position: RowPosition | ColumnPosition) {
         this.direction_move = {};
         this.position = position;
+         // to-do. magic number
+        this.lives = new Int(5);
         this.run_speed = .01;
+        this.bomb_strength = new Int(3);
+        this.time_since_damage = 3000;
         this.tick_count_since_turn = 2;
         this.bombs = new MapValueIndexed();
     }
@@ -97,6 +107,8 @@ class Player {
         let position = this.position; // I do as Flow guides.
         switch (event.type) {
             case "Tick": {
+                this.time_since_damage += event.time;
+
                 // opposed directions cancel each other out
                 const direction_move = Object.assign({}, this.direction_move);
                 if ("up" in direction_move && "down" in direction_move) {
@@ -188,6 +200,46 @@ class Player {
                 break;
             }
         }
+    }
+    take_damage(explosions: Array<Explosion>) {
+        if (this.time_since_damage <= 3000) { // to-do. magic number
+            return;
+        }
+        const column =
+            this.position.type === "RowPosition"
+                ? int.round(this.position.x)
+                : this.position.column;
+        const row =
+            this.position.type === "RowPosition"
+                ? this.position.row
+                : int.round(this.position.y);
+        R.forEach(
+            explosion_current => {
+                if (
+                    (
+                        int.even(explosion_current.center.column) &&
+                        int.equals(column, explosion_current.center.column) &&
+                        int.less_or_equals(
+                            int.absolute(int.subtract(row, explosion_current.center.row)),
+                            explosion_current.radius
+                        )
+                    ) ||
+                    (
+                        int.even(explosion_current.center.row) &&
+                        int.equals(row, explosion_current.center.row) &&
+                        int.less_or_equals(
+                            int.absolute(int.subtract(column, explosion_current.center.column)),
+                            explosion_current.radius
+                        )
+                    )
+                ) {
+                    this.lives = int.subtract(this.lives, new Int(1));
+                    this.time_since_damage = 0;
+                    return;
+                }
+            },
+            explosions
+        );
     }
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
