@@ -26,7 +26,7 @@ const loop =
             game_state = update_and_synchronize(game_state, draft => {
                 draft.update(new Tick(timestamp - timestamp_previous));
             });
-            if (step_count % 100 === 0) {
+            if (step_count % 1000 === 0) {
                 console.log(timestamp - timestamp_previous);
             }
         }
@@ -36,7 +36,7 @@ const loop =
         ++step_count;
     };
 
-setInterval(loop, 50);
+setInterval(loop, 13);
 
 io.on("connection", socket => {
     socket.emit("state", game_state);
@@ -76,8 +76,5 @@ const update_and_synchronize =
             // $FlowFixMe https://github.com/immerjs/immer/pull/632
             immer.produceWithPatches(game_state_parameter, update);
         io.emit("update", patches);
-        if (step_count % 100 === 0) {
-            console.log(JSON.stringify(patches));
-        }
         return game_state_new;
     };

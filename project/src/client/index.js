@@ -60,12 +60,10 @@ const lives_display = document.getElementById("lives"); // to-do. remove
 if (lives_display === null) {
     throw new ReferenceError("Where is the lives display?");
 }
-let step_count: number = 0; // to-do. remove
 const loop =
     (): void =>
     {
         draw(game_state, canvas);
-        // if (step_count < 300)
         requestAnimationFrame(loop);
         let lives_display_text = "";
         R.forEachObjIndexed(
@@ -73,7 +71,6 @@ const loop =
             game_state.player
         );
         lives_display.textContent = lives_display_text;
-        ++step_count;
     };
 
 socket.on("state", state => {
