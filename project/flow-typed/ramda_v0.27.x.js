@@ -1844,7 +1844,10 @@ declare module ramda {
 
   // TODO lift
 
-  // TODO liftN
+  declare function liftN<R>(
+    length: number,
+    fn: (...args: Array<any>) => R
+  ): (...args: $ReadOnlyArray<$ReadOnlyArray<any>>) => Array<R>;
 
   declare function memoizeWith<A, B, C>(
     keyFn: (...args: $ReadOnlyArray<A>) => C

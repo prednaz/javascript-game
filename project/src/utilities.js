@@ -19,8 +19,12 @@ const resources_get: Array<string> => Map<string, HTMLElement> =
         })
     );
 
+const cartesian_product: <T, U>(Array<T>, Array<U>) => Array<[T, U]> =
+    (R.liftN(2, <T, U>(a: T, b: U): [T, U] => [a, b]) : any);
+
 module.exports = {
     last,
     map_of_pairs,
-    resources_get
+    resources_get,
+    cartesian_product,
 };
