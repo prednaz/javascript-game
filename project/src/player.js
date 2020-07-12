@@ -1,7 +1,8 @@
 // @flow
 
 const {Bomb} = require("./bomb.js");
-const {Int, round, multiply_int} = require("./int.js");
+const int = require("./int.js");
+const Int = int.Int;
 const map_value_indexed = require("./map_value_indexed.js");
 const MapValueIndexed = map_value_indexed.MapValueIndexed;
 const {ColumnRowPosition} = require("./game_types.js");
@@ -83,8 +84,8 @@ class Player {
                 let position = this.position; // I do as Flow guides.
                 map_value_indexed.insert(
                     position.type === "RowPosition"
-                        ? new ColumnRowPosition(round(position.x), position.row)
-                        : new ColumnRowPosition(position.column, round(position.y)),
+                        ? new ColumnRowPosition(int.round(position.x), position.row)
+                        : new ColumnRowPosition(position.column, int.round(position.y)),
                     new Bomb(),
                     this.bombs
                 );
@@ -115,7 +116,7 @@ class Player {
                 // to-do. refactor
                 if (position.type === "RowPosition") {
                     if ("up" in direction_move || "down" in direction_move) {
-                        const column = multiply_int(round(position.x / 2), new Int(2)); // round to the nearest mutliple of 2
+                        const column = int.multiply(int.round(position.x / 2), new Int(2)); // round to the nearest mutliple of 2
                         const column_difference = column.number - position.x;
                         const column_direction = Math.sign(column_difference);
                         const column_distance = Math.abs(column_difference);
@@ -150,7 +151,7 @@ class Player {
                 }
                 else { // position.type === "ColumnPosition"
                     if ("left" in direction_move || "right" in direction_move) {
-                        const row = multiply_int(round(position.y / 2), new Int(2)); // round to the nearest mutliple of 2
+                        const row = int.multiply(int.round(position.y / 2), new Int(2)); // round to the nearest mutliple of 2
                         const row_difference = row.number - position.y;
                         const row_direction = Math.sign(row_difference);
                         const row_distance = Math.abs(row_difference);
