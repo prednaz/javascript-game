@@ -3,6 +3,7 @@
 const {Game, draw} = require("../game.js");
 const {Accelerate, Decelerate, PlantBomb} = require("../game_types.js");
 const {resources_get} = require("../utilities.js");
+const R = require("ramda");
 const immer = require("immer");
 immer.enablePatches();
 immer.enableMapSet();
@@ -55,6 +56,10 @@ document.addEventListener(
     }
 );
 
+const lives_display = document.getElementById("lives"); // to-do. remove
+if (lives_display === null) {
+    throw new ReferenceError("Where is the lives display?");
+}
 let step_count: number = 0; // to-do. remove
 const loop =
     (): void =>
@@ -62,8 +67,12 @@ const loop =
         draw(game_state, canvas);
         // if (step_count < 300)
         requestAnimationFrame(loop);
-        // if (step_count % 100 === 0)
-        //     console.log(keys_pressed);
+        let lives_display_text = "";
+        R.forEachObjIndexed(
+            (player, player_id) => {lives_display_text += player_id + ": " + player.lives.number + "\n"},
+            game_state.player
+        );
+        lives_display.textContent = lives_display_text;
         ++step_count;
     };
 
