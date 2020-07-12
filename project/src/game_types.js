@@ -67,6 +67,6 @@ class UserCommandEvent {
 
 export type Event = Tick | UserCommandEvent;
 
-export type PlayerId = "top left" | "bottom right" | "bottom left" | "top right";
+export type PlayerId = "top_left" | "bottom_right" | "bottom_left" | "top_right";
 
 module.exports = {ColumnRowPosition, Accelerate, Decelerate, PlantBomb, Tick, UserCommandEvent};

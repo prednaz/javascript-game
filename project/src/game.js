@@ -52,7 +52,7 @@ class Game {
     }
     addPlayer(): PlayerId | null {
         const player_id_range: Array<PlayerId> =
-            ["top left", "bottom right", "bottom left", "top right"];
+            ["top_left", "bottom_right", "bottom_left", "top_right"];
         const player_id_new =
             player_id_range.find(player_id => !(player_id in this.player));
         if (player_id_new === undefined) {
