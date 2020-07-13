@@ -87,7 +87,7 @@ class Game {
         if (player_id_new === undefined) {
             return null;
         }
-        const [y_word, x_word] = player_id_new.split(" ");
+        const [y_word, x_word] = player_id_new.split("_");
         const y = y_word === "top" ? new Int(0) : round(this.coordinate_maximum.y);
         const x = x_word === "left" ? 0 : this.coordinate_maximum.x;
         this.players[player_id_new] = new Player(new player.RowPosition(y, x));
