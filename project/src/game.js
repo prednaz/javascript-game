@@ -14,31 +14,32 @@ const R = require("ramda");
 const {immerable} = require("immer");
 
 class Game {
-    +player: {[PlayerId]: Player};
+    +players: {[PlayerId]: Player};
     +explosions: Array<Explosion>;
     +coordinate_maximum: {
         +x: number,
         +y: number,
     };
     constructor(): void {
-        this.player = {};
+        this.players = {};
         this.explosions = [];
         this.coordinate_maximum = {x: 12, y: 10};
     }
     update(event: Event): void {
         if (event.type === "UserCommandEvent") {
-            this.player[event.player_id].user_command(event.command);
+            this.players[event.player_id].user_command(event.command);
         }
         else {
-            // update player forwarding event to them
+            // update players forwarding event to them
             R.forEachObjIndexed(
-                (player_current: Player) => player_current.update(event, this.coordinate_maximum),
-                this.player
+                (player_current: Player) =>
+                    player_current.update(event, this.coordinate_maximum),
+                this.players
             );
-            // have the player take damage from bombs
+            // have the players take damage from bombs
             R.forEachObjIndexed(
-                (player_current: Player) => player_current.take_damage(this.explosions), // to-do. add type annotations for lambdas in ramdas
-                this.player
+                (player_current: Player) => player_current.take_damage(this.explosions),
+                this.players
             );
             // remove faded explosions
             const faded_explosions: Array<number> = [];
@@ -49,7 +50,10 @@ class Game {
                     }
                 }
             );
-            R.forEach((index: number) => {this.explosions.splice(index, 1);}, faded_explosions);
+            R.forEach(
+                (index: number) => {this.explosions.splice(index, 1);},
+                faded_explosions
+            );
             // turn exploding bombs into explosions
             R.forEachObjIndexed(
                 (player_current: Player) => {
@@ -66,11 +70,12 @@ class Game {
                         player_current.bombs
                     );
                     R.forEach(
-                        position => map_value_indexed.remove(position, player_current.bombs),
+                        (position: ColumnRowPosition) =>
+                            map_value_indexed.remove(position, player_current.bombs),
                         exploding_bombs
                     );
                 },
-                this.player
+                this.players
             );
         }
     }
@@ -78,18 +83,18 @@ class Game {
         const player_id_range: Array<PlayerId> =
             ["top_left", "bottom_right", "bottom_left", "top_right"];
         const player_id_new =
-            player_id_range.find(player_id => !(player_id in this.player));
+            player_id_range.find(player_id => !(player_id in this.players));
         if (player_id_new === undefined) {
             return null;
         }
         const [y_word, x_word] = player_id_new.split(" ");
         const y = y_word === "top" ? new Int(0) : round(this.coordinate_maximum.y);
         const x = x_word === "left" ? 0 : this.coordinate_maximum.x;
-        this.player[player_id_new] = new Player(new player.RowPosition(y, x));
+        this.players[player_id_new] = new Player(new player.RowPosition(y, x));
         return player_id_new;
     }
     deletePlayer(player_id: PlayerId) {
-        delete this.player[player_id];
+        delete this.players[player_id];
     }
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
@@ -115,17 +120,20 @@ const draw =
             "The canvas has not got the required aspect ratio of " + grid_length.x + ":" + grid_length.y + "."
         );
     }
+    // inner holes
     for (let x = 2; x < grid_length.x-2; x += 2) {
         for (let y = 2; y < grid_length.y-2; y += 2) {
             canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * x, grid_scale * y);
         }
     }
+    // explosions
     R.forEach(
-        explosion_current => {
+        (explosion_current: Explosion) => {
             explosion.draw(explosion_current, canvas, grid_scale);
         },
         game.explosions
     );
+    // outer holes
     for (let x = 0; x < grid_length.x; ++x) {
         canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * x, 0);
         canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * x, grid_scale * (grid_length.y-1));
@@ -134,18 +142,20 @@ const draw =
         canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * (grid_length.x-1), grid_scale * y);
         }
     }
+    // bombs
     R.forEachObjIndexed(
-        player_current => {
-            map_value_indexed.traverse_(
-                (bomb_current, position) => bomb.draw(canvas, grid_scale, position),
+        (player_current: Player) => {
+            map_value_indexed.itraverse_(
+                bomb_current => bomb.draw(bomb_current, canvas, grid_scale),
                 player_current.bombs
             );
         },
-        game.player
+        game.players
     );
+    // players
     R.forEachObjIndexed(
-        player_current => {player.draw(player_current, canvas, grid_scale)},
-        game.player
+        (player_current: Player) => {player.draw(player_current, canvas, grid_scale)},
+        game.players
     );
 };
 

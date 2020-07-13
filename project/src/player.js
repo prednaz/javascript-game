@@ -214,7 +214,7 @@ class Player {
                 ? this.position.row
                 : int.round(this.position.y);
         R.forEach(
-            explosion_current => {
+            (explosion_current: Explosion) => {
                 if (
                     (
                         int.even(explosion_current.center.column) &&

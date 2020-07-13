@@ -20,9 +20,9 @@ Bomb[immerable] = true;
 
 const draw =
     (
+        [position, bomb]: [ColumnRowPosition, Bomb],
         canvas: {context: any, resources: Map<string, HTMLElement>,...},
-        grid_scale: number,
-        position: ColumnRowPosition
+        grid_scale: number
     ): void =>
     {
         canvas.context.beginPath();

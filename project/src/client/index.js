@@ -1,7 +1,9 @@
 // @flow
 
 const {Game, draw} = require("../game.js");
+const {Player} = require("../player.js");
 const {Accelerate, Decelerate, PlantBomb} = require("../game_types.js");
+import type {PlayerId} from "../game_types.js";
 const {resources_get} = require("../utilities.js");
 const R = require("ramda");
 const immer = require("immer");
@@ -67,8 +69,8 @@ const loop =
         requestAnimationFrame(loop);
         let lives_display_text = "";
         R.forEachObjIndexed(
-            (player, player_id) => {lives_display_text += player_id + ": " + player.lives.number + "\n"},
-            game_state.player
+            (player: Player, player_id: PlayerId) => {lives_display_text += player_id + ": " + player.lives.number + "\n"},
+            game_state.players
         );
         lives_display.textContent = lives_display_text;
     };
