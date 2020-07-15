@@ -6,6 +6,7 @@ const bomb = require("./bomb.js");
 const Bomb = bomb.Bomb;
 const explosion = require("./explosion.js");
 const Explosion = explosion.Explosion;
+const obstacle = require("./obstacle.js");
 const {Int, round} = require("./int.js");
 const {ColumnRowPosition} = require("./game_types.js");
 import type {Event, PlayerId} from "./game_types.js";
@@ -29,6 +30,10 @@ class Game {
         this.players = {};
         this.explosions = [];
         this.obstacles = set_value_indexed.create();
+        set_value_indexed.insert(
+            new ColumnRowPosition(new Int(2), new Int(0)),
+            this.obstacles
+        );
         this.coordinate_maximum = {x: new Int(12), y: new Int(10)}; // to-do. magic numbers
     }
     update(event: Event): void {
@@ -69,14 +74,15 @@ class Game {
                         (bomb: Bomb, position: ColumnRowPosition) => {
                             if (bomb.update(event) === "exploding") {
                                 exploding_bombs.push(position);
-                                this.explosions.push(
+                                const explosion_new =
                                     explosion.create(
                                         position,
                                         player_current.bomb_strength,
                                         this.valid_position.bind(this),
                                         this.obstacles
-                                    )
-                                );
+                                    );
+                                this.explosions.push(explosion_new);
+                                this.explode_obstacles(explosion_new);
                             }
                         },
                         player_current.bombs
@@ -108,6 +114,12 @@ class Game {
     }
     deletePlayer(player_id: PlayerId) {
         delete this.players[player_id];
+    }
+    explode_obstacles(explosion_new: Explosion): void {
+        set_value_indexed.remove_all(
+            explosion_new.scorched_positions(),
+            this.obstacles
+        );
     }
     valid_position(position: ColumnRowPosition): boolean {
         return (
@@ -158,6 +170,11 @@ const draw =
         canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * (grid_length.x-1), grid_scale * y);
         }
     }
+    // obstacles
+    set_value_indexed.traverse_(
+        position => obstacle.draw(position, canvas, grid_scale),
+        game.obstacles
+    );
     // explosions
     R.forEach(
         (explosion_current: Explosion) => {
