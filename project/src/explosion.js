@@ -77,10 +77,10 @@ class Explosion {
     scorched_positions(): SetValueIndexed<ColumnRowPosition> {
         const result = set_value_indexed.create();
         if (this.row_rectangle !== null) {
-            set_value_indexed.union(result, this.row_rectangle.scorched_positions());
+            set_value_indexed.insert_all(this.row_rectangle.scorched_positions(), result);
         }
         if (this.column_rectangle !== null) {
-            set_value_indexed.union(result, this.column_rectangle.scorched_positions());
+            set_value_indexed.insert_all(this.column_rectangle.scorched_positions(), result);
         }
         return result;
     }
