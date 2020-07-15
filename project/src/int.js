@@ -19,21 +19,32 @@ const less_or_equals = (int1: Int, int2: Int): boolean => int1.number <= int2.nu
 
 const round = (number: number): Int => new Int(Math.round(number));
 
+const add =
+    (summand1: Int, summand2: Int): Int => new Int(summand1.number + summand2.number);
 const subtract =
     (minuend: Int, subtrahend: Int): Int => new Int(minuend.number - subtrahend.number);
+
+const one = new Int(1);
+const predecessor = (int: Int): Int => subtract(int, one);
+const successor = (int: Int): Int => add(int, one);
+
 const multiply =
     (factor1: Int, factor2: Int): Int => new Int(factor1.number * factor2.number);
 
 const absolute = (int: Int): Int => new Int(Math.abs(int.number));
 const even = (int: Int): boolean => int.number % 2 === 0;
 
-module.exports = {
-    Int,
-    equals,
-    less_or_equals,
-    round,
-    subtract,
-    multiply,
-    absolute,
-    even
-};
+module.exports = 
+    {
+        Int,
+        equals,
+        less_or_equals,
+        round,
+        add,
+        subtract,
+        predecessor,
+        successor,
+        multiply,
+        absolute,
+        even
+    };
