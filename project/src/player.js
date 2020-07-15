@@ -3,18 +3,20 @@
 const {Bomb} = require("./bomb.js");
 const explosion = require("./explosion.js");
 const Explosion = explosion.Explosion;
-const int = require("./int.js");
-const Int = int.Int;
-const map_value_indexed = require("./map_value_indexed.js");
-const MapValueIndexed = map_value_indexed.MapValueIndexed;
 const {ColumnRowPosition} = require("./game_types.js");
 import type {Direction, UserCommand, Event} from "./game_types.js";
+const map_value_indexed = require("./map_value_indexed.js");
+const MapValueIndexed = map_value_indexed.MapValueIndexed;
+const set_value_indexed = require("./set_value_indexed.js");
+import type {SetValueIndexed} from "./set_value_indexed.js";
+const int = require("./int.js");
+const Int = int.Int;
 const R = require("ramda");
 const {immerable} = require("immer");
 
 type CoordinateMaximum = {
-    +x: number,
-    +y: number,
+    +x: Int,
+    +y: Int,
 }
 
 class RowPosition {
@@ -31,8 +33,8 @@ class RowPosition {
         if (this.x < 0) {
             this.x = 0;
         }
-        else if (this.x > coordinate_maximum.x) {
-            this.x = coordinate_maximum.x;
+        else if (this.x > coordinate_maximum.x.number) {
+            this.x = coordinate_maximum.x.number;
         }
     }
 }
@@ -52,8 +54,8 @@ class ColumnPosition {
         if (this.y < 0) {
             this.y = 0;
         }
-        else if (this.y > coordinate_maximum.y) {
-            this.y = coordinate_maximum.y;
+        else if (this.y > coordinate_maximum.y.number) {
+            this.y = coordinate_maximum.y.number;
         }
     }
 }
@@ -205,41 +207,21 @@ class Player {
         if (this.time_since_damage <= 3000) { // to-do. magic number
             return;
         }
-        const column =
+        const position = new ColumnRowPosition(
             this.position.type === "RowPosition"
                 ? int.round(this.position.x)
-                : this.position.column;
-        const row =
+                : this.position.column,
             this.position.type === "RowPosition"
                 ? this.position.row
-                : int.round(this.position.y);
-        R.forEach(
-            (explosion_current: Explosion) => {
-                if (
-                    (
-                        int.even(explosion_current.center.column) &&
-                        int.equals(column, explosion_current.center.column) &&
-                        int.less_or_equals(
-                            int.absolute(int.subtract(row, explosion_current.center.row)),
-                            explosion_current.radius
-                        )
-                    ) ||
-                    (
-                        int.even(explosion_current.center.row) &&
-                        int.equals(row, explosion_current.center.row) &&
-                        int.less_or_equals(
-                            int.absolute(int.subtract(column, explosion_current.center.column)),
-                            explosion_current.radius
-                        )
-                    )
-                ) {
-                    this.lives = int.subtract(this.lives, new Int(1));
-                    this.time_since_damage = 0;
-                    return;
-                }
-            },
-            explosions
+                : int.round(this.position.y)
         );
+        for (const explosion_current of explosions) {
+            if (set_value_indexed.member(position, explosion_current.scorched_positions())) {
+                this.lives = int.subtract(this.lives, new Int(1));
+                this.time_since_damage = 0;
+                return;
+            }
+        }
     }
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258

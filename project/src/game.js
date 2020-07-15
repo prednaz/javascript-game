@@ -7,23 +7,29 @@ const Bomb = bomb.Bomb;
 const explosion = require("./explosion.js");
 const Explosion = explosion.Explosion;
 const {Int, round} = require("./int.js");
-const map_value_indexed = require("./map_value_indexed.js");
 const {ColumnRowPosition} = require("./game_types.js");
 import type {Event, PlayerId} from "./game_types.js";
+const map_value_indexed = require("./map_value_indexed.js");
+const MapValueIndexed = map_value_indexed.MapValueIndexed;
+const set_value_indexed = require("./set_value_indexed.js");
+import type {SetValueIndexed} from "./set_value_indexed.js";
+const int = require("./int.js");
 const R = require("ramda");
 const {immerable} = require("immer");
 
 class Game {
     +players: {[PlayerId]: Player};
     +explosions: Array<Explosion>;
+    +obstacles: SetValueIndexed<ColumnRowPosition>;
     +coordinate_maximum: {
-        +x: number,
-        +y: number,
+        +x: Int,
+        +y: Int,
     };
     constructor(): void {
         this.players = {};
         this.explosions = [];
-        this.coordinate_maximum = {x: 12, y: 10};
+        this.obstacles = set_value_indexed.create();
+        this.coordinate_maximum = {x: new Int(12), y: new Int(10)}; // to-do. magic numbers
     }
     update(event: Event): void {
         if (event.type === "UserCommandEvent") {
@@ -58,17 +64,24 @@ class Game {
             R.forEachObjIndexed(
                 (player_current: Player) => {
                     const exploding_bombs: Array<ColumnRowPosition> = [];
+                    // collect exploding bombs
                     map_value_indexed.traverse_(
                         (bomb: Bomb, position: ColumnRowPosition) => {
                             if (bomb.update(event) === "exploding") {
                                 exploding_bombs.push(position);
                                 this.explosions.push(
-                                    new Explosion(position, player_current.bomb_strength)
+                                    explosion.create(
+                                        position,
+                                        player_current.bomb_strength,
+                                        this.valid_position.bind(this),
+                                        this.obstacles
+                                    )
                                 );
                             }
                         },
                         player_current.bombs
                     );
+                    // remove exploding bombs
                     R.forEach(
                         (position: ColumnRowPosition) =>
                             map_value_indexed.remove(position, player_current.bombs),
@@ -88,17 +101,27 @@ class Game {
             return null;
         }
         const [y_word, x_word] = player_id_new.split("_");
-        const y = y_word === "top" ? new Int(0) : round(this.coordinate_maximum.y);
-        const x = x_word === "left" ? 0 : this.coordinate_maximum.x;
+        const y = y_word === "top" ? new Int(0) : this.coordinate_maximum.y;
+        const x = x_word === "left" ? 0 : this.coordinate_maximum.x.number;
         this.players[player_id_new] = new Player(new player.RowPosition(y, x));
         return player_id_new;
     }
     deletePlayer(player_id: PlayerId) {
         delete this.players[player_id];
     }
+    valid_position(position: ColumnRowPosition): boolean {
+        return (
+            int.less_or_equals(zero, position.column) &&
+            int.less_or_equals(position.column, this.coordinate_maximum.x) &&
+            int.less_or_equals(zero, position.row) &&
+            int.less_or_equals(position.row, this.coordinate_maximum.y)
+        );
+    }
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
 Game[immerable] = true;
+
+const zero = new Int(0);
 
 const draw =
     (
@@ -111,8 +134,8 @@ const draw =
     canvas.context.clearRect(0, 0, canvas.width, canvas.height);
     // to-do. cache these
     const grid_length = {
-        x: game.coordinate_maximum.x + 3, // two walls + one zero index
-        y: game.coordinate_maximum.y + 3, // two walls + one zero index
+        x: game.coordinate_maximum.x.number + 3, // two walls + one zero index
+        y: game.coordinate_maximum.y.number + 3, // two walls + one zero index
     };
     const grid_scale = canvas.width / grid_length.x;
     if (grid_scale !== canvas.height / grid_length.y) {
@@ -126,13 +149,6 @@ const draw =
             canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * x, grid_scale * y);
         }
     }
-    // explosions
-    R.forEach(
-        (explosion_current: Explosion) => {
-            explosion.draw(explosion_current, canvas, grid_scale);
-        },
-        game.explosions
-    );
     // outer holes
     for (let x = 0; x < grid_length.x; ++x) {
         canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * x, 0);
@@ -142,6 +158,13 @@ const draw =
         canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * (grid_length.x-1), grid_scale * y);
         }
     }
+    // explosions
+    R.forEach(
+        (explosion_current: Explosion) => {
+            explosion.draw(explosion_current, canvas, grid_scale);
+        },
+        game.explosions
+    );
     // bombs
     R.forEachObjIndexed(
         (player_current: Player) => {
