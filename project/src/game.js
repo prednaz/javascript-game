@@ -93,7 +93,7 @@ class Game {
         }
     }
     addPlayer(): PlayerId | null {
-        const player_id_range: Array<PlayerId> =
+        const player_id_range: $ReadOnlyArray<PlayerId> =
             ["top_left", "bottom_right", "bottom_left", "top_right"];
         const player_id_new =
             player_id_range.find(player_id => !(player_id in this.players));

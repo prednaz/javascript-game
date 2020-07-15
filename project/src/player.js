@@ -63,19 +63,19 @@ class ColumnPosition {
 ColumnPosition[immerable] = true;
 
 class Player {
-    +direction_move: {[Direction]: true};
+    +direction_move: {[Direction]: null};
     position: RowPosition | ColumnPosition;
-    lives: Int;
+    life_count: Int;
     run_speed: number;
     bomb_strength: Int;
-    time_since_damage: number;
     tick_count_since_turn: number;
+    time_since_damage: number;
     +bombs: MapValueIndexed<ColumnRowPosition, Bomb>;
     constructor(position: RowPosition | ColumnPosition) {
         this.direction_move = {};
         this.position = position;
          // to-do. magic number
-        this.lives = new Int(5);
+        this.life_count = new Int(5);
         this.run_speed = .01;
         this.bomb_strength = new Int(3);
         this.time_since_damage = 3000;
@@ -85,7 +85,7 @@ class Player {
     user_command(command: UserCommand): void {
         switch (command.type) {
             case "Accelerate": {
-                this.direction_move[command.direction] = true;
+                this.direction_move[command.direction] = null;
                 break;
             }
             case "Decelerate": {
@@ -203,7 +203,7 @@ class Player {
             }
         }
     }
-    take_damage(explosions: Array<Explosion>) {
+    take_damage(explosions: $ReadOnlyArray<Explosion>) {
         if (this.time_since_damage <= 3000) { // to-do. magic number
             return;
         }
@@ -217,7 +217,7 @@ class Player {
         );
         for (const explosion_current of explosions) {
             if (set_value_indexed.member(position, explosion_current.scorched_positions())) {
-                this.lives = int.subtract(this.lives, new Int(1));
+                this.life_count = int.subtract(this.life_count, new Int(1));
                 this.time_since_damage = 0;
                 return;
             }

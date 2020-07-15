@@ -1,17 +1,20 @@
 // @flow
 
-const {ColumnRowPosition, Tick} = require("./game_types.js");
+const {ColumnRowPosition} = require("./game_types.js");
+import type {Event} from "./game_types.js";
 const {immerable} = require("immer");
-
-type IsExploding = "exploding" | "not exploding";
 
 class Bomb {
     fuse: number;
     constructor(): void {
         this.fuse = 2600;
     }
-    update(event: Tick): IsExploding {
-        this.fuse -= event.time;
+    update(event: Event): "exploding" | "not exploding" {
+        switch (event.type) {
+            case "Tick": {
+                this.fuse -= event.time;
+            }
+        }
         return this.fuse <= 0 ? "exploding" : "not exploding";
     }
 }

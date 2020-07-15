@@ -58,21 +58,21 @@ document.addEventListener(
     }
 );
 
-const lives_display = document.getElementById("lives"); // to-do. remove
-if (lives_display === null) {
-    throw new ReferenceError("Where is the lives display?");
+const life_count_display = document.getElementById("life_count"); // to-do. remove
+if (life_count_display === null) {
+    throw new ReferenceError("Where is the life count display?");
 }
 const loop =
     (): void =>
     {
         draw(game_state, canvas);
         requestAnimationFrame(loop);
-        let lives_display_text = "";
+        let life_count_display_text = "";
         R.forEachObjIndexed(
-            (player: Player, player_id: PlayerId) => {lives_display_text += player_id + ": " + player.lives.number + "\n"},
+            (player: Player, player_id: PlayerId) => {life_count_display_text += player_id + ": " + player.life_count.number + "\n"},
             game_state.players
         );
-        lives_display.textContent = lives_display_text;
+        life_count_display.textContent = life_count_display_text;
     };
 
 socket.on("state", state => {

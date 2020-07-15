@@ -3,11 +3,11 @@
 const R = require("ramda");
 
 // argument must not be empty
-const last = <T>(array: Array<T>): T => array[array.length - 1];
+const last = <T>(array: $ReadOnlyArray<T>): T => array[array.length - 1];
 
-const map_of_pairs = <K, V>(entries: Array<[K,V]>): Map<K, V> => new Map(entries);
+const map_of_pairs = <K, V>(entries: $ReadOnlyArray<[K,V]>): Map<K, V> => new Map(entries);
 
-const resources_get: Array<string> => Map<string, HTMLElement> =
+const resources_get: $ReadOnlyArray<string> => Map<string, HTMLElement> =
     R.compose(
         map_of_pairs,
         R.map((identifier: string): [string, HTMLElement] => {
@@ -19,7 +19,7 @@ const resources_get: Array<string> => Map<string, HTMLElement> =
         })
     );
 
-const cartesian_product: <T, U>(Array<T>, Array<U>) => Array<[T, U]> =
+const cartesian_product: <T, U>($ReadOnlyArray<T>, $ReadOnlyArray<U>) => Array<[T, U]> =
     (R.liftN(2, <T, U>(a: T, b: U): [T, U] => [a, b]) : any);
 
 module.exports = {

@@ -92,7 +92,7 @@ const create =
     (
         center: ColumnRowPosition,
         radius: Int,
-        valid_position: (ColumnRowPosition) => boolean,
+        valid_position: ColumnRowPosition => boolean,
         obstacles: SetValueIndexed<ColumnRowPosition>
     ): Explosion =>
     {
@@ -156,7 +156,7 @@ const determine_explosion_limit =
     (
         center: ColumnRowPosition,
         radius: Int,
-        valid_position: (ColumnRowPosition) => boolean,
+        valid_position: ColumnRowPosition => boolean,
         obstacles: SetValueIndexed<ColumnRowPosition>
     ) =>
     (next_position: ColumnRowPosition => ColumnRowPosition): ColumnRowPosition =>

@@ -28,7 +28,7 @@ const union =
     {map_value_indexed.union(set1, set2)};
 
 const traverse_ =
-    <Value: HasId>(f: (Value) => mixed, set: SetValueIndexed<Value>): void =>
+    <Value: HasId>(f: Value => mixed, set: SetValueIndexed<Value>): void =>
     map_value_indexed.itraverse_(([value, null_]: [Value, null]) => f(value), set);
 
 module.exports = {create, insert, remove, member, union, traverse_};

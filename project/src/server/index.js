@@ -41,7 +41,7 @@ setInterval(loop, 13);
 io.on("connection", socket => {
     socket.emit("state", game_state);
     let player_id_new: PlayerId | null = null;
-    let patches: Array<Patch>;
+    let patches: $ReadOnlyArray<Patch>;
     // $FlowFixMe https://github.com/immerjs/immer/pull/632
     [game_state, patches] = immer.produceWithPatches(game_state, draft => {
         player_id_new = draft.addPlayer();
@@ -72,7 +72,7 @@ http.listen(1234, () => {
 const update_and_synchronize =
     (game_state_parameter: Game, update: (draft: Game) => void): Game =>
     {
-        const [game_state_new: Game, patches: Array<Patch>] =
+        const [game_state_new: Game, patches: $ReadOnlyArray<Patch>] =
             // $FlowFixMe https://github.com/immerjs/immer/pull/632
             immer.produceWithPatches(game_state_parameter, update);
         io.emit("update", patches);
