@@ -4,7 +4,7 @@ const {Game, draw} = require("../game.js");
 const {Player} = require("../player.js");
 const {Accelerate, Decelerate, PlantBomb} = require("../game_types.js");
 import type {PlayerId} from "../game_types.js";
-const {resources_get} = require("../utilities.js");
+const {resources_get, log_html_of_resources} = require("../utilities.js");
 const R = require("ramda");
 const immer = require("immer");
 immer.enablePatches();
@@ -30,11 +30,15 @@ const controls = {
 let key_pressed_last: string | null = null;
 let game_state: Game;
 const canvas_dom = (document.getElementById("canvas"): any);
+const image = new Image();
+image.src = require("../../resources/explosion_end_bottom_left_.png");
+image.addEventListener('load', () => {
+
 const canvas = {
     width: canvas_dom.width,
     height: canvas_dom.height,
     context: canvas_dom.getContext("2d"), // to-do. Is there a better type for this than any?
-    resources: resources_get(["hole"]),
+    resources: new Map([["hole", image]]),
 };
 
 document.addEventListener(
@@ -82,4 +86,6 @@ socket.on("state", state => {
 
 socket.on("update", patches => {
     game_state = immer.applyPatches(game_state, patches);
+});
+
 });

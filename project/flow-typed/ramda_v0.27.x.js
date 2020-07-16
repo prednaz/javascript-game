@@ -1126,7 +1126,7 @@ declare module ramda {
 
   declare function uniq<T>(xs: $ReadOnlyArray<T>): Array<T>;
 
-  declare function unnest<T>(xs: $ReadOnlyArray<T | $ReadOnlyArray<T>>): $ReadOnlyArray<T>;
+  declare function unnest<T>(xs: $ReadOnlyArray<$ReadOnlyArray<T>>): $ReadOnlyArray<T>;
 
   declare function zipWith<T, S, R>(
     fn: (a: T, b: S) => R,
