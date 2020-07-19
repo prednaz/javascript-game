@@ -5,6 +5,7 @@ const set_value_indexed = require("./set_value_indexed.js");
 import type {SetValueIndexed} from "./set_value_indexed.js";
 const int = require("./int.js");
 const Int = int.Int;
+import type {Resources} from "./resources.js";
 const R = require("ramda");
 const {immerable} = require("immer");
 
@@ -182,7 +183,7 @@ const determine_explosion_limit =
 const draw =
     (
         explosion: Explosion,
-        canvas: {context: any, resources: Map<string, HTMLElement>,...},
+        canvas: {context: any, resources: Resources,...},
         grid_scale: number
     ): void =>
     {

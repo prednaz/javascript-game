@@ -36,7 +36,7 @@ const loop =
         ++step_count;
     };
 
-setInterval(loop, 1000);
+setInterval(loop, 20);
 
 io.on("connection", socket => {
     socket.emit("state", game_state);

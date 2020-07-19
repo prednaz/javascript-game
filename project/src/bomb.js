@@ -2,6 +2,7 @@
 
 const {ColumnRowPosition} = require("./game_types.js");
 import type {Event} from "./game_types.js";
+import type {Resources} from "./resources.js";
 const {immerable} = require("immer");
 
 class Bomb {
@@ -24,7 +25,7 @@ Bomb[immerable] = true;
 const draw =
     (
         [position, bomb]: [ColumnRowPosition, Bomb],
-        canvas: {context: any, resources: Map<string, HTMLElement>,...},
+        canvas: {context: any, resources: Resources,...},
         grid_scale: number
     ): void =>
     {

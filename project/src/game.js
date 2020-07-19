@@ -15,6 +15,7 @@ const MapValueIndexed = map_value_indexed.MapValueIndexed;
 const set_value_indexed = require("./set_value_indexed.js");
 import type {SetValueIndexed} from "./set_value_indexed.js";
 const int = require("./int.js");
+import type {Resources} from "./resources.js";
 const R = require("ramda");
 const {immerable} = require("immer");
 
@@ -138,7 +139,7 @@ const zero = new Int(0);
 const draw =
     (
         game: Game,
-        canvas: {width: number, height: number, context: any, resources: Map<string, HTMLElement>,...}
+        canvas: {width: number, height: number, context: any, resources: Resources,...}
     ): void =>
     {
      // to-do. refactor
@@ -158,16 +159,16 @@ const draw =
     // inner holes
     for (let x = 2; x < grid_length.x-2; x += 2) {
         for (let y = 2; y < grid_length.y-2; y += 2) {
-            canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * x, grid_scale * y);
+            canvas.context.drawImage(canvas.resources["hole"], grid_scale * x, grid_scale * y);
         }
     }
     // outer holes
     for (let x = 0; x < grid_length.x; ++x) {
-        canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * x, 0);
-        canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * x, grid_scale * (grid_length.y-1));
+        canvas.context.drawImage(canvas.resources["hole"], grid_scale * x, 0);
+        canvas.context.drawImage(canvas.resources["hole"], grid_scale * x, grid_scale * (grid_length.y-1));
     for (let y = 1; y < grid_length.y-1; ++y) {
-        canvas.context.drawImage(canvas.resources.get("hole"), 0, grid_scale * y);
-        canvas.context.drawImage(canvas.resources.get("hole"), grid_scale * (grid_length.x-1), grid_scale * y);
+        canvas.context.drawImage(canvas.resources["hole"], 0, grid_scale * y);
+        canvas.context.drawImage(canvas.resources["hole"], grid_scale * (grid_length.x-1), grid_scale * y);
         }
     }
     // obstacles
