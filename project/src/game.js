@@ -7,7 +7,9 @@ const Bomb = bomb.Bomb;
 const explosion = require("./explosion.js");
 const Explosion = explosion.Explosion;
 const obstacle = require("./obstacle.js");
-const {Int, round} = require("./int.js");
+const power_ups = require("./power_ups.js");
+import type {PowerUp} from "./power_ups.js";
+const {Int, round} = require("./int.js"); // to-do. why not qualified?
 const {ColumnRowPosition} = require("./game_types.js");
 import type {Event, PlayerId} from "./game_types.js";
 const map_value_indexed = require("./map_value_indexed.js");
@@ -23,6 +25,7 @@ class Game {
     +players: {[PlayerId]: Player};
     +explosions: Array<Explosion>;
     +obstacles: SetValueIndexed<ColumnRowPosition>;
+    +power_ups: MapValueIndexed<ColumnRowPosition, PowerUp>
     +coordinate_maximum: {
         +x: Int,
         +y: Int,
@@ -35,6 +38,17 @@ class Game {
             new ColumnRowPosition(new Int(2), new Int(0)),
             this.obstacles
         );
+        this.power_ups = new MapValueIndexed();
+        map_value_indexed.insert(
+            new ColumnRowPosition(new Int(4), new Int(2)),
+            new power_ups.BombCapacityPowerUp(),
+            this.power_ups
+        );
+        map_value_indexed.insert(
+            new ColumnRowPosition(new Int(7), new Int(2)),
+            new power_ups.RunSpeedPowerUp(),
+            this.power_ups
+        );
         this.coordinate_maximum = {x: new Int(12), y: new Int(10)}; // to-do. magic numbers
     }
     update(event: Event): void {
@@ -45,7 +59,83 @@ class Game {
             // update players forwarding event to them
             R.forEachObjIndexed(
                 (player_current: Player) =>
-                    player_current.update(event, this.coordinate_maximum),
+                    player_current.update(event, this.coordinate_maximum, this.obstacles),
+                this.players
+            );
+            // power up players
+            R.forEachObjIndexed(
+                (player_current: Player) => {
+                    // to-do. refactor
+                    const position = player_current.position; // I do as Flow guides.
+                    if (position.type === "RowPosition") {
+                        const x_lower = int.floor(position.x);
+                        const x_upper = int.ceil(position.x);
+                        {
+                            const power_up_maybe = map_value_indexed.lookup(new ColumnRowPosition(x_lower, position.row), this.power_ups);
+                            if (power_up_maybe !== null) {
+                                switch (power_up_maybe.type) {
+                                    case "BombCapacityPowerUp": {
+                                        player_current.power_up_bomb_capacity();
+                                        break;
+                                    }
+                                    case "RunSpeedPowerUp": {
+                                        break;
+                                    }
+                                }
+                                map_value_indexed.remove(new ColumnRowPosition(x_lower, position.row), this.power_ups);
+                            }
+                        }
+                        {
+                            const power_up_maybe = map_value_indexed.lookup(new ColumnRowPosition(x_upper, position.row), this.power_ups);
+                            if (power_up_maybe !== null) {
+                                switch (power_up_maybe.type) {
+                                    case "BombCapacityPowerUp": {
+                                        player_current.power_up_bomb_capacity();
+                                        break;
+                                    }
+                                    case "RunSpeedPowerUp": {
+                                        break;
+                                    }
+                                }
+                                map_value_indexed.remove(new ColumnRowPosition(x_upper, position.row), this.power_ups);
+                            }
+                        }
+                    }
+                    else { // position.type === "ColumnPosition"
+                        const y_lower = int.floor(position.y);
+                        const y_upper = int.ceil(position.y);
+                        {
+                            const power_up_maybe = map_value_indexed.lookup(new ColumnRowPosition(position.column, y_lower), this.power_ups);
+                            if (power_up_maybe !== null) {
+                                switch (power_up_maybe.type) {
+                                    case "BombCapacityPowerUp": {
+                                        player_current.power_up_bomb_capacity();
+                                        break;
+                                    }
+                                    case "RunSpeedPowerUp": {
+                                        break;
+                                    }
+                                }
+                                map_value_indexed.remove(new ColumnRowPosition(position.column, y_lower), this.power_ups);
+                            }
+                        }
+                        {
+                            const power_up_maybe = map_value_indexed.lookup(new ColumnRowPosition(position.column, y_upper), this.power_ups);
+                            if (power_up_maybe !== null) {
+                                switch (power_up_maybe.type) {
+                                    case "BombCapacityPowerUp": {
+                                        player_current.power_up_bomb_capacity();
+                                        break;
+                                    }
+                                    case "RunSpeedPowerUp": {
+                                        break;
+                                    }
+                                }
+                                map_value_indexed.remove(new ColumnRowPosition(position.column, y_upper), this.power_ups);
+                            }
+                        }
+                    }
+                },
                 this.players
             );
             // have the players take damage from bombs
@@ -175,6 +265,10 @@ const draw =
     set_value_indexed.traverse_(
         position => obstacle.draw(position, canvas, grid_scale),
         game.obstacles
+    );
+    map_value_indexed.itraverse_(
+        power_up => power_ups.draw(power_up, canvas, grid_scale),
+        game.power_ups
     );
     // explosions
     R.forEach(

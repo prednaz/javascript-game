@@ -4,7 +4,8 @@ const R = require("ramda");
 const load_images = require("./load_images.js");
 
 const sources = {
-    "hole": require("../resources/hole.png")
+    "hole": require("../resources/hole.png"),
+    "power_ups/bomb_capacity": require("../resources/power_ups/bomb_capacity.png"),
 };
 
 type ConstImage = () => Image;

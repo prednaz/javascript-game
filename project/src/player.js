@@ -72,6 +72,7 @@ class Player {
     tick_count_since_turn: number;
     time_since_damage: number;
     +bombs: MapValueIndexed<ColumnRowPosition, Bomb>;
+    bomb_capacity: Int;
     constructor(position: RowPosition | ColumnPosition) {
         this.direction_move = {};
         this.position = position;
@@ -82,6 +83,7 @@ class Player {
         this.time_since_damage = 3000;
         this.tick_count_since_turn = 2;
         this.bombs = new MapValueIndexed();
+        this.bomb_capacity = new Int(1);
     }
     user_command(command: UserCommand): void {
         switch (command.type) {
@@ -95,13 +97,15 @@ class Player {
             }
             case "PlantBomb": {
                 let position = this.position; // I do as Flow guides.
-                map_value_indexed.insert(
-                    position.type === "RowPosition"
-                        ? new ColumnRowPosition(int.round(position.x), position.row)
-                        : new ColumnRowPosition(position.column, int.round(position.y)),
-                    new Bomb(),
-                    this.bombs
-                );
+                if (int.less(map_value_indexed.size(this.bombs), this.bomb_capacity)) {
+                    map_value_indexed.insert(
+                        position.type === "RowPosition"
+                            ? new ColumnRowPosition(int.round(position.x), position.row)
+                            : new ColumnRowPosition(position.column, int.round(position.y)),
+                        new Bomb(),
+                        this.bombs
+                    );
+                }
                 break;
             }
         }
@@ -224,6 +228,9 @@ class Player {
                 break;
             }
         }
+    }
+    power_up_bomb_capacity(): void {
+        this.bomb_capacity = int.successor(this.bomb_capacity);
     }
     take_damage(explosions: $ReadOnlyArray<Explosion>) {
         if (this.time_since_damage <= 3000) { // to-do. magic number

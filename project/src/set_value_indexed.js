@@ -3,6 +3,7 @@
 const map_value_indexed = require("./map_value_indexed.js");
 const MapValueIndexed = map_value_indexed.MapValueIndexed;
 import type {HasId} from "./map_value_indexed.js";
+const {Int} = require("./int.js");
 
 export opaque type SetValueIndexed<Value: HasId> = MapValueIndexed<Value, null>;
 
@@ -21,6 +22,10 @@ const remove =
 const member =
     <Value: HasId>(value: Value, set: SetValueIndexed<Value>): boolean =>
     map_value_indexed.member(value, set);
+
+const size =
+    <Value: HasId>(set: SetValueIndexed<Value>): Int =>
+    map_value_indexed.size(set);
 
 // warning. mutates the second argument
 const insert_all =
@@ -42,4 +47,4 @@ const traverse_ =
     <Value: HasId>(f: Value => mixed, set: SetValueIndexed<Value>): void =>
     map_value_indexed.itraverse_(([value, null_]: [Value, null]) => f(value), set);
 
-module.exports = {create, insert, remove, member, insert_all, remove_all, traverse_};
+module.exports = {create, insert, remove, member, size, insert_all, remove_all, traverse_};

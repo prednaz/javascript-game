@@ -2,6 +2,8 @@
 
 const R = require("ramda");
 const {immerable} = require("immer");
+const int = require("./int.js");
+const Int = int.Int;
 
 export interface HasId {
     id(): string;
@@ -36,6 +38,14 @@ const member =
     <Key: HasId, Value>(key: Key, map: MapValueIndexed<Key, Value>): boolean =>
     key.id() in map.content;
 
+const size =
+    <Key: HasId, Value>(map: MapValueIndexed<Key, Value>): Int =>
+    int.round(Object.keys(map.content).length);
+
+const lookup =
+    <Key: HasId, Value>(key: Key, map: MapValueIndexed<Key, Value>): Value | null =>
+    member(key, map) ? map.content[key.id()][1] : null;
+
 // warning. mutates the second argument
 const insert_all =
     <Key: HasId, Value>(
@@ -67,6 +77,8 @@ module.exports =
         insert,
         remove,
         member,
+        size,
+        lookup,
         insert_all,
         remove_all,
         traverse_,
