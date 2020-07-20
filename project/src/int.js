@@ -16,7 +16,10 @@ Int[immerable] = true;
 
 const equals = (int1: Int, int2: Int): boolean => int1.number === int2.number;
 const less_or_equals = (int1: Int, int2: Int): boolean => int1.number <= int2.number;
+const less = (int1: Int, int2: Int): boolean => int1.number < int2.number;
 
+const floor = (number: number): Int => new Int(Math.floor(number));
+const ceil = (number: number): Int => new Int(Math.ceil(number));
 const round = (number: number): Int => new Int(Math.round(number));
 
 const add =
@@ -39,6 +42,9 @@ module.exports =
         Int,
         equals,
         less_or_equals,
+        less,
+        floor,
+        ceil,
         round,
         add,
         subtract,

@@ -106,7 +106,7 @@ class Player {
             }
         }
     }
-    update(event: Event, coordinate_maximum: CoordinateMaximum): void {
+    update(event: Event, coordinate_maximum: CoordinateMaximum, obstacles: SetValueIndexed<ColumnRowPosition>): void {
         let position = this.position; // I do as Flow guides.
         switch (event.type) {
             case "Tick": {
@@ -197,6 +197,27 @@ class Player {
                             ("up" in direction_move ? -1 : 1) * step_distance,
                             coordinate_maximum
                         );
+                    }
+                }
+                // to-do. refactor
+                if (position.type === "RowPosition") {
+                    const x_lower = int.floor(position.x);
+                    const x_upper = int.ceil(position.x);
+                    if (set_value_indexed.member(new ColumnRowPosition(x_lower, position.row), obstacles)) {
+                        position.x = x_upper.number;
+                    }
+                    else if (set_value_indexed.member(new ColumnRowPosition(x_upper, position.row), obstacles)) {
+                        position.x = x_lower.number;
+                    }
+                }
+                else { // position.type === "ColumnPosition"
+                    const y_lower = int.floor(position.y);
+                    const y_upper = int.ceil(position.y);
+                    if (set_value_indexed.member(new ColumnRowPosition(position.column, y_lower), obstacles)) {
+                        position.y = y_upper.number;
+                    }
+                    else if (set_value_indexed.member(new ColumnRowPosition(position.column, y_upper), obstacles)) {
+                        position.y = y_lower.number;
                     }
                 }
                 ++this.tick_count_since_turn;
