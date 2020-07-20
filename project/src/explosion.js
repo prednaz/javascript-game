@@ -13,12 +13,12 @@ class RowRectangle {
     +row: Int;
     +column_lower: Int;
     +column_upper: Int;
-    constructor(row: Int, column_lower: Int, column_upper: Int) {
+    constructor(row: Int, column_lower: Int, column_upper: Int): void {
         this.row = row;
         this.column_lower = column_lower;
         this.column_upper = column_upper;
     }
-    scorched_positions(): SetValueIndexed<ColumnRowPosition> { // to-do. native Set?
+    scorched_positions(): SetValueIndexed<ColumnRowPosition> {
         const result = set_value_indexed.create();
         for (
             let column = this.column_lower;
@@ -36,7 +36,7 @@ class ColumnRectangle {
     +column: Int;
     +row_lower: Int;
     +row_upper: Int;
-    constructor(column: Int, row_lower: Int, row_upper: Int) {
+    constructor(column: Int, row_lower: Int, row_upper: Int): void {
         this.column = column;
         this.row_lower = row_lower;
         this.row_upper = row_upper;
@@ -63,43 +63,16 @@ class Explosion {
     progress: number;
     constructor(
         center: ColumnRowPosition,
-        row_rectangle: RowRectangle | null,
-        column_rectangle: ColumnRectangle | null
-    ): void {
-        this.center = center;
-        this.row_rectangle = row_rectangle;
-        this.column_rectangle = column_rectangle;
-        this.progress = 1000; // to-do. magic number
-    }
-    update(event: Tick): "faded" | "present" {
-        this.progress -= event.time;
-        return this.progress <= 0 ? "faded" : "present";
-    }
-    scorched_positions(): SetValueIndexed<ColumnRowPosition> {
-        const result = set_value_indexed.create();
-        if (this.row_rectangle !== null) {
-            set_value_indexed.insert_all(this.row_rectangle.scorched_positions(), result);
-        }
-        if (this.column_rectangle !== null) {
-            set_value_indexed.insert_all(this.column_rectangle.scorched_positions(), result);
-        }
-        return result;
-    }
-}
-// $FlowFixMe https://github.com/facebook/flow/issues/3258
-Explosion[immerable] = true;
-
-const create =
-    (
-        center: ColumnRowPosition,
         radius: Int,
         valid_position: ColumnRowPosition => boolean,
         obstacles: SetValueIndexed<ColumnRowPosition>
-    ): Explosion =>
-    {
+    ): void {
+        this.center = center;
+        this.progress = 1000; // to-do. magic number
+
         const determine_explosion_limit_partially_applied =
             determine_explosion_limit(center, radius, valid_position, obstacles);
-        const row_rectangle =
+        this.row_rectangle =
             !int.even(center.row)
                 ? null
                 : new RowRectangle(
@@ -119,7 +92,7 @@ const create =
                             )
                     ).column
                 );
-        const column_rectangle =
+        this.column_rectangle =
             !int.even(center.column)
                 ? null
                 : new ColumnRectangle(
@@ -139,14 +112,24 @@ const create =
                             )
                     ).row
                 );
-        return (
-            new Explosion(
-                center,
-                row_rectangle,
-                column_rectangle
-            )
-        );
-    };
+    }
+    update(event: Tick): "faded" | "present" {
+        this.progress -= event.time;
+        return this.progress <= 0 ? "faded" : "present";
+    }
+    scorched_positions(): SetValueIndexed<ColumnRowPosition> {
+        const result = set_value_indexed.create();
+        if (this.row_rectangle !== null) {
+            set_value_indexed.insert_all(this.row_rectangle.scorched_positions(), result);
+        }
+        if (this.column_rectangle !== null) {
+            set_value_indexed.insert_all(this.column_rectangle.scorched_positions(), result);
+        }
+        return result;
+    }
+}
+// $FlowFixMe https://github.com/facebook/flow/issues/3258
+Explosion[immerable] = true;
 
 // determine the explosions limit by walking (next_position parameter)
 // away from the explosion center (center parameter)
@@ -226,4 +209,4 @@ const draw =
         }
     };
 
-module.exports = {Explosion, create, draw};
+module.exports = {Explosion, draw};

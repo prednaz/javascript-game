@@ -16,7 +16,7 @@ const pairing_function_integer =
             : n1 * n1 + n1 + n2 ;
 
 class MapValueIndexed<Key: HasId, Value> {
-    +content: {[string]: [Key, Value]}; // to-do. read only
+    +content: {[string]: [Key, Value]};
     constructor() {
         this.content = {};
     }

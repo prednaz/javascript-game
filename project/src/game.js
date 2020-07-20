@@ -7,9 +7,9 @@ const Bomb = bomb.Bomb;
 const explosion = require("./explosion.js");
 const Explosion = explosion.Explosion;
 const obstacle = require("./obstacle.js");
-const power_ups = require("./power_ups.js");
-import type {PowerUp} from "./power_ups.js";
-const {Int, round} = require("./int.js"); // to-do. why not qualified?
+const power_up = require("./power_up.js");
+import type {PowerUp} from "./power_up.js";
+const {Int} = require("./int.js");
 const {ColumnRowPosition} = require("./game_types.js");
 import type {Event, PlayerId} from "./game_types.js";
 const map_value_indexed = require("./map_value_indexed.js");
@@ -41,12 +41,12 @@ class Game {
         this.power_ups = new MapValueIndexed();
         map_value_indexed.insert(
             new ColumnRowPosition(new Int(4), new Int(2)),
-            new power_ups.BombCapacityPowerUp(),
+            "bomb_capacity",
             this.power_ups
         );
         map_value_indexed.insert(
             new ColumnRowPosition(new Int(7), new Int(2)),
-            new power_ups.RunSpeedPowerUp(),
+            "run_speed",
             this.power_ups
         );
         this.coordinate_maximum = {x: new Int(12), y: new Int(10)}; // to-do. magic numbers
@@ -73,12 +73,12 @@ class Game {
                         {
                             const power_up_maybe = map_value_indexed.lookup(new ColumnRowPosition(x_lower, position.row), this.power_ups);
                             if (power_up_maybe !== null) {
-                                switch (power_up_maybe.type) {
-                                    case "BombCapacityPowerUp": {
+                                switch (power_up_maybe) {
+                                    case "bomb_capacity": {
                                         player_current.power_up_bomb_capacity();
                                         break;
                                     }
-                                    case "RunSpeedPowerUp": {
+                                    case "run_speed": {
                                         break;
                                     }
                                 }
@@ -88,12 +88,12 @@ class Game {
                         {
                             const power_up_maybe = map_value_indexed.lookup(new ColumnRowPosition(x_upper, position.row), this.power_ups);
                             if (power_up_maybe !== null) {
-                                switch (power_up_maybe.type) {
-                                    case "BombCapacityPowerUp": {
+                                switch (power_up_maybe) {
+                                    case "bomb_capacity": {
                                         player_current.power_up_bomb_capacity();
                                         break;
                                     }
-                                    case "RunSpeedPowerUp": {
+                                    case "run_speed": {
                                         break;
                                     }
                                 }
@@ -107,12 +107,12 @@ class Game {
                         {
                             const power_up_maybe = map_value_indexed.lookup(new ColumnRowPosition(position.column, y_lower), this.power_ups);
                             if (power_up_maybe !== null) {
-                                switch (power_up_maybe.type) {
-                                    case "BombCapacityPowerUp": {
+                                switch (power_up_maybe) {
+                                    case "bomb_capacity": {
                                         player_current.power_up_bomb_capacity();
                                         break;
                                     }
-                                    case "RunSpeedPowerUp": {
+                                    case "run_speed": {
                                         break;
                                     }
                                 }
@@ -122,12 +122,12 @@ class Game {
                         {
                             const power_up_maybe = map_value_indexed.lookup(new ColumnRowPosition(position.column, y_upper), this.power_ups);
                             if (power_up_maybe !== null) {
-                                switch (power_up_maybe.type) {
-                                    case "BombCapacityPowerUp": {
+                                switch (power_up_maybe) {
+                                    case "bomb_capacity": {
                                         player_current.power_up_bomb_capacity();
                                         break;
                                     }
-                                    case "RunSpeedPowerUp": {
+                                    case "run_speed": {
                                         break;
                                     }
                                 }
@@ -161,12 +161,12 @@ class Game {
                 (player_current: Player) => {
                     const exploding_bombs: Array<ColumnRowPosition> = [];
                     // collect exploding bombs
-                    map_value_indexed.traverse_(
-                        (bomb: Bomb, position: ColumnRowPosition) => {
+                    map_value_indexed.itraverse_(
+                        ([position, bomb]: [ColumnRowPosition, Bomb]) => {
                             if (bomb.update(event) === "exploding") {
                                 exploding_bombs.push(position);
                                 const explosion_new =
-                                    explosion.create(
+                                    new Explosion(
                                         position,
                                         player_current.bomb_strength,
                                         this.valid_position.bind(this),
@@ -249,16 +249,46 @@ const draw =
     // inner holes
     for (let x = 2; x < grid_length.x-2; x += 2) {
         for (let y = 2; y < grid_length.y-2; y += 2) {
-            canvas.context.drawImage(canvas.resources["hole"], grid_scale * x, grid_scale * y);
+            canvas.context.drawImage(
+                canvas.resources["hole"],
+                grid_scale * x,
+                grid_scale * y,
+                grid_scale,
+                grid_scale
+            );
         }
     }
     // outer holes
     for (let x = 0; x < grid_length.x; ++x) {
-        canvas.context.drawImage(canvas.resources["hole"], grid_scale * x, 0);
-        canvas.context.drawImage(canvas.resources["hole"], grid_scale * x, grid_scale * (grid_length.y-1));
+        canvas.context.drawImage(
+            canvas.resources["hole"],
+            grid_scale * x,
+            0,
+            grid_scale,
+            grid_scale
+        );
+        canvas.context.drawImage(
+            canvas.resources["hole"],
+            grid_scale * x,
+            grid_scale * (grid_length.y-1),
+            grid_scale,
+            grid_scale
+        );
     for (let y = 1; y < grid_length.y-1; ++y) {
-        canvas.context.drawImage(canvas.resources["hole"], 0, grid_scale * y);
-        canvas.context.drawImage(canvas.resources["hole"], grid_scale * (grid_length.x-1), grid_scale * y);
+        canvas.context.drawImage(
+            canvas.resources["hole"],
+            0,
+            grid_scale * y,
+            grid_scale,
+            grid_scale
+        );
+        canvas.context.drawImage(
+            canvas.resources["hole"],
+            grid_scale * (grid_length.x-1),
+            grid_scale * y,
+            grid_scale,
+            grid_scale
+        );
         }
     }
     // obstacles
@@ -266,8 +296,9 @@ const draw =
         position => obstacle.draw(position, canvas, grid_scale),
         game.obstacles
     );
+    // power_ups
     map_value_indexed.itraverse_(
-        power_up => power_ups.draw(power_up, canvas, grid_scale),
+        power_up_current => power_up.draw(power_up_current, canvas, grid_scale),
         game.power_ups
     );
     // explosions

@@ -29,7 +29,7 @@ class RowPosition {
         this.x = x;
         this.type = "RowPosition";
     }
-    stepRow(difference: number, coordinate_maximum: CoordinateMaximum): void {
+    step_row(difference: number, coordinate_maximum: CoordinateMaximum): void {
         this.x += difference;
         if (this.x < 0) {
             this.x = 0;
@@ -50,7 +50,7 @@ class ColumnPosition {
         this.y = y;
         this.type = "ColumnPosition";
     }
-    stepColumn(difference: number, coordinate_maximum: CoordinateMaximum): void {
+    step_column(difference: number, coordinate_maximum: CoordinateMaximum): void {
         this.y += difference;
         if (this.y < 0) {
             this.y = 0;
@@ -142,27 +142,27 @@ class Player {
                         if (column_distance < 1.5 * step_distance && this.tick_count_since_turn >= 2) {
                             this.position = new ColumnPosition(column, position.row.number);
                             position = this.position;
-                            position.stepColumn(
+                            position.step_column(
                                 ("up" in direction_move ? -1 : 1) * Math.max(0, step_distance - column_distance),
                                 coordinate_maximum
                             );
                             this.tick_count_since_turn = -1;
                         }
                         else if ("left" in direction_move || "right" in direction_move) {
-                            position.stepRow(
+                            position.step_row(
                                 ("left" in direction_move ? -1 : 1) * step_distance,
                                 coordinate_maximum
                             );
                         }
                         else {
-                            position.stepRow(
+                            position.step_row(
                                 column_direction * step_distance,
                                 coordinate_maximum
                             );
                         }
                     }
                     else {
-                        position.stepRow(
+                        position.step_row(
                             ("left" in direction_move ? -1 : 1) * step_distance,
                             coordinate_maximum
                         );
@@ -177,27 +177,27 @@ class Player {
                         if (row_distance < 1.5 * step_distance && this.tick_count_since_turn >= 2) {
                             this.position = new RowPosition(row, position.column.number);
                             position = this.position;
-                            position.stepRow(
+                            position.step_row(
                                 ("left" in direction_move ? -1 : 1) * Math.max(0, step_distance - row_distance),
                                 coordinate_maximum
                             );
                             this.tick_count_since_turn = -1;
                         }
                         else if ("up" in direction_move || "down" in direction_move) {
-                            position.stepColumn(
+                            position.step_column(
                                 ("up" in direction_move ? -1 : 1) * step_distance,
                                 coordinate_maximum
                             );
                         }
                         else {
-                            position.stepColumn(
+                            position.step_column(
                                 row_direction * step_distance,
                                 coordinate_maximum
                             );
                         }
                     }
                     else {
-                        position.stepColumn(
+                        position.step_column(
                             ("up" in direction_move ? -1 : 1) * step_distance,
                             coordinate_maximum
                         );

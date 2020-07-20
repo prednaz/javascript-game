@@ -4,7 +4,7 @@ const {Game, draw} = require("../game.js");
 const {Player} = require("../player.js");
 const {Accelerate, Decelerate, PlantBomb} = require("../game_types.js");
 import type {PlayerId} from "../game_types.js";
-const {with_resources, generate_fields} = require("../resources.js");
+const {with_resources} = require("../resources.js");
 const R = require("ramda");
 const immer = require("immer");
 immer.enablePatches();
