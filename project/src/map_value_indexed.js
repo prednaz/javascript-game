@@ -40,7 +40,7 @@ const member =
 
 const size =
     <Key: HasId, Value>(map: MapValueIndexed<Key, Value>): Int =>
-    int.round(Object.keys(map.content).length);
+    int.round(R.length(Object.keys(map.content)));
 
 const lookup =
     <Key: HasId, Value>(key: Key, map: MapValueIndexed<Key, Value>): Value | null =>
@@ -60,13 +60,13 @@ const remove_all =
         map1: MapValueIndexed<Key, Value>,
         map2: MapValueIndexed<Key, Value>
     ): void =>
-    {itraverse_(([key, value]: [Key, Value]) => remove(key, map2), map1);};
+    {forEachIndexed(([key, value]: [Key, Value]) => remove(key, map2), map1);};
 
-const traverse_ =
+const forEach =
     <Key: HasId, Value>(f: (Value, Key) => mixed, map: MapValueIndexed<Key, Value>): void =>
     {R.forEachObjIndexed(([key, value]: [Key, Value]) => f(value, key), map.content);};
 
-const itraverse_ =
+const forEachIndexed =
     <Key: HasId, Value>(f: ([Key, Value]) => mixed, map: MapValueIndexed<Key, Value>): void =>
     {R.forEachObjIndexed((tuple: [Key, Value]) => f(tuple), map.content);};
 
@@ -81,6 +81,6 @@ module.exports =
         lookup,
         insert_all,
         remove_all,
-        traverse_,
-        itraverse_
+        forEach,
+        forEachIndexed
     };

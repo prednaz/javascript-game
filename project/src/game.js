@@ -110,7 +110,7 @@ class Game {
                 (player_current: Player) => {
                     const exploding_bombs: Array<ColumnRowPosition> = [];
                     // collect exploding bombs
-                    map_value_indexed.itraverse_(
+                    map_value_indexed.forEachIndexed(
                         ([position, bomb]: [ColumnRowPosition, Bomb]) => {
                             if (bomb.update(event) === "exploding") {
                                 exploding_bombs.push(position);
@@ -129,8 +129,7 @@ class Game {
                     );
                     // remove exploding bombs
                     R.forEach(
-                        (position: ColumnRowPosition) => // to-do. flip?
-                            map_value_indexed.remove(position, player_current.bombs),
+                        R.flip(map_value_indexed.remove)(player_current.bombs),
                         exploding_bombs
                     );
                 },
@@ -241,12 +240,12 @@ const draw =
         }
     }
     // obstacles
-    set_value_indexed.traverse_(
+    set_value_indexed.forEach(
         position => obstacle.draw(position, canvas, grid_scale),
         game.obstacles
     );
     // power_ups
-    map_value_indexed.itraverse_(
+    map_value_indexed.forEachIndexed(
         power_up_current => power_up.draw(power_up_current, canvas, grid_scale),
         game.power_ups
     );
@@ -260,7 +259,7 @@ const draw =
     // bombs
     R.forEachObjIndexed(
         (player_current: Player) => {
-            map_value_indexed.itraverse_(
+            map_value_indexed.forEachIndexed(
                 bomb_current => bomb.draw(bomb_current, canvas, grid_scale),
                 player_current.bombs
             );

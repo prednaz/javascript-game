@@ -43,8 +43,8 @@ const remove_all =
     ): void =>
     {map_value_indexed.remove_all(set1, set2)};
 
-const traverse_ =
+const forEach =
     <Value: HasId>(f: Value => mixed, set: SetValueIndexed<Value>): void =>
-    map_value_indexed.itraverse_(([value, null_]: [Value, null]) => f(value), set);
+    map_value_indexed.forEachIndexed(([value, null_]: [Value, null]) => f(value), set);
 
-module.exports = {create, insert, remove, member, size, insert_all, remove_all, traverse_};
+module.exports = {create, insert, remove, member, size, insert_all, remove_all, forEach};

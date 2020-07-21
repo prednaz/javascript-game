@@ -127,7 +127,7 @@ class Player {
                     delete direction_move["right"];
                 }
 
-                if (Object.keys(direction_move).length === 0) {
+                if (R.length(Object.keys(direction_move)) === 0) {
                     return;
                 }
 
