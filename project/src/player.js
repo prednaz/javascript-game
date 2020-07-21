@@ -21,29 +21,36 @@ type CoordinateMaximum = {
 }
 
 class RowPosition {
-    +row: Int;
-    x: number;
+    +discrete_coordinate: Int;
+    continuous_coordinate: number;
     +type: "RowPosition";
     constructor(row: Int, x: number): void {
-        this.row = row;
-        this.x = x;
+        this.discrete_coordinate = row;
+        this.continuous_coordinate = x;
         this.type = "RowPosition";
     }
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
 RowPosition[immerable] = true;
+const x_get = (position: RowPosition): number => position.continuous_coordinate;
+const x_set = (x: number, position: RowPosition): void => {position.continuous_coordinate = x;};
+const row_get = (position: RowPosition): Int => position.discrete_coordinate;
+
 class ColumnPosition {
-    +column: Int;
-    y: number;
+    +discrete_coordinate: Int;
+    continuous_coordinate: number;
     +type: "ColumnPosition";
     constructor(column: Int, y: number): void {
-        this.column = column;
-        this.y = y;
+        this.discrete_coordinate = column;
+        this.continuous_coordinate = y;
         this.type = "ColumnPosition";
     }
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
 ColumnPosition[immerable] = true;
+const column_get = (position: ColumnPosition): Int => position.discrete_coordinate;
+const y_get = (position: ColumnPosition): number => position.continuous_coordinate;
+const y_set = (y: number, position: ColumnPosition): void => {position.continuous_coordinate = y;};
 
 class Player {
     +direction_move: {[Direction]: null};
@@ -82,8 +89,8 @@ class Player {
                 if (int.less(map_value_indexed.size(this.bombs), this.bomb_capacity)) {
                     map_value_indexed.insert(
                         position.type === "RowPosition"
-                            ? new ColumnRowPosition(int.round(position.x), position.row)
-                            : new ColumnRowPosition(position.column, int.round(position.y)),
+                            ? new ColumnRowPosition(int.round(x_get(position)), row_get(position))
+                            : new ColumnRowPosition(column_get(position), int.round(y_get(position))),
                         new Bomb(),
                         this.bombs
                     );
@@ -97,7 +104,6 @@ class Player {
         on_map: ColumnRowPosition => boolean,
         clear_of_obstacles: ColumnRowPosition => boolean
     ): void {
-        let position = this.position; // I do as Flow guides.
         switch (event.type) {
             case "Tick": {
                 this.time_since_damage += event.time;
@@ -118,70 +124,67 @@ class Player {
                 }
 
                 const step_distance = this.run_speed * event.time;
-                // to-do. refactor
-                if (position.type === "RowPosition") {
-                    if ("up" in direction_move || "down" in direction_move) {
-                        const column = int.multiply(int.round(position.x / 2), new Int(2)); // round to the nearest mutliple of 2
-                        const column_difference = column.number - position.x;
-                        const column_direction = Math.sign(column_difference);
-                        const column_distance = Math.abs(column_difference);
-                        if (column_distance < 1.5 * step_distance && this.tick_count_since_turn >= 2) {
-                            this.position = new ColumnPosition(column, position.row.number);
-                            position = this.position;
-                            position.y +=
-                                ("up" in direction_move ? -1 : 1) * Math.max(0, step_distance - column_distance);
-                            this.tick_count_since_turn = -1;
-                        }
-                        else if ("left" in direction_move || "right" in direction_move) {
-                            position.x +=
-                                ("left" in direction_move ? -1 : 1) * step_distance;
-                        }
-                        else {
-                            position.x += column_direction * step_distance;
-                        }
+                let parallel_negative: Direction;
+                let parallel_positive: Direction;
+                let orthogonal_negative: Direction;
+                let orthogonal_positive: Direction;
+                let new_position:
+                    ((new_discrete: Int, new_continuous: number) => RowPosition) |
+                    (new_discrete: Int, new_continuous: number) => ColumnPosition;
+                if (this.position.type === "RowPosition") {
+                    parallel_negative = "left";
+                    parallel_positive = "right";
+                    orthogonal_negative = "up";
+                    orthogonal_positive = "down";
+                    new_position =
+                        (new_discrete: Int, new_continuous: number): ColumnPosition =>
+                        new ColumnPosition(new_discrete, new_continuous);
+                }
+                else { // this.position.type === "ColumnPosition"
+                    parallel_negative = "up";
+                    parallel_positive = "down";
+                    orthogonal_negative = "left";
+                    orthogonal_positive = "right";
+                    new_position =
+                        (new_discrete: Int, new_continuous: number): RowPosition =>
+                        new RowPosition(new_discrete, new_continuous);
+                }
+
+                if (orthogonal_negative in direction_move || orthogonal_positive in direction_move) {
+                    const new_discrete = int.multiply(int.round(this.position.continuous_coordinate / 2), new Int(2)) // round to the nearest multiple of 2
+                    const new_discrete_difference = new_discrete.number - this.position.continuous_coordinate;
+                    const new_discrete_direction = Math.sign(new_discrete_difference);
+                    const new_discrete_distance = Math.abs(new_discrete_difference);
+                    if (new_discrete_distance < 1.5 * step_distance && this.tick_count_since_turn >= 2) {
+                        this.position = new_position(new_discrete, this.position.discrete_coordinate.number);
+                        this.position.continuous_coordinate +=
+                            (orthogonal_negative in direction_move ? -1 : 1) * Math.max(0, step_distance - new_discrete_distance);
+                        this.tick_count_since_turn = -1;
+                    }
+                    else if (parallel_negative in direction_move || parallel_positive in direction_move) {
+                        this.position.continuous_coordinate +=
+                            (parallel_negative in direction_move ? -1 : 1) * step_distance;
                     }
                     else {
-                        position.x +=
-                            ("left" in direction_move ? -1 : 1) * step_distance;
+                        this.position.continuous_coordinate += new_discrete_direction * step_distance;
                     }
                 }
-                else { // position.type === "ColumnPosition"
-                    if ("left" in direction_move || "right" in direction_move) {
-                        const row = int.multiply(int.round(position.y / 2), new Int(2)); // round to the nearest mutliple of 2
-                        const row_difference = row.number - position.y;
-                        const row_direction = Math.sign(row_difference);
-                        const row_distance = Math.abs(row_difference);
-                        if (row_distance < 1.5 * step_distance && this.tick_count_since_turn >= 2) {
-                            this.position = new RowPosition(row, position.column.number);
-                            position = this.position;
-                            position.x +=
-                                ("left" in direction_move ? -1 : 1) * Math.max(0, step_distance - row_distance);
-                            this.tick_count_since_turn = -1;
-                        }
-                        else if ("up" in direction_move || "down" in direction_move) {
-                            position.y +=
-                                ("up" in direction_move ? -1 : 1) * step_distance;
-                        }
-                        else {
-                            position.y += row_direction * step_distance;
-                        }
-                    }
-                    else {
-                        position.y +=
-                            ("up" in direction_move ? -1 : 1) * step_distance;
-                    }
+                else {
+                    this.position.continuous_coordinate +=
+                        (parallel_negative in direction_move ? -1 : 1) * step_distance;
                 }
+
                 const free_positions =
                     R.filter(
                         R.both(clear_of_obstacles, on_map),
                         this.touched_positions()
                     );
                 if (R.length(free_positions) === 1) {
-                    if (position.type === "RowPosition") {
-                        position.x = free_positions[0].column.number;
+                    if (this.position.type === "RowPosition") {
+                        x_set(free_positions[0].column.number, this.position);
                     }
-                    else { // position.type === "ColumnPosition"
-                        position.y = free_positions[0].row.number;
+                    else { // this.position.type === "ColumnPosition"
+                        y_set(free_positions[0].row.number, this.position);
                     }
                 }
                 ++this.tick_count_since_turn;
@@ -195,11 +198,11 @@ class Player {
         }
         const position = new ColumnRowPosition(
             this.position.type === "RowPosition"
-                ? int.round(this.position.x)
-                : this.position.column,
+                ? int.round(x_get(this.position))
+                : column_get(this.position),
             this.position.type === "RowPosition"
-                ? this.position.row
-                : int.round(this.position.y)
+                ? row_get(this.position)
+                : int.round(y_get(this.position))
         );
         for (const explosion_current of explosions) {
             if (set_value_indexed.member(position, explosion_current.scorched_positions())) {
@@ -215,13 +218,13 @@ class Player {
             position.type === "RowPosition"
                 ?
                     [
-                        new ColumnRowPosition(int.floor(position.x), position.row),
-                        new ColumnRowPosition(int.ceil(position.x), position.row)
+                        new ColumnRowPosition(int.floor(x_get(position)), row_get(position)),
+                        new ColumnRowPosition(int.ceil(x_get(position)), row_get(position))
                     ]
                 :
                     [
-                        new ColumnRowPosition(position.column, int.floor(position.y)),
-                        new ColumnRowPosition(position.column, int.ceil(position.y))
+                        new ColumnRowPosition(column_get(position), int.floor(y_get(position))),
+                        new ColumnRowPosition(column_get(position), int.ceil(y_get(position)))
                     ]
         );
     }
@@ -243,11 +246,11 @@ const draw =
         canvas.context.fillStyle = "green";
         canvas.context.fillRect(
             player.position.type === "RowPosition"
-                ? grid_scale * player.position.x + grid_scale * 1
-                : grid_scale * player.position.column.number + grid_scale * 1,
+                ? grid_scale * x_get(player.position) + grid_scale * 1
+                : grid_scale * column_get(player.position).number + grid_scale * 1,
             player.position.type === "RowPosition"
-                ? grid_scale * player.position.row.number + grid_scale * 1
-                : grid_scale * player.position.y + grid_scale * 1,
+                ? grid_scale * row_get(player.position).number + grid_scale * 1
+                : grid_scale * y_get(player.position) + grid_scale * 1,
             grid_scale,
             grid_scale
         );
