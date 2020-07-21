@@ -29,15 +29,6 @@ class RowPosition {
         this.x = x;
         this.type = "RowPosition";
     }
-    step_row(difference: number, coordinate_maximum: CoordinateMaximum): void {
-        this.x += difference;
-        if (this.x < 0) {
-            this.x = 0;
-        }
-        else if (this.x > coordinate_maximum.x.number) {
-            this.x = coordinate_maximum.x.number;
-        }
-    }
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
 RowPosition[immerable] = true;
@@ -49,15 +40,6 @@ class ColumnPosition {
         this.column = column;
         this.y = y;
         this.type = "ColumnPosition";
-    }
-    step_column(difference: number, coordinate_maximum: CoordinateMaximum): void {
-        this.y += difference;
-        if (this.y < 0) {
-            this.y = 0;
-        }
-        else if (this.y > coordinate_maximum.y.number) {
-            this.y = coordinate_maximum.y.number;
-        }
     }
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
@@ -110,7 +92,11 @@ class Player {
             }
         }
     }
-    update(event: Event, coordinate_maximum: CoordinateMaximum, obstacles: SetValueIndexed<ColumnRowPosition>): void {
+    update(
+        event: Event,
+        on_map: ColumnRowPosition => boolean,
+        clear_of_obstacles: ColumnRowPosition => boolean
+    ): void {
         let position = this.position; // I do as Flow guides.
         switch (event.type) {
             case "Tick": {
@@ -142,30 +128,21 @@ class Player {
                         if (column_distance < 1.5 * step_distance && this.tick_count_since_turn >= 2) {
                             this.position = new ColumnPosition(column, position.row.number);
                             position = this.position;
-                            position.step_column(
-                                ("up" in direction_move ? -1 : 1) * Math.max(0, step_distance - column_distance),
-                                coordinate_maximum
-                            );
+                            position.y +=
+                                ("up" in direction_move ? -1 : 1) * Math.max(0, step_distance - column_distance);
                             this.tick_count_since_turn = -1;
                         }
                         else if ("left" in direction_move || "right" in direction_move) {
-                            position.step_row(
-                                ("left" in direction_move ? -1 : 1) * step_distance,
-                                coordinate_maximum
-                            );
+                            position.x +=
+                                ("left" in direction_move ? -1 : 1) * step_distance;
                         }
                         else {
-                            position.step_row(
-                                column_direction * step_distance,
-                                coordinate_maximum
-                            );
+                            position.x += column_direction * step_distance;
                         }
                     }
                     else {
-                        position.step_row(
-                            ("left" in direction_move ? -1 : 1) * step_distance,
-                            coordinate_maximum
-                        );
+                        position.x +=
+                            ("left" in direction_move ? -1 : 1) * step_distance;
                     }
                 }
                 else { // position.type === "ColumnPosition"
@@ -177,36 +154,26 @@ class Player {
                         if (row_distance < 1.5 * step_distance && this.tick_count_since_turn >= 2) {
                             this.position = new RowPosition(row, position.column.number);
                             position = this.position;
-                            position.step_row(
-                                ("left" in direction_move ? -1 : 1) * Math.max(0, step_distance - row_distance),
-                                coordinate_maximum
-                            );
+                            position.x +=
+                                ("left" in direction_move ? -1 : 1) * Math.max(0, step_distance - row_distance);
                             this.tick_count_since_turn = -1;
                         }
                         else if ("up" in direction_move || "down" in direction_move) {
-                            position.step_column(
-                                ("up" in direction_move ? -1 : 1) * step_distance,
-                                coordinate_maximum
-                            );
+                            position.y +=
+                                ("up" in direction_move ? -1 : 1) * step_distance;
                         }
                         else {
-                            position.step_column(
-                                row_direction * step_distance,
-                                coordinate_maximum
-                            );
+                            position.y += row_direction * step_distance;
                         }
                     }
                     else {
-                        position.step_column(
-                            ("up" in direction_move ? -1 : 1) * step_distance,
-                            coordinate_maximum
-                        );
+                        position.y +=
+                            ("up" in direction_move ? -1 : 1) * step_distance;
                     }
                 }
                 const free_positions =
                     R.filter(
-                        (touched_position: ColumnRowPosition) =>
-                            !set_value_indexed.member(touched_position, obstacles),
+                        R.both(clear_of_obstacles, on_map),
                         this.touched_positions()
                     );
                 if (R.length(free_positions) === 1) {

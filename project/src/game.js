@@ -66,7 +66,11 @@ class Game {
             // update players forwarding event to them
             R.forEachObjIndexed(
                 (player_current: Player) =>
-                    player_current.update(event, this.coordinate_maximum, this.obstacles),
+                    player_current.update(
+                        event,
+                        this.on_map.bind(this),
+                        this.clear_of_obstacles.bind(this)
+                    ),
                 this.players
             );
             // power up players
@@ -125,8 +129,8 @@ class Game {
                                     new Explosion(
                                         position,
                                         player_current.bomb_strength,
-                                        this.valid_position.bind(this),
-                                        this.obstacles
+                                        this.on_map.bind(this),
+                                        this.clear_of_obstacles.bind(this)
                                     );
                                 this.explosions.push(explosion_new);
                                 this.explode_obstacles(explosion_new);
@@ -167,7 +171,10 @@ class Game {
             this.obstacles
         );
     }
-    valid_position(position: ColumnRowPosition): boolean {
+    clear_of_obstacles(position: ColumnRowPosition): boolean {
+        return !set_value_indexed.member(position, this.obstacles);
+    }
+    on_map(position: ColumnRowPosition): boolean {
         return (
             int.less_or_equals(zero, position.column) &&
             int.less_or_equals(position.column, this.coordinate_maximum.x) &&

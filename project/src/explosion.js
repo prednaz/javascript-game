@@ -64,14 +64,14 @@ class Explosion {
     constructor(
         center: ColumnRowPosition,
         radius: Int,
-        valid_position: ColumnRowPosition => boolean,
-        obstacles: SetValueIndexed<ColumnRowPosition>
+        on_map: ColumnRowPosition => boolean,
+        clear_of_obstacles: ColumnRowPosition => boolean
     ): void {
         this.center = center;
         this.progress = 1000; // to-do. magic number
 
         const determine_explosion_limit_partially_applied =
-            determine_explosion_limit(center, radius, valid_position, obstacles);
+            determine_explosion_limit(center, radius, on_map, clear_of_obstacles);
         this.row_rectangle =
             !int.even(center.row)
                 ? null
@@ -140,8 +140,8 @@ const determine_explosion_limit =
     (
         center: ColumnRowPosition,
         radius: Int,
-        valid_position: ColumnRowPosition => boolean,
-        obstacles: SetValueIndexed<ColumnRowPosition>
+        on_map: ColumnRowPosition => boolean,
+        clear_of_obstacles: ColumnRowPosition => boolean
     ) =>
     (next_position: ColumnRowPosition => ColumnRowPosition): ColumnRowPosition =>
     {
@@ -150,12 +150,12 @@ const determine_explosion_limit =
         for (let count = 0; count < radius.number; ++count) {
             position_test = next_position(position_test);
                 // new ColumnRowPosition(int.subtract(position.column, one), position.row);
-            if (!valid_position(position_test)) {
+            if (!on_map(position_test)) {
                 break;
             }
             // map has not ended yet, so advance position_result
             position_result = position_test;
-            if (set_value_indexed.member(position_result, obstacles)) {
+            if (!clear_of_obstacles(position_result)) {
                 break;
             }
             // no obtacle yet, so loop
