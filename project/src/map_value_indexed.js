@@ -1,9 +1,9 @@
 // @flow
 
-const R = require("ramda");
-const {immerable} = require("immer");
 const int = require("./int.js");
 const Int = int.Int;
+const R = require("ramda");
+const {immerable} = require("immer");
 
 export interface HasId {
     id(): string;
@@ -17,8 +17,12 @@ const pairing_function_integer =
 
 class MapValueIndexed<Key: HasId, Value> {
     +content: {[string]: [Key, Value]};
-    constructor() {
+    constructor(initial_elements: Array<[Key, Value]>): void {
         this.content = {};
+        R.forEach(
+            ([key, value]: [Key, Value]) => insert(key, value, this),
+            initial_elements
+        );
     }
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258

@@ -4,10 +4,15 @@ const map_value_indexed = require("./map_value_indexed.js");
 const MapValueIndexed = map_value_indexed.MapValueIndexed;
 import type {HasId} from "./map_value_indexed.js";
 const {Int} = require("./int.js");
+const R = require("ramda");
 
 export opaque type SetValueIndexed<Value: HasId> = MapValueIndexed<Value, null>;
 
-const create = <Value: HasId>(): SetValueIndexed<Value> => new MapValueIndexed();
+const create =
+    <Value: HasId>(initial_elements: Array<Value>): SetValueIndexed<Value> =>
+    new MapValueIndexed(
+        R.map((value: Value): [Value, null] => [value, null], initial_elements)
+    );
 
 // warning. mutates the second argument
 const insert =

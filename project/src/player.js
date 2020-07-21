@@ -82,7 +82,7 @@ class Player {
         this.bomb_strength = new Int(3);
         this.time_since_damage = 3000;
         this.tick_count_since_turn = 2;
-        this.bombs = new MapValueIndexed();
+        this.bombs = new MapValueIndexed([]);
         this.bomb_capacity = new Int(1);
     }
     user_command(command: UserCommand): void {

@@ -19,7 +19,7 @@ class RowRectangle {
         this.column_upper = column_upper;
     }
     scorched_positions(): SetValueIndexed<ColumnRowPosition> {
-        const result = set_value_indexed.create();
+        const result = set_value_indexed.create([]);
         for (
             let column = this.column_lower;
             int.less_or_equals(column, this.column_upper);
@@ -42,7 +42,7 @@ class ColumnRectangle {
         this.row_upper = row_upper;
     }
     scorched_positions(): SetValueIndexed<ColumnRowPosition> {
-        const result = set_value_indexed.create();
+        const result = set_value_indexed.create([]);
         for (
             let row = this.row_lower;
             int.less_or_equals(row, this.row_upper);
@@ -118,7 +118,7 @@ class Explosion {
         return this.progress <= 0 ? "faded" : "present";
     }
     scorched_positions(): SetValueIndexed<ColumnRowPosition> {
-        const result = set_value_indexed.create();
+        const result = set_value_indexed.create([]);
         if (this.row_rectangle !== null) {
             set_value_indexed.insert_all(this.row_rectangle.scorched_positions(), result);
         }

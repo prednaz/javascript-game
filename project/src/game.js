@@ -33,22 +33,29 @@ class Game {
     constructor(): void {
         this.players = {};
         this.explosions = [];
-        this.obstacles = set_value_indexed.create();
-        set_value_indexed.insert(
-            new ColumnRowPosition(new Int(2), new Int(0)),
-            this.obstacles
-        );
-        this.power_ups = new MapValueIndexed();
-        map_value_indexed.insert(
-            new ColumnRowPosition(new Int(4), new Int(2)),
-            "bomb_capacity",
-            this.power_ups
-        );
-        map_value_indexed.insert(
-            new ColumnRowPosition(new Int(7), new Int(2)),
-            "run_speed",
-            this.power_ups
-        );
+        this.obstacles = set_value_indexed.create([
+            new ColumnRowPosition(new Int(3), new Int(0)),
+            new ColumnRowPosition(new Int(2), new Int(1)),
+            new ColumnRowPosition(new Int(4), new Int(1)),
+            new ColumnRowPosition(new Int(1), new Int(2)),
+            new ColumnRowPosition(new Int(3), new Int(2)),
+            new ColumnRowPosition(new Int(6), new Int(2)),
+            new ColumnRowPosition(new Int(2), new Int(3)),
+            new ColumnRowPosition(new Int(4), new Int(3)),
+            new ColumnRowPosition(new Int(1), new Int(4)),
+            new ColumnRowPosition(new Int(2), new Int(4)),
+            new ColumnRowPosition(new Int(0), new Int(5)),
+            new ColumnRowPosition(new Int(2), new Int(5)),
+            new ColumnRowPosition(new Int(0), new Int(6)),
+            new ColumnRowPosition(new Int(2), new Int(6)),
+            new ColumnRowPosition(new Int(0), new Int(7)),
+            new ColumnRowPosition(new Int(2), new Int(7)),
+            new ColumnRowPosition(new Int(1), new Int(8)),
+        ]);
+        this.power_ups = new MapValueIndexed([
+            [new ColumnRowPosition(new Int(4), new Int(2)), "bomb_capacity"],
+            [new ColumnRowPosition(new Int(7), new Int(2)), "run_speed"],
+        ]);
         this.coordinate_maximum = {x: new Int(12), y: new Int(10)}; // to-do. magic numbers
     }
     update(event: Event): void {
