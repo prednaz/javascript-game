@@ -68,8 +68,7 @@ class Game {
                 (player_current: Player) =>
                     player_current.update(
                         event,
-                        this.on_map.bind(this),
-                        this.clear_of_obstacles.bind(this)
+                        this.free_position.bind(this)
                     ),
                 this.players
             );
@@ -181,6 +180,9 @@ class Game {
             int.less_or_equals(zero, position.row) &&
             int.less_or_equals(position.row, this.coordinate_maximum.y)
         );
+    }
+    free_position(position: ColumnRowPosition): boolean {
+        return this.clear_of_obstacles(position) && this.on_map(position);
     }
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258

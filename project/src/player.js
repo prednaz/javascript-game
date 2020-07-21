@@ -101,15 +101,14 @@ class Player {
     }
     update(
         event: Event,
-        on_map: ColumnRowPosition => boolean,
-        clear_of_obstacles: ColumnRowPosition => boolean
+        free_position: ColumnRowPosition => boolean
     ): void {
         switch (event.type) {
             case "Tick": {
                 this.time_since_damage += event.time;
 
                 // opposed directions cancel each other out
-                const direction_move = Object.assign({}, this.direction_move);
+                const direction_move: {[Direction]: null} = Object.assign({}, this.direction_move);
                 if ("up" in direction_move && "down" in direction_move) {
                     delete direction_move["up"];
                     delete direction_move["down"];
@@ -123,72 +122,12 @@ class Player {
                     return;
                 }
 
-                const step_distance = this.run_speed * event.time;
-                let parallel_negative: Direction;
-                let parallel_positive: Direction;
-                let orthogonal_negative: Direction;
-                let orthogonal_positive: Direction;
-                let new_position:
-                    ((new_discrete: Int, new_continuous: number) => RowPosition) |
-                    (new_discrete: Int, new_continuous: number) => ColumnPosition;
-                if (this.position.type === "RowPosition") {
-                    parallel_negative = "left";
-                    parallel_positive = "right";
-                    orthogonal_negative = "up";
-                    orthogonal_positive = "down";
-                    new_position =
-                        (new_discrete: Int, new_continuous: number): ColumnPosition =>
-                        new ColumnPosition(new_discrete, new_continuous);
-                }
-                else { // this.position.type === "ColumnPosition"
-                    parallel_negative = "up";
-                    parallel_positive = "down";
-                    orthogonal_negative = "left";
-                    orthogonal_positive = "right";
-                    new_position =
-                        (new_discrete: Int, new_continuous: number): RowPosition =>
-                        new RowPosition(new_discrete, new_continuous);
-                }
+                this.step(direction_move, this.run_speed * event.time, free_position);
 
-                if (orthogonal_negative in direction_move || orthogonal_positive in direction_move) {
-                    const new_discrete = int.multiply(int.round(this.position.continuous_coordinate / 2), new Int(2)) // round to the nearest multiple of 2
-                    const new_discrete_difference = new_discrete.number - this.position.continuous_coordinate;
-                    const new_discrete_direction = Math.sign(new_discrete_difference);
-                    const new_discrete_distance = Math.abs(new_discrete_difference);
-                    const target_coordinate_of_discrete_coordinate =
-                        orthogonal_negative in direction_move ? int.predecessor : int.successor;
-                    const target_position =
-                        new ColumnRowPosition(
-                            this.position.type === "RowPosition"
-                                ? new_discrete
-                                : target_coordinate_of_discrete_coordinate(column_get(this.position)),
-                            this.position.type === "RowPosition"
-                                ? target_coordinate_of_discrete_coordinate(row_get(this.position))
-                                : new_discrete
-                        );
-                    const target_free = clear_of_obstacles(target_position) && on_map(target_position);
-                    if (target_free && new_discrete_distance < 1.5 * step_distance && this.tick_count_since_turn >= 2) {
-                        this.position = new_position(new_discrete, this.position.discrete_coordinate.number);
-                        this.position.continuous_coordinate +=
-                            (orthogonal_negative in direction_move ? -1 : 1) * Math.max(0, step_distance - new_discrete_distance);
-                        this.tick_count_since_turn = -1;
-                    }
-                    else if (parallel_negative in direction_move || parallel_positive in direction_move) {
-                        this.position.continuous_coordinate +=
-                            (parallel_negative in direction_move ? -1 : 1) * step_distance;
-                    }
-                    else if (target_free && new_discrete_distance < 1) {
-                        this.position.continuous_coordinate += new_discrete_direction * step_distance;
-                    }
-                }
-                else {
-                    this.position.continuous_coordinate +=
-                        (parallel_negative in direction_move ? -1 : 1) * step_distance;
-                }
-
+                // handle a collision with an obstacle or the map edge
                 const free_positions =
                     R.filter(
-                        R.both(clear_of_obstacles, on_map),
+                        free_position,
                         this.touched_positions()
                     );
                 if (R.length(free_positions) === 1) {
@@ -201,6 +140,79 @@ class Player {
                 }
                 ++this.tick_count_since_turn;
                 break;
+            }
+        }
+    }
+    step(
+        direction_move: {[Direction]: null},
+        step_distance: number,
+        free_position: ColumnRowPosition => boolean
+    ): void {
+        // abstract some information away from RowPosition, ColumnPosition for later
+        let parallel_negative: Direction;
+        let parallel_positive: Direction;
+        let orthogonal_negative: Direction;
+        let orthogonal_positive: Direction;
+        let position_after_turn:
+            ((new_discrete: Int, new_continuous: number) => RowPosition) |
+            (new_discrete: Int, new_continuous: number) => ColumnPosition;
+        if (this.position.type === "RowPosition") {
+            parallel_negative = "left";
+            parallel_positive = "right";
+            orthogonal_negative = "up";
+            orthogonal_positive = "down";
+            position_after_turn =
+                (new_discrete: Int, new_continuous: number): ColumnPosition =>
+                new ColumnPosition(new_discrete, new_continuous);
+        }
+        else { // this.position.type === "ColumnPosition"
+            parallel_negative = "up";
+            parallel_positive = "down";
+            orthogonal_negative = "left";
+            orthogonal_positive = "right";
+            position_after_turn =
+                (new_discrete: Int, new_continuous: number): RowPosition =>
+                new RowPosition(new_discrete, new_continuous);
+        }
+
+        // adjust this.position
+        if (!(orthogonal_negative in direction_move || orthogonal_positive in direction_move)) {
+            // move along the row or column
+            this.position.continuous_coordinate +=
+                (parallel_negative in direction_move ? -1 : 1) * step_distance;
+        }
+        else {
+            const new_discrete = int.multiply(int.round(this.position.continuous_coordinate / 2), new Int(2)) // round to the nearest multiple of 2
+            const new_discrete_difference = new_discrete.number - this.position.continuous_coordinate;
+            const new_discrete_direction = Math.sign(new_discrete_difference);
+            const new_discrete_distance = Math.abs(new_discrete_difference);
+            const target_coordinate_of_discrete_coordinate =
+                orthogonal_negative in direction_move ? int.predecessor : int.successor;
+            const target_position =
+                new ColumnRowPosition(
+                    this.position.type === "RowPosition"
+                        ? new_discrete
+                        : target_coordinate_of_discrete_coordinate(column_get(this.position)),
+                    this.position.type === "RowPosition"
+                        ? target_coordinate_of_discrete_coordinate(row_get(this.position))
+                        : new_discrete
+                );
+            const target_free = free_position(target_position);
+            if (target_free && new_discrete_distance < 1.5 * step_distance && this.tick_count_since_turn >= 2) {
+                // turn at the intersection
+                this.position = position_after_turn(new_discrete, this.position.discrete_coordinate.number);
+                this.position.continuous_coordinate +=
+                    (orthogonal_negative in direction_move ? -1 : 1) * Math.max(0, step_distance - new_discrete_distance);
+                this.tick_count_since_turn = -1;
+            }
+            else if (parallel_negative in direction_move || parallel_positive in direction_move) {
+                // ignore the orthogonal command because there is a parallel one too
+                this.position.continuous_coordinate +=
+                    (parallel_negative in direction_move ? -1 : 1) * step_distance;
+            }
+            else if (target_free && new_discrete_distance < 1) {
+                // glide towards the intersection
+                this.position.continuous_coordinate += new_discrete_direction * step_distance;
             }
         }
     }
