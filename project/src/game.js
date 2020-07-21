@@ -65,13 +65,10 @@ class Game {
             // power up players
             R.forEachObjIndexed(
                 (player_current: Player) => {
-                    // to-do. refactor
-                    const position = player_current.position; // I do as Flow guides.
-                    if (position.type === "RowPosition") {
-                        const x_lower = int.floor(position.x);
-                        const x_upper = int.ceil(position.x);
-                        {
-                            const power_up_maybe = map_value_indexed.lookup(new ColumnRowPosition(x_lower, position.row), this.power_ups);
+                    R.forEach(
+                        (position: ColumnRowPosition) => {
+                            const power_up_maybe =
+                                map_value_indexed.lookup(position, this.power_ups);
                             if (power_up_maybe !== null) {
                                 switch (power_up_maybe) {
                                     case "bomb_capacity": {
@@ -82,59 +79,11 @@ class Game {
                                         break;
                                     }
                                 }
-                                map_value_indexed.remove(new ColumnRowPosition(x_lower, position.row), this.power_ups);
+                                map_value_indexed.remove(position, this.power_ups);
                             }
-                        }
-                        {
-                            const power_up_maybe = map_value_indexed.lookup(new ColumnRowPosition(x_upper, position.row), this.power_ups);
-                            if (power_up_maybe !== null) {
-                                switch (power_up_maybe) {
-                                    case "bomb_capacity": {
-                                        player_current.power_up_bomb_capacity();
-                                        break;
-                                    }
-                                    case "run_speed": {
-                                        break;
-                                    }
-                                }
-                                map_value_indexed.remove(new ColumnRowPosition(x_upper, position.row), this.power_ups);
-                            }
-                        }
-                    }
-                    else { // position.type === "ColumnPosition"
-                        const y_lower = int.floor(position.y);
-                        const y_upper = int.ceil(position.y);
-                        {
-                            const power_up_maybe = map_value_indexed.lookup(new ColumnRowPosition(position.column, y_lower), this.power_ups);
-                            if (power_up_maybe !== null) {
-                                switch (power_up_maybe) {
-                                    case "bomb_capacity": {
-                                        player_current.power_up_bomb_capacity();
-                                        break;
-                                    }
-                                    case "run_speed": {
-                                        break;
-                                    }
-                                }
-                                map_value_indexed.remove(new ColumnRowPosition(position.column, y_lower), this.power_ups);
-                            }
-                        }
-                        {
-                            const power_up_maybe = map_value_indexed.lookup(new ColumnRowPosition(position.column, y_upper), this.power_ups);
-                            if (power_up_maybe !== null) {
-                                switch (power_up_maybe) {
-                                    case "bomb_capacity": {
-                                        player_current.power_up_bomb_capacity();
-                                        break;
-                                    }
-                                    case "run_speed": {
-                                        break;
-                                    }
-                                }
-                                map_value_indexed.remove(new ColumnRowPosition(position.column, y_upper), this.power_ups);
-                            }
-                        }
-                    }
+                        },
+                        player_current.touched_positions()
+                    );
                 },
                 this.players
             );
@@ -180,7 +129,7 @@ class Game {
                     );
                     // remove exploding bombs
                     R.forEach(
-                        (position: ColumnRowPosition) =>
+                        (position: ColumnRowPosition) => // to-do. flip?
                             map_value_indexed.remove(position, player_current.bombs),
                         exploding_bombs
                     );

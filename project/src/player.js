@@ -96,7 +96,7 @@ class Player {
                 break;
             }
             case "PlantBomb": {
-                let position = this.position; // I do as Flow guides.
+                const position = this.position; // I do as Flow guides.
                 if (int.less(map_value_indexed.size(this.bombs), this.bomb_capacity)) {
                     map_value_indexed.insert(
                         position.type === "RowPosition"
@@ -203,34 +203,24 @@ class Player {
                         );
                     }
                 }
-                // to-do. refactor
-                if (position.type === "RowPosition") {
-                    const x_lower = int.floor(position.x);
-                    const x_upper = int.ceil(position.x);
-                    if (set_value_indexed.member(new ColumnRowPosition(x_lower, position.row), obstacles)) {
-                        position.x = x_upper.number;
+                const free_positions =
+                    R.filter(
+                        (touched_position: ColumnRowPosition) =>
+                            !set_value_indexed.member(touched_position, obstacles),
+                        this.touched_positions()
+                    );
+                if (R.length(free_positions) === 1) {
+                    if (position.type === "RowPosition") {
+                        position.x = free_positions[0].column.number;
                     }
-                    else if (set_value_indexed.member(new ColumnRowPosition(x_upper, position.row), obstacles)) {
-                        position.x = x_lower.number;
-                    }
-                }
-                else { // position.type === "ColumnPosition"
-                    const y_lower = int.floor(position.y);
-                    const y_upper = int.ceil(position.y);
-                    if (set_value_indexed.member(new ColumnRowPosition(position.column, y_lower), obstacles)) {
-                        position.y = y_upper.number;
-                    }
-                    else if (set_value_indexed.member(new ColumnRowPosition(position.column, y_upper), obstacles)) {
-                        position.y = y_lower.number;
+                    else { // position.type === "ColumnPosition"
+                        position.y = free_positions[0].row.number;
                     }
                 }
                 ++this.tick_count_since_turn;
                 break;
             }
         }
-    }
-    power_up_bomb_capacity(): void {
-        this.bomb_capacity = int.successor(this.bomb_capacity);
     }
     take_damage(explosions: $ReadOnlyArray<Explosion>) {
         if (this.time_since_damage <= 3000) { // to-do. magic number
@@ -251,6 +241,25 @@ class Player {
                 return;
             }
         }
+    }
+    touched_positions(): [ColumnRowPosition, ColumnRowPosition] {
+        const position = this.position; // I do as Flow guides.
+        return (
+            position.type === "RowPosition"
+                ?
+                    [
+                        new ColumnRowPosition(int.floor(position.x), position.row),
+                        new ColumnRowPosition(int.ceil(position.x), position.row)
+                    ]
+                :
+                    [
+                        new ColumnRowPosition(position.column, int.floor(position.y)),
+                        new ColumnRowPosition(position.column, int.ceil(position.y))
+                    ]
+        );
+    }
+    power_up_bomb_capacity(): void {
+        this.bomb_capacity = int.successor(this.bomb_capacity);
     }
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
