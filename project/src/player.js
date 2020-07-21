@@ -155,7 +155,19 @@ class Player {
                     const new_discrete_difference = new_discrete.number - this.position.continuous_coordinate;
                     const new_discrete_direction = Math.sign(new_discrete_difference);
                     const new_discrete_distance = Math.abs(new_discrete_difference);
-                    if (new_discrete_distance < 1.5 * step_distance && this.tick_count_since_turn >= 2) {
+                    const target_coordinate_of_discrete_coordinate =
+                        orthogonal_negative in direction_move ? int.predecessor : int.successor;
+                    const target_position =
+                        new ColumnRowPosition(
+                            this.position.type === "RowPosition"
+                                ? new_discrete
+                                : target_coordinate_of_discrete_coordinate(column_get(this.position)),
+                            this.position.type === "RowPosition"
+                                ? target_coordinate_of_discrete_coordinate(row_get(this.position))
+                                : new_discrete
+                        );
+                    const target_free = clear_of_obstacles(target_position) && on_map(target_position);
+                    if (target_free && new_discrete_distance < 1.5 * step_distance && this.tick_count_since_turn >= 2) {
                         this.position = new_position(new_discrete, this.position.discrete_coordinate.number);
                         this.position.continuous_coordinate +=
                             (orthogonal_negative in direction_move ? -1 : 1) * Math.max(0, step_distance - new_discrete_distance);
@@ -165,7 +177,7 @@ class Player {
                         this.position.continuous_coordinate +=
                             (parallel_negative in direction_move ? -1 : 1) * step_distance;
                     }
-                    else {
+                    else if (target_free && new_discrete_distance < 1) {
                         this.position.continuous_coordinate += new_discrete_direction * step_distance;
                     }
                 }
