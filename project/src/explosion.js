@@ -69,7 +69,7 @@ class Explosion {
         clear_of_obstacles: ColumnRowPosition => boolean
     ): void {
         this.center = center;
-        this.progress = 1000; // to-do. magic number
+        this.progress = 1000; // explosion duration in ms
 
         const determine_explosion_limit_partially_applied =
             determine_explosion_limit(center, radius, on_map, clear_of_obstacles);
@@ -150,7 +150,6 @@ const determine_explosion_limit =
         let position_result = position_test;
         for (let count = 0; count < radius.number; ++count) {
             position_test = next_position(position_test);
-                // new ColumnRowPosition(int.subtract(position.column, one), position.row);
             if (!on_map(position_test)) {
                 break;
             }
@@ -186,7 +185,7 @@ const draw =
                 },
                 R.range(
                     row_rectangle.column_lower.number,
-                    row_rectangle.column_upper.number + 1
+                    row_rectangle.column_upper.number + 1 // include the upper limit
                 )
             );
         }
@@ -204,7 +203,7 @@ const draw =
                 },
                 R.range(
                     column_rectangle.row_lower.number,
-                    column_rectangle.row_upper.number + 1
+                    column_rectangle.row_upper.number + 1 // include the upper limit
                 )
             );
         }

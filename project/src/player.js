@@ -15,6 +15,8 @@ import type {Resources} from "./resources.js";
 const R = require("ramda");
 const {immerable} = require("immer");
 
+const protection_duration = 3000;
+
 type CoordinateMaximum = {
     +x: Int,
     +y: Int,
@@ -64,11 +66,10 @@ class Player {
     constructor(position: RowPosition | ColumnPosition) {
         this.direction_move = {};
         this.position = position;
-         // to-do. magic number
         this.life_count = new Int(5);
         this.run_speed = .01;
         this.bomb_strength = new Int(3);
-        this.time_since_damage = 3000;
+        this.time_since_damage = protection_duration;
         this.bombs = new MapValueIndexed([]);
         this.bomb_capacity = new Int(1);
     }
@@ -128,7 +129,7 @@ class Player {
                         free_position,
                         this.touched_positions()
                     );
-                if (R.length(free_positions) === 1) {
+                if (R.length(free_positions) === 1) { // zero free positions is not reachable
                     if (this.position.type === "RowPosition") {
                         x_set(free_positions[0].column.number, this.position);
                     }
@@ -166,7 +167,7 @@ class Player {
 
         // adjust this.position
         if (orthogonal_command !== null) {
-            const new_discrete = // round to the nearest multiple of 2
+            const new_discrete = // round to the nearest multiple of 2 because that is where the intersections are
                 int.multiply(int.round(this.position.continuous_coordinate / 2), new Int(2))
             const new_discrete_difference =
                 new_discrete.number - this.position.continuous_coordinate;
@@ -181,13 +182,13 @@ class Player {
                         ? (orthogonal_command === -1 ? int.predecessor : int.successor)(row_get(this.position))
                         : new_discrete
                 );
-            const target_free = free_position(target_position);
             if (
-                target_free &&
                 new_discrete_distance < step_distance &&
-                (parallel_command === null || parallel_command === new_discrete_direction || new_discrete_direction === 0)
+                (parallel_command === null || parallel_command === new_discrete_direction || new_discrete_direction === 0) &&
+                free_position(target_position)
             ) {
-                // turn at the intersection
+                // intersection is close and there is no parallel command aiming away from it,
+                // so turn
                 this.position =
                     this.position.type === "RowPosition"
                         ? 
@@ -204,24 +205,26 @@ class Player {
                     orthogonal_command * (step_distance - new_discrete_distance);
             }
             else if (parallel_command !== null) {
-                // ignore the orthogonal command because there is a parallel one too
+                // there is a parallel command, so ignore the orthogonal one
                 this.position.continuous_coordinate +=
                     parallel_command * step_distance;
             }
-            else if (target_free && new_discrete_distance < 1) {
-                // glide towards the intersection
+            else if (new_discrete_distance !== 1 && free_position(target_position)) {
+                // one intersection is closer than the other and it is free,
+                // so glide towards it
                 this.position.continuous_coordinate +=
                     new_discrete_direction * step_distance;
             }
         }
         else if (parallel_command !== null) {
-            // move along the row or column
+            // only a parallel command,
+            // so move along the row or column
             this.position.continuous_coordinate +=
                 parallel_command * step_distance;
         }
     }
     take_damage(explosions: $ReadOnlyArray<Explosion>) {
-        if (this.time_since_damage <= 3000) { // to-do. magic number
+        if (this.time_since_damage <= protection_duration) {
             return;
         }
         const position = new ColumnRowPosition(
@@ -234,7 +237,7 @@ class Player {
         );
         for (const explosion_current of explosions) {
             if (set_value_indexed.member(position, explosion_current.scorched_positions())) {
-                this.life_count = int.subtract(this.life_count, new Int(1));
+                this.life_count = int.predecessor(this.life_count);
                 this.time_since_damage = 0;
                 return;
             }

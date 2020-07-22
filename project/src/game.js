@@ -56,7 +56,7 @@ class Game {
             [new ColumnRowPosition(new Int(4), new Int(2)), "bomb_capacity"],
             [new ColumnRowPosition(new Int(7), new Int(2)), "run_speed"],
         ]);
-        this.coordinate_maximum = {x: new Int(12), y: new Int(10)}; // to-do. magic numbers
+        this.coordinate_maximum = {x: new Int(12), y: new Int(10)};
     }
     update(event: Event): void {
         if (event.type === "UserCommandEvent") {
