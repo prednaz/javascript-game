@@ -1,6 +1,6 @@
 // @flow
 
-const {ColumnRowPosition} = require("./game_types.js");
+import type {ColumnRowPosition} from "./game_types.js";
 import type {Resources} from "./resources.js";
 
 export type PowerUp = "bomb_capacity" | "run_speed";

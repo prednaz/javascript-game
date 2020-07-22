@@ -1,6 +1,6 @@
 // @flow
 
-const {ColumnRowPosition} = require("./game_types.js");
+import type {ColumnRowPosition} from "./game_types.js";
 import type {Event} from "./game_types.js";
 import type {Resources} from "./resources.js";
 const {immerable} = require("immer");

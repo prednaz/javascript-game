@@ -1,7 +1,7 @@
 // @flow
 
 const int = require("./int.js");
-const Int = int.Int;
+import type {Int} from "./int.js";
 const R = require("ramda");
 const {immerable} = require("immer");
 

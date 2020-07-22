@@ -3,7 +3,7 @@
 const map_value_indexed = require("./map_value_indexed.js");
 const MapValueIndexed = map_value_indexed.MapValueIndexed;
 import type {HasId} from "./map_value_indexed.js";
-const {Int} = require("./int.js");
+import type {Int} from "./int.js";
 const R = require("ramda");
 
 export opaque type SetValueIndexed<Value: HasId> = MapValueIndexed<Value, null>;

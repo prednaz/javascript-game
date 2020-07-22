@@ -2,7 +2,7 @@
 
 const {Bomb} = require("./bomb.js");
 const explosion = require("./explosion.js");
-const Explosion = explosion.Explosion;
+import type {Explosion} from "./explosion.js";
 const {ColumnRowPosition} = require("./game_types.js");
 import type {Direction, UserCommand, Event} from "./game_types.js";
 const map_value_indexed = require("./map_value_indexed.js");

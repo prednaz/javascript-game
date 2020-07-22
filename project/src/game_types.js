@@ -1,8 +1,8 @@
 // @flow
 
-const {Int} = require("./int.js");
 const {pairing_function_integer} = require("./map_value_indexed.js");
 import type {HasId} from "./map_value_indexed.js";
+import type {Int} from "./int.js";
 const {immerable} = require("immer");
 
 class ColumnRowPosition implements HasId {

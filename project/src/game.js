@@ -3,7 +3,7 @@
 const player = require("./player.js");
 const Player = player.Player;
 const bomb = require("./bomb.js");
-const Bomb = bomb.Bomb;
+import type {Bomb} from "./bomb.js";
 const explosion = require("./explosion.js");
 const Explosion = explosion.Explosion;
 const obstacle = require("./obstacle.js");
@@ -151,8 +151,8 @@ class Game {
         const player_id_range: $ReadOnlyArray<PlayerId> =
             ["top_left", "bottom_right", "bottom_left", "top_right"];
         const player_id_new =
-            player_id_range.find(player_id => !(player_id in this.players));
-        if (player_id_new === undefined) {
+            R.find(player_id => !(player_id in this.players), player_id_range);
+        if (player_id_new === null || player_id_new === undefined) {
             return null;
         }
         const [y_word, x_word] = player_id_new.split("_");

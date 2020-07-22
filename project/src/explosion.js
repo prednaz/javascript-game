@@ -1,10 +1,11 @@
 // @flow
 
-const {ColumnRowPosition, Tick} = require("./game_types.js");
+const {ColumnRowPosition} = require("./game_types.js");
+import type {Tick} from "./game_types.js";
 const set_value_indexed = require("./set_value_indexed.js");
 import type {SetValueIndexed} from "./set_value_indexed.js";
 const int = require("./int.js");
-const Int = int.Int;
+import type {Int} from "./int.js";
 import type {Resources} from "./resources.js";
 const R = require("ramda");
 const {immerable} = require("immer");
