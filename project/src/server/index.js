@@ -4,6 +4,7 @@ const {Game} = require("../game.js");
 const {UserCommandEvent, Tick} = require("../game_types.js");
 import type {PlayerId} from "../game_types.js";
 const {performance} = require('perf_hooks');
+const R = require("ramda");
 const immer = require("immer");
 immer.enablePatches();
 immer.enableMapSet();
@@ -25,7 +26,7 @@ const loop =
         if (timestamp_previous !== -1) {
             game_state = update_and_synchronize(game_state, draft => {
                 draft.update(new Tick(timestamp - timestamp_previous));
-            });
+            })[0];
             if (step_count % 1000 === 0) {
                 console.log(timestamp - timestamp_previous);
             }
@@ -40,26 +41,21 @@ setInterval(loop, 20);
 
 io.on("connection", socket => {
     socket.emit("state", game_state);
-    let player_id_new: PlayerId | null = null;
-    let patches: $ReadOnlyArray<Patch>;
-    // $FlowFixMe https://github.com/immerjs/immer/pull/632
-    [game_state, patches] = immer.produceWithPatches(game_state, draft => {
-        player_id_new = draft.addPlayer();
-    });
-    const player_id_new_copy = player_id_new; // I do as Flow guides.
-    if (player_id_new_copy === null) {
+    const result = update_and_synchronize(game_state, draft => draft.addPlayer());
+    game_state = result[0];
+    const player_id_new = result[1];
+    if (player_id_new === null) {
         return; // to-do. Notify the client of the game being full.
     }
-    io.emit("update", patches);
     socket.on("user command", command => {
         game_state = update_and_synchronize(game_state, draft => {
-            draft.update(new UserCommandEvent(player_id_new_copy, command));
-        });
+            draft.update(new UserCommandEvent(player_id_new, command));
+        })[0];
     });
     socket.on('disconnect', () => {
         game_state = update_and_synchronize(game_state, draft => {
-            draft.deletePlayer(player_id_new_copy);
-        });
+            draft.deletePlayer(player_id_new);
+        })[0];
     });
 });
 
@@ -70,11 +66,29 @@ http.listen(1234, () => {
 });
 
 const update_and_synchronize =
-    (game_state_parameter: Game, update: (draft: Game) => void): Game =>
+    <T>(game_state_parameter: Game, update: (draft: Game) => T): [Game, T] =>
     {
-        const [game_state_new: Game, patches: $ReadOnlyArray<Patch>] =
+        let result: T;
+        let [game_state_new, patches]: [Game, $ReadOnlyArray<Patch>] =
             // $FlowFixMe https://github.com/immerjs/immer/pull/632
-            immer.produceWithPatches(game_state_parameter, update);
-        io.emit("update", patches);
-        return game_state_new;
+            immer.produceWithPatches(game_state_parameter, (draft: Game) => {result = update(draft);});
+        patches = R.filter(
+            (patch: Patch) =>
+                !path_match([[0, "players"], [2, "tick_count_since_turn"]], patch) &&
+                !path_match([[0, "players"], [2, "time_since_damage"]], patch) &&
+                !path_match([[0, "players"], [2, "bombs"], [3, "content"], [6, "fuse"]], patch) &&
+                !path_match([[0, "explosions"], [2, "progress"]], patch) &&
+                !path_match([[0, "players"], [2, "run_speed"]], patch) &&
+                !path_match([[0, "players"], [2, "bomb_strength"]], patch) &&
+                !path_match([[0, "players"], [2, "bomb_capacity"]], patch),
+            patches
+        );
+        if (patches.length !== 0) {
+            io.emit("update", patches);
+        }
+        return [game_state_new, ((result: any): T)];
     };
+
+const path_match =
+    (pattern: $ReadOnlyArray<[number, string | number]>, patch: Patch) =>
+    R.all(segment => patch.path[segment[0]] === segment[1], pattern);
