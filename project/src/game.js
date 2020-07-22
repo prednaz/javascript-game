@@ -196,6 +196,16 @@ const update_animation =
         time: number
     ): void =>
     {
+        // bombs
+        R.forEachObjIndexed(
+            (player_current: Player) => {
+                map_value_indexed.forEach(
+                    bomb_current => bomb.update_animation(bomb_current, time),
+                    player_current.bombs
+                );
+            },
+            game.players
+        );
     };
 
 const draw =

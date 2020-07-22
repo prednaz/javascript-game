@@ -8,6 +8,8 @@ const resources_grid_scale = 30;
 
 const sources = {
     "hole": require("../resources/hole.png"),
+    "bombs/frame0_top_left": require("../resources/bombs/frame0_top_left.png"),
+    "bombs/frame1_top_left": require("../resources/bombs/frame1_top_left.png"),
     "explosion/line/up_top_left": require("../resources/explosion/line/up_top_left.png"),
     "explosion/line/up_bottom_right": require("../resources/explosion/line/up_bottom_right.png"),
     "explosion/line/up_bottom_left": require("../resources/explosion/line/up_bottom_left.png"),
@@ -57,6 +59,7 @@ const generate_sources_fields =
     (): string =>
     generate_fields_from_filenames(R.unnest([
         ["hole"],
+        ["bombs/frame0_top_left", "bombs/frame1_top_left"],
         R.liftN(
             3,
             (part: string, direction: string, player_id: PlayerId): string =>
