@@ -34,6 +34,9 @@ const successor = (int: Int): Int => add(int, one);
 const multiply =
     (factor1: Int, factor2: Int): Int => new Int(factor1.number * factor2.number);
 
+const modulo =
+    (dividend: Int, divisor: Int): Int => new Int(dividend.number % divisor.number);
+
 const absolute = (int: Int): Int => new Int(Math.abs(int.number));
 const even = (int: Int): boolean => int.number % 2 === 0;
 
@@ -51,6 +54,7 @@ module.exports =
         predecessor,
         successor,
         multiply,
+        modulo,
         absolute,
         even
     };

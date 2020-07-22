@@ -4,6 +4,8 @@ const R = require("ramda");
 const load_images = require("./load_images.js");
 import type {PlayerId} from "./game_types.js";
 
+const resources_grid_scale = 30;
+
 const sources = {
     "hole": require("../resources/hole.png"),
     "explosion/line/up_top_left": require("../resources/explosion/line/up_top_left.png"),
@@ -44,40 +46,44 @@ const sources = {
 };
 
 type ConstImage = () => Image;
+type ReturnType = <R>(() => R) => R;
 export type Resources = $ObjMap<typeof sources,ConstImage>;
 
 const with_resources =
     (action: Resources => mixed): void =>
     {load_images(sources).then(action);};
 
-const generate_fields: $ReadOnlyArray<string> => string =
+const generate_sources_fields =
+    (): string =>
+    generate_fields_from_filenames(R.unnest([
+        ["hole"],
+        R.liftN(
+            3,
+            (part: string, direction: string, player_id: PlayerId): string =>
+                "explosion/" + part + "/" + direction + "_" + player_id
+        )
+            (
+                ["line", "end"],
+                ["up", "left", "down", "right"],
+                ["top_left", "bottom_right", "bottom_left", "top_right"]
+            ),
+        R.liftN(
+            1,
+            (power_up: string): string => "power_ups/" + power_up
+        )
+            (["bomb_capacity", "bomb_strength", "run_speed"]),
+    ]));
+
+const generate_fields_from_filenames: $ReadOnlyArray<string> => string =
     R.compose(
         R.join(""),
         R.map(
             identifier =>
-            "    \"" + identifier + "\": require(\"../resources/" + identifier + ".png\"),\n"
+                R.join("", R.repeat(" ", 4*3)) +
+                "\"" + identifier +
+                "\": require(\"../resources/" +
+                identifier + ".png\"),\n"
         )
     );
 
-// `copy(resources)` in the browser's console
-// will copy the content for `sources` above to your clipboard
-window.resources = generate_fields(R.unnest([
-    ["hole"],
-    R.liftN(
-        3,
-        (part: string, direction: string, player_id: PlayerId): string =>
-            "explosion/" + part + "/" + direction + "_" + player_id
-    )
-        (
-            ["line", "end"],
-            ["up", "left", "down", "right"],
-            ["top_left", "bottom_right", "bottom_left", "top_right"]
-        ),
-    R.liftN(
-        1,
-        (power_up: string): string => "power_ups/" + power_up
-    )
-        (["bomb_capacity", "bomb_strength", "run_speed"]),
-]));
-
-module.exports = {with_resources, generate_fields};
+module.exports = {with_resources, resources_grid_scale, generate_sources_fields};

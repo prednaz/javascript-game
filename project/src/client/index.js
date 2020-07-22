@@ -1,17 +1,23 @@
 // @flow
 
-const {draw} = require("../game.js");
+const {update_animation, draw} = require("../game.js");
 import type {Game} from "../game.js";
 import type {Player} from "../player.js";
 const {Accelerate, Decelerate, PlantBomb} = require("../game_types.js");
 import type {PlayerId} from "../game_types.js";
-const {with_resources} = require("../resources.js");
+const {with_resources, resources_grid_scale, generate_sources_fields} =
+    require("../resources.js");
 const R = require("ramda");
 const immer = require("immer");
 immer.enablePatches();
 immer.enableMapSet();
 immer.setAutoFreeze(true);
 const socket = require("socket.io-client")();
+
+// `copy(resources)` in the browser's console
+// will copy the fields for `sources` in resources.js
+// to-do. remove
+window.resources = generate_sources_fields();
 
 with_resources(resources => {
     const controls = {
@@ -37,6 +43,7 @@ with_resources(resources => {
         height: canvas_dom.height,
         context: canvas_dom.getContext("2d"), // to-do. Is there a better type for this than any?
         resources: resources,
+        resources_grid_scale: resources_grid_scale
     };
 
     document.addEventListener(
@@ -64,9 +71,18 @@ with_resources(resources => {
     if (life_count_display === null) {
         throw new ReferenceError("Where is the life count display?");
     }
+    let timestamp_previous: number = -1;
     const loop =
-        (): void =>
+        (timestamp: number): void =>
         {
+            if (timestamp_previous !== -1) {
+                game_state =
+                    immer.produce(
+                        game_state,
+                        (draft: Game) =>
+                            update_animation(draft, timestamp - timestamp_previous)
+                    );
+            }
             draw(game_state, canvas);
             requestAnimationFrame(loop);
             let life_count_display_text = "";
@@ -75,6 +91,7 @@ with_resources(resources => {
                 game_state.players
             );
             life_count_display.textContent = life_count_display_text;
+            timestamp_previous = timestamp;
         };
 
     socket.on("state", state => {

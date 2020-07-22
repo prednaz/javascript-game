@@ -190,103 +190,111 @@ Game[immerable] = true;
 
 const zero = new Int(0);
 
+const update_animation =
+    (
+        game: Game,
+        time: number
+    ): void =>
+    {
+    };
+
 const draw =
     (
         game: Game,
-        canvas: {width: number, height: number, context: any, resources: Resources,...}
+        canvas: {width: number, height: number, context: any, resources: Resources, resources_grid_scale: number,...}
     ): void =>
     {
-     // to-do. refactor
-     // to-do. seperate background canvas
-    canvas.context.clearRect(0, 0, canvas.width, canvas.height);
-    // to-do. cache these
-    const grid_length = {
-        x: game.coordinate_maximum.x.number + 3, // two walls + one zero index
-        y: game.coordinate_maximum.y.number + 3, // two walls + one zero index
-    };
-    const grid_scale = canvas.width / grid_length.x;
-    if (grid_scale !== canvas.height / grid_length.y) {
-        throw new RangeError(
-            "The canvas has not got the required aspect ratio of " + grid_length.x + ":" + grid_length.y + "."
-        );
-    }
-    // inner holes
-    for (let x = 2; x < grid_length.x-2; x += 2) {
-        for (let y = 2; y < grid_length.y-2; y += 2) {
+        // to-do. refactor
+        // to-do. seperate background canvas
+        canvas.context.clearRect(0, 0, canvas.width, canvas.height);
+        // to-do. cache these
+        const grid_length = {
+            x: game.coordinate_maximum.x.number + 3, // two walls + one zero index
+            y: game.coordinate_maximum.y.number + 3, // two walls + one zero index
+        };
+        const grid_scale = canvas.width / grid_length.x;
+        if (grid_scale !== canvas.height / grid_length.y) {
+            throw new RangeError(
+                "The canvas has not got the required aspect ratio of " + grid_length.x + ":" + grid_length.y + "."
+            );
+        }
+        // inner holes
+        for (let x = 2; x < grid_length.x-2; x += 2) {
+            for (let y = 2; y < grid_length.y-2; y += 2) {
+                canvas.context.drawImage(
+                    canvas.resources["hole"],
+                    grid_scale * x,
+                    grid_scale * y,
+                    grid_scale,
+                    grid_scale
+                );
+            }
+        }
+        // outer holes
+        for (let x = 0; x < grid_length.x; ++x) {
             canvas.context.drawImage(
                 canvas.resources["hole"],
                 grid_scale * x,
+                0,
+                grid_scale,
+                grid_scale
+            );
+            canvas.context.drawImage(
+                canvas.resources["hole"],
+                grid_scale * x,
+                grid_scale * (grid_length.y-1),
+                grid_scale,
+                grid_scale
+            );
+        for (let y = 1; y < grid_length.y-1; ++y) {
+            canvas.context.drawImage(
+                canvas.resources["hole"],
+                0,
                 grid_scale * y,
                 grid_scale,
                 grid_scale
             );
-        }
-    }
-    // outer holes
-    for (let x = 0; x < grid_length.x; ++x) {
-        canvas.context.drawImage(
-            canvas.resources["hole"],
-            grid_scale * x,
-            0,
-            grid_scale,
-            grid_scale
-        );
-        canvas.context.drawImage(
-            canvas.resources["hole"],
-            grid_scale * x,
-            grid_scale * (grid_length.y-1),
-            grid_scale,
-            grid_scale
-        );
-    for (let y = 1; y < grid_length.y-1; ++y) {
-        canvas.context.drawImage(
-            canvas.resources["hole"],
-            0,
-            grid_scale * y,
-            grid_scale,
-            grid_scale
-        );
-        canvas.context.drawImage(
-            canvas.resources["hole"],
-            grid_scale * (grid_length.x-1),
-            grid_scale * y,
-            grid_scale,
-            grid_scale
-        );
-        }
-    }
-    // obstacles
-    set_value_indexed.forEach(
-        position => obstacle.draw(position, canvas, grid_scale),
-        game.obstacles
-    );
-    // power_ups
-    map_value_indexed.forEachIndexed(
-        power_up_current => power_up.draw(power_up_current, canvas, grid_scale),
-        game.power_ups
-    );
-    // explosions
-    R.forEach(
-        (explosion_current: Explosion) => {
-            explosion.draw(explosion_current, canvas, grid_scale);
-        },
-        game.explosions
-    );
-    // bombs
-    R.forEachObjIndexed(
-        (player_current: Player) => {
-            map_value_indexed.forEachIndexed(
-                bomb_current => bomb.draw(bomb_current, canvas, grid_scale),
-                player_current.bombs
+            canvas.context.drawImage(
+                canvas.resources["hole"],
+                grid_scale * (grid_length.x-1),
+                grid_scale * y,
+                grid_scale,
+                grid_scale
             );
-        },
-        game.players
-    );
-    // players
-    R.forEachObjIndexed(
-        (player_current: Player) => {player.draw(player_current, canvas, grid_scale)},
-        game.players
-    );
-};
+            }
+        }
+        // obstacles
+        set_value_indexed.forEach(
+            position => obstacle.draw(position, canvas, grid_scale),
+            game.obstacles
+        );
+        // power_ups
+        map_value_indexed.forEachIndexed(
+            power_up_current => power_up.draw(power_up_current, canvas, grid_scale),
+            game.power_ups
+        );
+        // explosions
+        R.forEach(
+            (explosion_current: Explosion) => {
+                explosion.draw(explosion_current, canvas, grid_scale);
+            },
+            game.explosions
+        );
+        // bombs
+        R.forEachObjIndexed(
+            (player_current: Player) => {
+                map_value_indexed.forEachIndexed(
+                    bomb_current => bomb.draw(bomb_current, canvas, grid_scale),
+                    player_current.bombs
+                );
+            },
+            game.players
+        );
+        // players
+        R.forEachObjIndexed(
+            (player_current: Player) => {player.draw(player_current, canvas, grid_scale)},
+            game.players
+        );
+    };
 
-module.exports = {Game, draw};
+module.exports = {Game, update_animation, draw};
