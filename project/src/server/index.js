@@ -74,7 +74,6 @@ const update_and_synchronize =
             immer.produceWithPatches(game_state_parameter, (draft: Game) => {result = update(draft);});
         patches = R.filter(
             (patch: Patch) =>
-                !path_match([[0, "players"], [2, "tick_count_since_turn"]], patch) &&
                 !path_match([[0, "players"], [2, "time_since_damage"]], patch) &&
                 !path_match([[0, "players"], [2, "bombs"], [3, "content"], [6, "fuse"]], patch) &&
                 !path_match([[0, "explosions"], [2, "progress"]], patch) &&

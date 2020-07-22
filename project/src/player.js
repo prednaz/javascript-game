@@ -58,7 +58,6 @@ class Player {
     life_count: Int;
     run_speed: number;
     bomb_strength: Int;
-    tick_count_since_turn: number;
     time_since_damage: number;
     +bombs: MapValueIndexed<ColumnRowPosition, Bomb>;
     bomb_capacity: Int;
@@ -70,7 +69,6 @@ class Player {
         this.run_speed = .01;
         this.bomb_strength = new Int(3);
         this.time_since_damage = 3000;
-        this.tick_count_since_turn = 2;
         this.bombs = new MapValueIndexed([]);
         this.bomb_capacity = new Int(1);
     }
@@ -138,7 +136,6 @@ class Player {
                         y_set(free_positions[0].row.number, this.position);
                     }
                 }
-                ++this.tick_count_since_turn;
                 break;
             }
         }
@@ -168,12 +165,7 @@ class Player {
                 : horizontal_command;
 
         // adjust this.position
-        if (orthogonal_command === null && parallel_command !== null) {
-            // move along the row or column
-            this.position.continuous_coordinate +=
-                parallel_command * step_distance;
-        }
-        else if (orthogonal_command !== null) {
+        if (orthogonal_command !== null) {
             const new_discrete = // round to the nearest multiple of 2
                 int.multiply(int.round(this.position.continuous_coordinate / 2), new Int(2))
             const new_discrete_difference =
@@ -190,7 +182,11 @@ class Player {
                         : new_discrete
                 );
             const target_free = free_position(target_position);
-            if (target_free && new_discrete_distance < 1.5 * step_distance && this.tick_count_since_turn >= 2) {
+            if (
+                target_free &&
+                new_discrete_distance < step_distance &&
+                (parallel_command === null || parallel_command === new_discrete_direction || new_discrete_direction === 0)
+            ) {
                 // turn at the intersection
                 this.position =
                     this.position.type === "RowPosition"
@@ -205,8 +201,7 @@ class Player {
                                 this.position.discrete_coordinate.number
                             );
                 this.position.continuous_coordinate +=
-                    orthogonal_command * Math.max(0, step_distance - new_discrete_distance);
-                this.tick_count_since_turn = -1;
+                    orthogonal_command * (step_distance - new_discrete_distance);
             }
             else if (parallel_command !== null) {
                 // ignore the orthogonal command because there is a parallel one too
@@ -215,8 +210,14 @@ class Player {
             }
             else if (target_free && new_discrete_distance < 1) {
                 // glide towards the intersection
-                this.position.continuous_coordinate += new_discrete_direction * step_distance;
+                this.position.continuous_coordinate +=
+                    new_discrete_direction * step_distance;
             }
+        }
+        else if (parallel_command !== null) {
+            // move along the row or column
+            this.position.continuous_coordinate +=
+                parallel_command * step_distance;
         }
     }
     take_damage(explosions: $ReadOnlyArray<Explosion>) {
