@@ -71,18 +71,16 @@ with_resources(resources => {
     if (life_count_display === null) {
         throw new ReferenceError("Where is the life count display?");
     }
-    let timestamp_previous: number = -1;
+    let timestamp_previous: number;
     const loop =
         (timestamp: number): void =>
         {
-            if (timestamp_previous !== -1) {
-                game_state =
-                    immer.produce(
-                        game_state,
-                        (draft: Game) =>
-                            update_animation(draft, timestamp - timestamp_previous)
-                    );
-            }
+            game_state =
+                immer.produce(
+                    game_state,
+                    (draft: Game) =>
+                        update_animation(draft, timestamp - timestamp_previous)
+                );
             draw(game_state, canvas);
             requestAnimationFrame(loop);
             let life_count_display_text = "";
@@ -96,7 +94,10 @@ with_resources(resources => {
 
     socket.on("state", state => {
         game_state = state;
-        requestAnimationFrame(loop);
+        requestAnimationFrame((timestamp: number) => {
+            timestamp_previous = timestamp;
+            requestAnimationFrame(loop);
+        });
     });
 
     socket.on("update", patches => {

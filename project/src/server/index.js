@@ -16,22 +16,21 @@ const http = require("http").createServer(app);
 const io = require("socket.io")(http, {serveClient: false});
 
 let game_state: Game = new Game();
-let timestamp_previous: number = -1;
+let timestamp_previous: number = performance.now();
 
 let step_count: number = 0; // to-do. remove
 const loop =
     (): void =>
     {
         const timestamp = performance.now();
-        if (timestamp_previous !== -1) {
-            game_state = update_and_synchronize(game_state, draft => {
-                draft.update(new Tick(timestamp - timestamp_previous));
-            })[0];
-            if (step_count % 1000 === 0) {
-                console.log(timestamp - timestamp_previous);
-            }
+        game_state = update_and_synchronize(game_state, draft => {
+            draft.update(new Tick(timestamp - timestamp_previous));
+        })[0];
+        if (step_count % 1000 === 0) {
+            console.log(timestamp - timestamp_previous);
         }
         timestamp_previous = timestamp;
+        
         // if (step_count % 100 === 0)
         //     console.log(keys_pressed);
         ++step_count;
