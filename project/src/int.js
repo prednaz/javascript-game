@@ -22,14 +22,8 @@ const floor = (number: number): Int => new Int(Math.floor(number));
 const ceil = (number: number): Int => new Int(Math.ceil(number));
 const round = (number: number): Int => new Int(Math.round(number));
 
-const add =
-    (summand1: Int, summand2: Int): Int => new Int(summand1.number + summand2.number);
-const subtract =
-    (minuend: Int, subtrahend: Int): Int => new Int(minuend.number - subtrahend.number);
-
-const one = new Int(1);
-const predecessor = (int: Int): Int => subtract(int, one);
-const successor = (int: Int): Int => add(int, one);
+const predecessor = (int: Int): Int => new Int(int.number - 1);
+const successor = (int: Int): Int => new Int(int.number + 1);
 
 const multiply =
     (factor1: Int, factor2: Int): Int => new Int(factor1.number * factor2.number);
@@ -49,8 +43,6 @@ module.exports =
         floor,
         ceil,
         round,
-        add,
-        subtract,
         predecessor,
         successor,
         multiply,
