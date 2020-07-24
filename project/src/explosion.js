@@ -1,7 +1,7 @@
 // @flow
 
 const {ColumnRowPosition} = require("./game_types.js");
-import type {Tick} from "./game_types.js";
+import type {Tick, PlayerId} from "./game_types.js";
 const set_value_indexed = require("./set_value_indexed.js");
 import type {SetValueIndexed} from "./set_value_indexed.js";
 const int = require("./int.js");
@@ -61,15 +61,18 @@ class Explosion {
     +center: ColumnRowPosition;
     +row_rectangle: RowRectangle | null;
     +column_rectangle: ColumnRectangle | null;
+    +color: PlayerId;
     progress: number;
     constructor(
         center: ColumnRowPosition,
         radius: Int,
         on_map: ColumnRowPosition => boolean,
-        clear_of_obstacles: ColumnRowPosition => boolean
+        clear_of_obstacles: ColumnRowPosition => boolean,
+        color: PlayerId
     ): void {
         this.center = center;
         this.progress = 1000; // explosion duration in ms
+        this.color = color;
 
         const determine_explosion_limit_partially_applied =
             determine_explosion_limit(center, radius, on_map, clear_of_obstacles);
@@ -170,43 +173,113 @@ const draw =
         grid_scale: number
     ): void =>
     {
-        canvas.context.fillStyle = "blue";
         const row_rectangle = explosion.row_rectangle;
+        const column_rectangle = explosion.column_rectangle;
+        const center = explosion.center;
+        const color = explosion.color;
+        
         if (row_rectangle !== null) {
-            R.forEach(
-                n => {
-                    canvas.context.beginPath();
-                    canvas.context.fillRect(
-                        grid_scale * n + grid_scale * 1,
+            for (let i = row_rectangle.column_lower.number; i <= row_rectangle.column_upper.number; i += 1) {
+                    if (column_rectangle !== null && i === center.column.number){
+                        canvas.context.drawImage(
+                            canvas.resources["explosion/center/" + color],
+                            grid_scale * i + grid_scale * 1,
+                            grid_scale * row_rectangle.row.number + grid_scale * 1,
+                            grid_scale,
+                            grid_scale
+                        );
+                    }
+                    else if(i === row_rectangle.column_lower.number){
+                    canvas.context.drawImage(
+                        canvas.resources["explosion/end/left_" + color],
+                        grid_scale * i + grid_scale * 1,
                         grid_scale * row_rectangle.row.number + grid_scale * 1,
                         grid_scale,
                         grid_scale
                     );
-                },
-                R.range(
-                    row_rectangle.column_lower.number,
-                    row_rectangle.column_upper.number + 1 // include the upper limit
-                )
-            );
-        }
-        const column_rectangle = explosion.column_rectangle;
-        if (column_rectangle !== null) {
-            R.forEach(
-                n => {
-                    canvas.context.beginPath();
-                    canvas.context.fillRect(
-                        grid_scale * column_rectangle.column.number + grid_scale * 1,
-                        grid_scale * n + grid_scale * 1,
+                    }
+                    else if (i === row_rectangle.column_upper.number) {
+                    canvas.context.drawImage(
+                        canvas.resources["explosion/end/right_" + color],
+                        grid_scale * i + grid_scale * 1,
+                        grid_scale * row_rectangle.row.number + grid_scale * 1,
                         grid_scale,
                         grid_scale
                     );
-                },
-                R.range(
-                    column_rectangle.row_lower.number,
-                    column_rectangle.row_upper.number + 1 // include the upper limit
-                )
-            );
+                    }
+                    else if (i >= center.column.number) {
+                    canvas.context.drawImage(
+                        canvas.resources["explosion/line/right_" + color],
+                        grid_scale * i + grid_scale * 1,
+                        grid_scale * row_rectangle.row.number + grid_scale * 1,
+                        grid_scale,
+                        grid_scale
+                    );
+                    }
+
+                    else if (i <= center.column.number) {
+                    canvas.context.drawImage(
+                        canvas.resources["explosion/line/left_" + color],
+                        grid_scale * i + grid_scale * 1,
+                        grid_scale * row_rectangle.row.number + grid_scale * 1,
+                        grid_scale,
+                        grid_scale
+                    );
+                    }
+
+
+            }
         }
-    };
+        if (column_rectangle !== null) {
+            for (let i = column_rectangle.row_lower.number; i <= column_rectangle.row_upper.number; i += 1){
+                    if (row_rectangle !== null && i === center.row.number){
+                        canvas.context.drawImage(
+                            canvas.resources["explosion/center/" + color],
+                            grid_scale * column_rectangle.column.number + grid_scale * 1,
+                            grid_scale * i + grid_scale * 1,
+                            grid_scale,
+                            grid_scale
+                        );
+                    }
+                    else if(i === column_rectangle.row_lower.number){
+                    canvas.context.drawImage(
+                        canvas.resources["explosion/end/up_" + color],
+                        grid_scale * column_rectangle.column.number + grid_scale * 1,
+                        grid_scale * i + grid_scale * 1,
+                        grid_scale,
+                        grid_scale
+                    );
+                    }
+                    else if (i === column_rectangle.row_upper.number) {
+                    canvas.context.drawImage(
+                        canvas.resources["explosion/end/down_" + color],
+                        grid_scale * column_rectangle.column.number + grid_scale * 1,
+                        grid_scale * i + grid_scale * 1,
+                        grid_scale,
+                        grid_scale
+                    );
+                    }
+                    else if (i <= center.row.number) {
+                    canvas.context.drawImage(
+                        canvas.resources["explosion/line/up_" + color],
+                        grid_scale * column_rectangle.column.number + grid_scale * 1,
+                        grid_scale * i + grid_scale * 1,
+                        grid_scale,
+                        grid_scale
+                    );
+                    }
+
+                    else if (i >= center.row.number) {
+                    canvas.context.drawImage(
+                        canvas.resources["explosion/line/down_" + color],
+                        grid_scale * column_rectangle.column.number + grid_scale * 1,
+                        grid_scale * i + grid_scale * 1,
+                        grid_scale,
+                        grid_scale
+                    );
+                    }
+        }    
+    }
+};
 
 module.exports = {Explosion, draw};

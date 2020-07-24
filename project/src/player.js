@@ -4,7 +4,7 @@ const {Bomb} = require("./bomb.js");
 const explosion = require("./explosion.js");
 import type {Explosion} from "./explosion.js";
 const {ColumnRowPosition} = require("./game_types.js");
-import type {Direction, UserCommand, Event} from "./game_types.js";
+import type {Direction, UserCommand, Event, PlayerId} from "./game_types.js";
 const map_value_indexed = require("./map_value_indexed.js");
 const MapValueIndexed = map_value_indexed.MapValueIndexed;
 const set_value_indexed = require("./set_value_indexed.js");
@@ -16,6 +16,10 @@ const R = require("ramda");
 const {immerable} = require("immer");
 
 const protection_duration = 3000;
+const animation_frame_duration = 100;
+const animation_frame_count = new Int(4);
+const animation_frame_width = 30;
+const animation_frame_height = 35;
 
 type CoordinateMaximum = {
     +x: Int,
@@ -56,6 +60,7 @@ const y_set = (y: number, position: ColumnPosition): void => {position.continuou
 
 class Player {
     +direction_move: {[Direction]: null};
+    direction_face: Direction;
     position: RowPosition | ColumnPosition;
     life_count: Int;
     run_speed: number;
@@ -63,8 +68,11 @@ class Player {
     time_since_damage: number;
     +bombs: MapValueIndexed<ColumnRowPosition, Bomb>;
     bomb_capacity: Int;
+    animation_frame: Int;
+    time_since_animation_frame: number;
     constructor(position: RowPosition | ColumnPosition) {
         this.direction_move = {};
+        this.direction_face = "down";
         this.position = position;
         this.life_count = new Int(5);
         this.run_speed = .01;
@@ -72,11 +80,14 @@ class Player {
         this.time_since_damage = protection_duration;
         this.bombs = new MapValueIndexed([]);
         this.bomb_capacity = new Int(1);
+        this.animation_frame = new Int(0);
+        this.time_since_animation_frame = 0;
     }
     user_command(command: UserCommand): void {
         switch (command.type) {
             case "Accelerate": {
                 this.direction_move[command.direction] = null;
+                this.direction_face = command.direction;
                 break;
             }
             case "Decelerate": {
@@ -263,7 +274,7 @@ class Player {
         this.bomb_capacity = int.successor(this.bomb_capacity);
     }
     power_up_run_speed(): void {
-        this.run_speed *= 2;
+        this.run_speed *= 1.2;
     }
     power_up_bomb_strength(): void {
         this.bomb_strength = int.successor(this.bomb_strength);
@@ -273,6 +284,20 @@ class Player {
     }
 }
 
+const update_animation =
+    (
+        player: Player,
+        time: number
+    ): void =>
+    {
+        player.time_since_animation_frame += time;
+        while (player.time_since_animation_frame >= animation_frame_duration) {
+            player.animation_frame =
+                int.modulo(int.successor(player.animation_frame), animation_frame_count);
+            player.time_since_animation_frame -= animation_frame_duration;
+        }
+    };
+
 
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
 Player[immerable] = true;
@@ -280,13 +305,23 @@ Player[immerable] = true;
 const draw =
     (
         player: Player,
+        color: PlayerId,
         canvas: {context: any, resources: Resources,...},
         grid_scale: number
     ): void =>
     {
-        canvas.context.beginPath();
-        canvas.context.fillStyle = "green";
-        canvas.context.fillRect(
+        const frame = {
+            "0": 0,
+            "1": 1,
+            "2": 0,
+            "3": 2,
+        };
+        //canvas.context.beginPath();
+        //canvas.context.fillStyle = "green";
+        //canvas.context.fillRect(
+        if (Object.keys(player.direction_move).length !== 0){
+        canvas.context.drawImage(
+        canvas.resources["player/" + player.direction_face + "/frame" + frame[player.animation_frame.number] + "_" + color],
             player.position.type === "RowPosition"
                 ? grid_scale * x_get(player.position) + grid_scale * 1
                 : grid_scale * column_get(player.position).number + grid_scale * 1,
@@ -296,7 +331,21 @@ const draw =
             grid_scale,
             grid_scale
         );
+        }
+        else {
+        canvas.context.drawImage(
+        canvas.resources["player/" + player.direction_face + "/frame0_" + color],
+            player.position.type === "RowPosition"
+                ? grid_scale * x_get(player.position) + grid_scale * 1
+                : grid_scale * column_get(player.position).number + grid_scale * 1,
+            player.position.type === "RowPosition"
+                ? grid_scale * row_get(player.position).number + grid_scale * 1
+                : grid_scale * y_get(player.position) + grid_scale * 1,
+            grid_scale,
+            grid_scale
+        );
+        }
     };
 
 
-module.exports = {Player, draw, RowPosition, ColumnPosition};
+module.exports = {Player, update_animation, draw, RowPosition, ColumnPosition};

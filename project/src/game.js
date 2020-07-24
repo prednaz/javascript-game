@@ -33,29 +33,12 @@ class Game {
     constructor(): void {
         this.players = {};
         this.explosions = [];
-        this.obstacles = set_value_indexed.create([
-            new ColumnRowPosition(new Int(3), new Int(0)),
-            new ColumnRowPosition(new Int(2), new Int(1)),
-            new ColumnRowPosition(new Int(4), new Int(1)),
-            new ColumnRowPosition(new Int(1), new Int(2)),
-            new ColumnRowPosition(new Int(3), new Int(2)),
-            new ColumnRowPosition(new Int(6), new Int(2)),
-            new ColumnRowPosition(new Int(2), new Int(3)),
-            new ColumnRowPosition(new Int(4), new Int(3)),
-            new ColumnRowPosition(new Int(1), new Int(4)),
-            new ColumnRowPosition(new Int(2), new Int(4)),
-            new ColumnRowPosition(new Int(0), new Int(5)),
-            new ColumnRowPosition(new Int(2), new Int(5)),
-            new ColumnRowPosition(new Int(0), new Int(6)),
-            new ColumnRowPosition(new Int(2), new Int(6)),
-            new ColumnRowPosition(new Int(0), new Int(7)),
-            new ColumnRowPosition(new Int(2), new Int(7)),
-            new ColumnRowPosition(new Int(1), new Int(8)),
-        ]);
-        this.power_ups = new MapValueIndexed([
-            [new ColumnRowPosition(new Int(4), new Int(2)), "bomb_capacity"],
-            [new ColumnRowPosition(new Int(7), new Int(2)), "run_speed"],
-        ]);
+        this.obstacles = set_value_indexed.create([]);
+        for (let i = 2; i < 12; i += 2)
+            for (let j = 2; j < 10; j += 2)
+                set_value_indexed.insert(
+                    new ColumnRowPosition(new Int(i), new Int(j)), this.obstacles);
+        this.power_ups = new MapValueIndexed([]);
         this.coordinate_maximum = {x: new Int(12), y: new Int(10)};
     }
     update(event: Event): void {
@@ -127,7 +110,7 @@ class Game {
             );
             // turn exploding bombs into explosions
             R.forEachObjIndexed(
-                (player_current: Player) => {
+                (player_current: Player, player_id: PlayerId) => {
                     const exploding_bombs: Array<ColumnRowPosition> = [];
                     // collect exploding bombs
                     map_value_indexed.forEachIndexed(
@@ -139,7 +122,8 @@ class Game {
                                         position,
                                         player_current.bomb_strength,
                                         this.on_map.bind(this),
-                                        this.clear_of_obstacles.bind(this)
+                                        this.clear_of_obstacles.bind(this),
+                                        player_id
                                     );
                                 this.explosions.push(explosion_new);
                                 this.explode_obstacles(explosion_new);
@@ -175,10 +159,38 @@ class Game {
         delete this.players[player_id];
     }
     explode_obstacles(explosion_new: Explosion): void {
-        set_value_indexed.remove_all(
-            explosion_new.scorched_positions(),
-            this.obstacles
+        set_value_indexed.forEach(
+            (scorched_position: ColumnRowPosition) => {
+                if (set_value_indexed.member(scorched_position, this.obstacles)) {
+                    set_value_indexed.remove(
+                        scorched_position,
+                        this.obstacles
+                    );
+                    const random = Math.random();
+                    const power_up = Math.random() * 4;
+                    if (random <= 0.5) {
+                        if (power_up <= 1) {
+                            map_value_indexed.insert(
+                            scorched_position, "bomb_capacity", this.power_ups);
+                        }
+                        else if (power_up <= 2) {
+                            map_value_indexed.insert(
+                            scorched_position, "run_speed", this.power_ups);
+                        }
+                        else if (power_up <= 3) {
+                            map_value_indexed.insert(
+                            scorched_position, "bomb_strength", this.power_ups);
+                        }
+                        else if (power_up <= 4) {
+                            map_value_indexed.insert(
+                            scorched_position, "life_count", this.power_ups);
+                        }
+                    }
+                }
+            },
+            explosion_new.scorched_positions()
         );
+        
     }
     clear_of_obstacles(position: ColumnRowPosition): boolean {
         return !set_value_indexed.member(position, this.obstacles);
@@ -214,6 +226,11 @@ const update_animation =
                     player_current.bombs
                 );
             },
+            game.players
+        );
+        // player
+        R.forEachObjIndexed(
+            (player_current: Player) => player.update_animation(player_current, time),
             game.players
         );
     };
@@ -283,28 +300,29 @@ const draw =
             );
             }
         }
-        // obstacles
-        set_value_indexed.forEach(
-            position => obstacle.draw(position, canvas, grid_scale),
-            game.obstacles
-        );
         // power_ups
         map_value_indexed.forEachIndexed(
             power_up_current => power_up.draw(power_up_current, canvas, grid_scale),
             game.power_ups
         );
+
+        // obstacles
+        set_value_indexed.forEach(
+            position => obstacle.draw(position, canvas, grid_scale),
+            game.obstacles
+        );
+        
         // explosions
         R.forEach(
-            (explosion_current: Explosion) => {
-                explosion.draw(explosion_current, canvas, grid_scale);
-            },
+            (explosion_current: Explosion) =>
+                explosion.draw(explosion_current, canvas, grid_scale),
             game.explosions
         );
         // bombs
         R.forEachObjIndexed(
-            (player_current: Player) => {
+            (player_current: Player, player_id: PlayerId) => {
                 map_value_indexed.forEachIndexed(
-                    bomb_current => bomb.draw(bomb_current, canvas, grid_scale),
+                    bomb_current => bomb.draw(bomb_current, player_id, canvas, grid_scale),
                     player_current.bombs
                 );
             },
@@ -312,7 +330,8 @@ const draw =
         );
         // players
         R.forEachObjIndexed(
-            (player_current: Player) => {player.draw(player_current, canvas, grid_scale)},
+            (player_current: Player, player_id: PlayerId) =>
+                player.draw(player_current, player_id, canvas, grid_scale),
             game.players
         );
     };

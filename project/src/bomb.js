@@ -1,7 +1,7 @@
 // @flow
 
 import type {ColumnRowPosition} from "./game_types.js";
-import type {Event} from "./game_types.js";
+import type {Event, PlayerId} from "./game_types.js";
 const int = require("./int.js");
 const Int = int.Int;
 import type {Resources} from "./resources.js";
@@ -50,12 +50,13 @@ const update_animation =
 const draw =
     (
         [position, bomb]: [ColumnRowPosition, Bomb],
+        color: PlayerId,
         canvas: {context: any, resources: Resources, resources_grid_scale: number,...},
         grid_scale: number
     ): void =>
     {
         canvas.context.drawImage(
-            canvas.resources["bombs/frame" + bomb.animation_frame.number + "_top_left"],
+            canvas.resources["bombs/frame" + bomb.animation_frame.number + "_" + color],
             grid_scale * position.column.number + grid_scale * 1 + (canvas.resources_grid_scale - animation_frame_width) / 2,
             grid_scale * position.row.number + grid_scale * 1 + (canvas.resources_grid_scale - animation_frame_height) / 2,
             grid_scale * animation_frame_width / canvas.resources_grid_scale,

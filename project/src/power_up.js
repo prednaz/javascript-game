@@ -15,8 +15,6 @@ const draw =
         canvas.context.beginPath();
         switch (power_up) {
             case "bomb_capacity": {
-                canvas.context.fillStyle = "cyan";
-                canvas.context.fillRect(grid_scale * position.column.number + grid_scale * 1, grid_scale * position.row.number + grid_scale * 1, grid_scale, grid_scale);
                 canvas.context.drawImage(
                     canvas.resources["power_ups/bomb_capacity"],
                     grid_scale * position.column.number + grid_scale * 1,
@@ -27,8 +25,6 @@ const draw =
                 break;
             }
             case "run_speed": {
-                canvas.context.fillStyle = "cyan"
-                canvas.context.fillRect(grid_scale * position.column.number + grid_scale * 1, grid_scale * position.row.number + grid_scale * 1, grid_scale, grid_scale);
                 canvas.context.drawImage(
                     canvas.resources["power_ups/run_speed"],
                     grid_scale * position.column.number + grid_scale * 1,
@@ -36,11 +32,10 @@ const draw =
                     grid_scale,
                     grid_scale
                 );
+                break;
             }
             
             case "bomb_strength":{
-                canvas.context.fillStyle = "cyan";
-                canvas.context.fillRect(grid_scale * position.column.number + grid_scale * 1, grid_scale * position.row.number + grid_scale * 1, grid_scale, grid_scale);
                 canvas.context.drawImage(
                     canvas.resources["power_ups/bomb_strength"],
                     grid_scale * position.column.number + grid_scale * 1,
@@ -48,11 +43,10 @@ const draw =
                     grid_scale,
                     grid_scale
                 );
+                break;
             }
 
             case "life_count":{
-                canvas.context.fillStyle = "cyan";
-                canvas.context.fillRect(grid_scale * position.column.number + grid_scale * 1, grid_scale * position.row.number + grid_scale * 1, grid_scale, grid_scale);
                 canvas.context.drawImage(
                     canvas.resources["power_ups/life_count"],
                     grid_scale * position.column.number + grid_scale * 1,
@@ -60,6 +54,7 @@ const draw =
                     grid_scale,
                     grid_scale
                 );
+                break;
             }
         }
     };
