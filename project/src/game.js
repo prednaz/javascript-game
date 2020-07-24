@@ -86,9 +86,19 @@ class Game {
                                         break;
                                     }
                                     case "run_speed": {
+                                        player_current.power_up_run_speed();
+                                        break;
+                                    }
+                                    case "bomb_strength": {
+                                        player_current.power_up_bomb_strength();
+                                        break;
+                                    }
+                                    case "life_count": {
+                                        player_current.power_up_life_count();
                                         break;
                                     }
                                 }
+                                
                                 map_value_indexed.remove(position, this.power_ups);
                             }
                         },

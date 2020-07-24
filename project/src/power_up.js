@@ -3,7 +3,7 @@
 import type {ColumnRowPosition} from "./game_types.js";
 import type {Resources} from "./resources.js";
 
-export type PowerUp = "bomb_capacity" | "run_speed";
+export type PowerUp = "bomb_capacity" | "run_speed" | "bomb_strength" | "life_count";
 
 const draw =
     (
@@ -27,9 +27,39 @@ const draw =
                 break;
             }
             case "run_speed": {
+                canvas.context.fillStyle = "cyan"
+                canvas.context.fillRect(grid_scale * position.column.number + grid_scale * 1, grid_scale * position.row.number + grid_scale * 1, grid_scale, grid_scale);
+                canvas.context.drawImage(
+                    canvas.resources["power_ups/run_speed"],
+                    grid_scale * position.column.number + grid_scale * 1,
+                    grid_scale * position.row.number + grid_scale * 1,
+                    grid_scale,
+                    grid_scale
+                );
+            }
+            
+            case "bomb_strength":{
                 canvas.context.fillStyle = "cyan";
                 canvas.context.fillRect(grid_scale * position.column.number + grid_scale * 1, grid_scale * position.row.number + grid_scale * 1, grid_scale, grid_scale);
-                break;
+                canvas.context.drawImage(
+                    canvas.resources["power_ups/bomb_strength"],
+                    grid_scale * position.column.number + grid_scale * 1,
+                    grid_scale * position.row.number + grid_scale * 1,
+                    grid_scale,
+                    grid_scale
+                );
+            }
+
+            case "life_count":{
+                canvas.context.fillStyle = "cyan";
+                canvas.context.fillRect(grid_scale * position.column.number + grid_scale * 1, grid_scale * position.row.number + grid_scale * 1, grid_scale, grid_scale);
+                canvas.context.drawImage(
+                    canvas.resources["power_ups/life_count"],
+                    grid_scale * position.column.number + grid_scale * 1,
+                    grid_scale * position.row.number + grid_scale * 1,
+                    grid_scale,
+                    grid_scale
+                );
             }
         }
     };

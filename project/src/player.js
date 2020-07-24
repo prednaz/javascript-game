@@ -262,7 +262,18 @@ class Player {
     power_up_bomb_capacity(): void {
         this.bomb_capacity = int.successor(this.bomb_capacity);
     }
+    power_up_run_speed(): void {
+        this.run_speed *= 2;
+    }
+    power_up_bomb_strength(): void {
+        this.bomb_strength = int.successor(this.bomb_strength);
+    }
+    power_up_life_count(): void {
+        this.life_count = int.successor(this.life_count);
+    }
 }
+
+
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
 Player[immerable] = true;
 

@@ -10,6 +10,7 @@ const sources = {
     "hole": require("../resources/hole.png"),
     "bombs/frame0_top_left": require("../resources/bombs/frame0_top_left.png"),
     "bombs/frame1_top_left": require("../resources/bombs/frame1_top_left.png"),
+    "bombs/exploding_top_left": require("../ressources/bombs/exploding_top_left.png"),
     "explosion/line/up_top_left": require("../resources/explosion/line/up_top_left.png"),
     "explosion/line/up_bottom_right": require("../resources/explosion/line/up_bottom_right.png"),
     "explosion/line/up_bottom_left": require("../resources/explosion/line/up_bottom_left.png"),
@@ -45,6 +46,7 @@ const sources = {
     "power_ups/bomb_capacity": require("../resources/power_ups/bomb_capacity.png"),
     "power_ups/bomb_strength": require("../resources/power_ups/bomb_strength.png"),
     "power_ups/run_speed": require("../resources/power_ups/run_speed.png"),
+    "power_ups/life_count": require("../resources/power_ups/life_count.png")
 };
 
 type ConstImage = () => Image;

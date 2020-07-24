@@ -18,7 +18,7 @@ const socket = require("socket.io-client")();
 // will copy the fields for `sources` in resources.js
 // to-do. remove
 window.resources = generate_sources_fields();
-
+ 
 with_resources(resources => {
     const controls = {
         down: {
