@@ -82,13 +82,16 @@ with_resources(resources => {
                         update_animation(draft, timestamp - timestamp_previous)
                 );
             draw(game_state, canvas);
+            life_count_display.textContent =
+                R.join(
+                    "",
+                    R.map(
+                        ([player_id, player]: [PlayerId, Player]): string =>
+                            player_id + ": " + player.life_count.number + "\n",
+                        to_list(game_state.players)
+                    )
+                );
             requestAnimationFrame(loop);
-            let life_count_display_text = "";
-            R.forEachObjIndexed(
-                (player: Player, player_id: PlayerId) => {life_count_display_text += player_id + ": " + player.life_count.number + "\n"},
-                game_state.players
-            );
-            life_count_display.textContent = life_count_display_text;
             timestamp_previous = timestamp;
         };
 
@@ -104,3 +107,7 @@ with_resources(resources => {
         game_state = immer.applyPatches(game_state, patches);
     });
 });
+
+const to_list =
+    <Key, Value>(object: {[Key]: Value}): Array<[Key, Value]> =>
+    (Object.entries(object): any);
