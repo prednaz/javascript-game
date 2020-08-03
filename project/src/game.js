@@ -169,19 +169,19 @@ class Game {
                     const random = Math.random();
                     const power_up = Math.random() * 4;
                     if (random <= 0.5) {
-                        if (power_up <= 1) {
+                        if (power_up < 1) {
                             map_value_indexed.insert(
                             scorched_position, "bomb_capacity", this.power_ups);
                         }
-                        else if (power_up <= 2) {
+                        else if (power_up < 2) {
                             map_value_indexed.insert(
                             scorched_position, "run_speed", this.power_ups);
                         }
-                        else if (power_up <= 3) {
+                        else if (power_up < 3) {
                             map_value_indexed.insert(
                             scorched_position, "bomb_strength", this.power_ups);
                         }
-                        else if (power_up <= 4) {
+                        else if (power_up < 4) {
                             map_value_indexed.insert(
                             scorched_position, "life_count", this.power_ups);
                         }

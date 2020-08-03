@@ -303,6 +303,13 @@ const update_animation =
         }
     };
 
+const frames = {
+    "0": 0,
+    "1": 1,
+    "2": 0,
+    "3": 2,
+};
+
 const draw =
     (
         player: Player,
@@ -311,18 +318,12 @@ const draw =
         grid_scale: number
     ): void =>
     {
-        const frame = {
-            "0": 0,
-            "1": 1,
-            "2": 0,
-            "3": 2,
-        };
         //canvas.context.beginPath();
         //canvas.context.fillStyle = "green";
         //canvas.context.fillRect(
         if (Object.keys(player.direction_command).length !== 0){
         canvas.context.drawImage(
-            canvas.resources["player/" + player.direction_face + "/frame" + frame[player.animation_frame.number] + "_" + color],
+            canvas.resources["player/" + player.direction_face + "/frame" + frames[player.animation_frame.number] + "_" + color],
             player.position.type === "RowPosition"
                 ? grid_scale * x_get(player.position) + grid_scale * 1
                 : grid_scale * column_get(player.position).number + grid_scale * 1,
