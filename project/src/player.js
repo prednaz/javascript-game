@@ -18,7 +18,6 @@ const {immerable} = require("immer");
 const protection_duration = 3000;
 const animation_frame_duration = 100;
 const animation_frame_count = new Int(4);
-const animation_frame_width = 30;
 const animation_frame_height = 35;
 
 type CoordinateMaximum = {
@@ -59,7 +58,7 @@ const y_get = (position: ColumnPosition): number => position.continuous_coordina
 const y_set = (y: number, position: ColumnPosition): void => {position.continuous_coordinate = y;};
 
 class Player {
-    +direction_move: {[Direction]: null};
+    +direction_command: {[Direction]: null};
     direction_face: Direction;
     position: RowPosition | ColumnPosition;
     life_count: Int;
@@ -71,11 +70,11 @@ class Player {
     animation_frame: Int;
     time_since_animation_frame: number;
     constructor(position: RowPosition | ColumnPosition) {
-        this.direction_move = {};
+        this.direction_command = {};
         this.direction_face = "down";
         this.position = position;
         this.life_count = new Int(5);
-        this.run_speed = .01;
+        this.run_speed = .005;
         this.bomb_strength = new Int(3);
         this.time_since_damage = protection_duration;
         this.bombs = new MapValueIndexed([]);
@@ -86,12 +85,11 @@ class Player {
     user_command(command: UserCommand): void {
         switch (command.type) {
             case "Accelerate": {
-                this.direction_move[command.direction] = null;
-                this.direction_face = command.direction;
+                this.direction_command[command.direction] = null;
                 break;
             }
             case "Decelerate": {
-                delete this.direction_move[command.direction];
+                delete this.direction_command[command.direction];
                 break;
             }
             case "PlantBomb": {
@@ -117,22 +115,7 @@ class Player {
             case "Tick": {
                 this.time_since_damage += event.time;
 
-                // opposed directions cancel each other out
-                const direction_move: {[Direction]: null} = Object.assign({}, this.direction_move);
-                if ("up" in direction_move && "down" in direction_move) {
-                    delete direction_move["up"];
-                    delete direction_move["down"];
-                }
-                if ("left" in direction_move && "right" in direction_move) {
-                    delete direction_move["left"];
-                    delete direction_move["right"];
-                }
-
-                if (R.length(Object.keys(direction_move)) === 0) {
-                    return;
-                }
-
-                this.step(direction_move, this.run_speed * event.time, free_position);
+                this.step(this.run_speed * event.time, free_position);
 
                 // handle a collision with an obstacle or the map edge
                 const free_positions =
@@ -153,25 +136,27 @@ class Player {
         }
     }
     step(
-        direction_move: {[Direction]: null},
         step_distance: number,
         free_position: ColumnRowPosition => boolean
     ): void {
+        const vertical_command: "up" | "down" | null =
+            "up" in this.direction_command && !("down" in this.direction_command) ? "up" :
+            !("up" in this.direction_command) && "down" in this.direction_command ? "down" :
+            null;
+        const horizontal_command: "left" | "right" | null =
+            "left" in this.direction_command && !("right" in this.direction_command) ? "left" :
+            !("left" in this.direction_command) && "right" in this.direction_command ? "right" :
+            null;
+        if (vertical_command === null && horizontal_command === null) {
+            return;
+        }
+
         // abstract some information away from RowPosition, ColumnPosition for later
-        const horizontal_command =
-            "left" in direction_move ? -1 :
-            "right" in direction_move ? 1 :
-            null;
-        const vertical_command =
-            "up" in direction_move ? -1 :
-            "down" in direction_move ? 1 :
-            null;
-        
-        const parallel_command =
+        const parallel_command: Direction | null =
             this.position.type === "RowPosition"
                 ? horizontal_command
                 : vertical_command;
-        const orthogonal_command =
+        const orthogonal_command: Direction | null =
             this.position.type === "RowPosition"
                 ? vertical_command
                 : horizontal_command;
@@ -184,18 +169,23 @@ class Player {
                 new_discrete.number - this.position.continuous_coordinate;
             const new_discrete_direction = Math.sign(new_discrete_difference);
             const new_discrete_distance = Math.abs(new_discrete_difference);
+            const orthogonal_command_sign = direction_sign(orthogonal_command);
             const target_position =
                 new ColumnRowPosition(
                     this.position.type === "RowPosition"
                         ? new_discrete
-                        : (orthogonal_command === -1 ? int.predecessor : int.successor)(column_get(this.position)),
+                        : (orthogonal_command_sign === -1 ? int.predecessor : int.successor)(column_get(this.position)),
                     this.position.type === "RowPosition"
-                        ? (orthogonal_command === -1 ? int.predecessor : int.successor)(row_get(this.position))
+                        ? (orthogonal_command_sign === -1 ? int.predecessor : int.successor)(row_get(this.position))
                         : new_discrete
                 );
             if (
                 new_discrete_distance < step_distance &&
-                (parallel_command === null || parallel_command === new_discrete_direction || new_discrete_direction === 0) &&
+                (
+                    parallel_command === null ||
+                    direction_sign(parallel_command) === new_discrete_direction ||
+                    new_discrete_direction === 0
+                ) &&
                 free_position(target_position)
             ) {
                 // intersection is close and there is no parallel command aiming away from it,
@@ -213,25 +203,32 @@ class Player {
                                 this.position.discrete_coordinate.number
                             );
                 this.position.continuous_coordinate +=
-                    orthogonal_command * (step_distance - new_discrete_distance);
+                    direction_sign(orthogonal_command) * (step_distance - new_discrete_distance);
+                this.direction_face = orthogonal_command;
             }
             else if (parallel_command !== null) {
                 // there is a parallel command, so ignore the orthogonal one
                 this.position.continuous_coordinate +=
-                    parallel_command * step_distance;
+                    direction_sign(parallel_command) * step_distance;
+                this.direction_face = parallel_command;
             }
             else if (new_discrete_distance !== 1 && free_position(target_position)) {
                 // one intersection is closer than the other and it is free,
                 // so glide towards it
                 this.position.continuous_coordinate +=
                     new_discrete_direction * step_distance;
+                this.direction_face =
+                    this.position.type === "RowPosition"
+                        ? new_discrete_direction === -1 ? "left" : "right"
+                        : new_discrete_direction === -1 ? "up" : "down";
             }
         }
         else if (parallel_command !== null) {
             // only a parallel command,
             // so move along the row or column
             this.position.continuous_coordinate +=
-                parallel_command * step_distance;
+                direction_sign(parallel_command) * step_distance;
+            this.direction_face = parallel_command;
         }
     }
     take_damage(explosions: $ReadOnlyArray<Explosion>) {
@@ -283,6 +280,14 @@ class Player {
         this.life_count = int.successor(this.life_count);
     }
 }
+// $FlowFixMe https://github.com/facebook/flow/issues/3258
+Player[immerable] = true;
+
+const direction_sign =
+    (direction: Direction): -1 | 1 =>
+    direction === "up" || direction === "left"
+        ? -1
+        : 1;
 
 const update_animation =
     (
@@ -298,15 +303,11 @@ const update_animation =
         }
     };
 
-
-// $FlowFixMe https://github.com/facebook/flow/issues/3258
-Player[immerable] = true;
-
 const draw =
     (
         player: Player,
         color: PlayerId,
-        canvas: {context: any, resources: Resources,...},
+        canvas: {context: any, resources: Resources, resources_grid_scale: number,...},
         grid_scale: number
     ): void =>
     {
@@ -319,30 +320,34 @@ const draw =
         //canvas.context.beginPath();
         //canvas.context.fillStyle = "green";
         //canvas.context.fillRect(
-        if (Object.keys(player.direction_move).length !== 0){
+        if (Object.keys(player.direction_command).length !== 0){
         canvas.context.drawImage(
-        canvas.resources["player/" + player.direction_face + "/frame" + frame[player.animation_frame.number] + "_" + color],
+            canvas.resources["player/" + player.direction_face + "/frame" + frame[player.animation_frame.number] + "_" + color],
             player.position.type === "RowPosition"
                 ? grid_scale * x_get(player.position) + grid_scale * 1
                 : grid_scale * column_get(player.position).number + grid_scale * 1,
-            player.position.type === "RowPosition"
-                ? grid_scale * row_get(player.position).number + grid_scale * 1
-                : grid_scale * y_get(player.position) + grid_scale * 1,
+            (
+                player.position.type === "RowPosition"
+                    ? grid_scale * row_get(player.position).number + grid_scale * 1
+                    : grid_scale * y_get(player.position) + grid_scale * 1
+            ) + (canvas.resources_grid_scale - animation_frame_height),
             grid_scale,
-            grid_scale
+            grid_scale * animation_frame_height / canvas.resources_grid_scale
         );
         }
         else {
         canvas.context.drawImage(
-        canvas.resources["player/" + player.direction_face + "/frame0_" + color],
+            canvas.resources["player/" + player.direction_face + "/frame0_" + color],
             player.position.type === "RowPosition"
                 ? grid_scale * x_get(player.position) + grid_scale * 1
                 : grid_scale * column_get(player.position).number + grid_scale * 1,
-            player.position.type === "RowPosition"
-                ? grid_scale * row_get(player.position).number + grid_scale * 1
-                : grid_scale * y_get(player.position) + grid_scale * 1,
+            (
+                player.position.type === "RowPosition"
+                    ? grid_scale * row_get(player.position).number + grid_scale * 1
+                    : grid_scale * y_get(player.position) + grid_scale * 1
+            ) + (canvas.resources_grid_scale - animation_frame_height),
             grid_scale,
-            grid_scale
+            grid_scale * animation_frame_height / canvas.resources_grid_scale
         );
         }
     };
