@@ -46,27 +46,6 @@ with_resources(resources => {
         resources_grid_scale: resources_grid_scale
     };
 
-    document.addEventListener(
-        "keydown",
-        (event: KeyboardEvent) => {
-            if (event.key === key_pressed_last)
-                return;
-            key_pressed_last = event.key;
-            if (event.key in controls.down) {
-                socket.emit("user command", controls.down[event.key]);
-            }
-        }
-    );
-    document.addEventListener(
-        "keyup",
-        (event: KeyboardEvent) => {
-            key_pressed_last = null;
-            if (event.key in controls.up) {
-                socket.emit("user command", controls.up[event.key]);
-            }
-        }
-    );
-
     const life_count_display = document.getElementById("life_count"); // to-do. remove
     if (life_count_display === null) {
         throw new ReferenceError("Where is the life count display?");
@@ -105,6 +84,28 @@ with_resources(resources => {
             game_state = immer.applyPatches(game_state, patches);
         });
     });
+    socket.emit("ready");
+
+    document.addEventListener(
+        "keydown",
+        (event: KeyboardEvent) => {
+            if (event.key === key_pressed_last)
+                return;
+            key_pressed_last = event.key;
+            if (event.key in controls.down) {
+                socket.emit("user command", controls.down[event.key]);
+            }
+        }
+    );
+    document.addEventListener(
+        "keyup",
+        (event: KeyboardEvent) => {
+            key_pressed_last = null;
+            if (event.key in controls.up) {
+                socket.emit("user command", controls.up[event.key]);
+            }
+        }
+    );
 });
 
 const to_list =

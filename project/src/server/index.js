@@ -38,7 +38,7 @@ const loop =
 
 setInterval(loop, 20);
 
-io.on("connection", socket => {
+io.on("connect", socket => {socket.on("ready", () => {
     socket.emit("state", game_state);
     const result = update_and_synchronize(game_state, draft => draft.addPlayer());
     game_state = result[0];
@@ -51,12 +51,12 @@ io.on("connection", socket => {
             draft.update(new UserCommandEvent(player_id_new, command));
         })[0];
     });
-    socket.on('disconnect', () => {
+    socket.on("disconnect", () => {
         game_state = update_and_synchronize(game_state, draft => {
             draft.deletePlayer(player_id_new);
         })[0];
     });
-});
+});});
 
 app.use(express.static("dist"));
 
