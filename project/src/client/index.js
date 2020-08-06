@@ -101,10 +101,9 @@ with_resources(resources => {
             timestamp_previous = timestamp;
             requestAnimationFrame(loop);
         });
-    });
-
-    socket.on("update", patches => {
-        game_state = immer.applyPatches(game_state, patches);
+        socket.on("update", patches => {
+            game_state = immer.applyPatches(game_state, patches);
+        });
     });
 });
 
