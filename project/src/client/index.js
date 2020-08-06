@@ -12,7 +12,7 @@ const immer = require("immer");
 immer.enablePatches();
 immer.enableMapSet();
 immer.setAutoFreeze(true);
-const socket = require("socket.io-client")();
+const socket = require("socket.io-client")({transports: ['websocket']});
 
 // `copy(resources)` in the browser's console
 // will copy the fields for `sources` in resources.js

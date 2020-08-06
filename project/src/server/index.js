@@ -13,7 +13,7 @@ import type {Patch} from "../../node_modules/immer/dist/index.js";
 const express = require("express");
 const app = express();
 const http = require("http").createServer(app);
-const io = require("socket.io")(http, {serveClient: false});
+const io = require("socket.io")(http, {serveClient: false, perMessageDeflate: false});
 
 let game_state: Game = new Game();
 let timestamp_previous: number = performance.now();

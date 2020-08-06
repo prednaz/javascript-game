@@ -69,7 +69,7 @@ declare module "socket.io-client" {
     } & ManagerOptions
   >;
 
-  declare type Lookup = (uri?: string, opts?: LookupOptions) => Socket;
+  declare type Lookup = (options: mixed) => Socket;
 
   declare var protocol: 4;
   declare var connect: Lookup;
