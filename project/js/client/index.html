@@ -3,14 +3,28 @@
   <head>
     <meta charset="utf-8">
     <style>
+      #game {
+        display: grid;
+        grid-template-columns: 1fr fit-content(0) fit-content(0) 1fr;
+        grid-template-rows: 1fr;
+        align-items: center;
+      }
+      #canvas_background {
+        grid-column: 2 / 4;
+        grid-row: 1;
+      }
       #canvas {
-          display: block;
-          margin: 0 auto;
+        grid-column: 3;
+        grid-row: 1;
+        margin-right: 12px;
       }
     </style>
   </head>
   <body>
-    <canvas id="canvas" width="450" height="390"></canvas> <!-- to-do. Should the size be set through CSS too? -->
+    <div id="game">
+      <canvas id="canvas_background" width="554" height="410"></canvas>
+      <canvas id="canvas" width="450" height="390"></canvas> <!-- to-do. Should the size be set through CSS too? -->
+    </div>
     <textarea id="life_count" rows="6" cols="30" readonly></textarea>
     <script src="index.js"></script>
   </body>

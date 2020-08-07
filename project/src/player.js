@@ -310,11 +310,29 @@ const frames = {
     "3": 2,
 };
 
+type Canvas =
+    {
+        foreground: {
+            width: number,
+            height: number,
+            context: any,
+        },
+        background: {
+            width: number,
+            height: number,
+            context: any,
+        },
+        resources: Resources,
+        resources_grid_scale: number,
+        ...
+    };
+
+
 const draw =
     (
         player: Player,
         color: PlayerId,
-        canvas: {context: any, resources: Resources, resources_grid_scale: number,...},
+        canvas: Canvas,
         grid_scale: number
     ): void =>
     {
@@ -322,7 +340,7 @@ const draw =
         //canvas.context.fillStyle = "green";
         //canvas.context.fillRect(
         if (Object.keys(player.direction_command).length !== 0){
-        canvas.context.drawImage(
+        canvas.foreground.context.drawImage(
             canvas.resources["player/" + player.direction_face + "/frame" + frames[player.animation_frame.number] + "_" + color],
             player.position.type === "RowPosition"
                 ? grid_scale * x_get(player.position) + grid_scale * 1
@@ -337,7 +355,7 @@ const draw =
         );
         }
         else {
-        canvas.context.drawImage(
+        canvas.foreground.context.drawImage(
             canvas.resources["player/" + player.direction_face + "/frame0_" + color],
             player.position.type === "RowPosition"
                 ? grid_scale * x_get(player.position) + grid_scale * 1

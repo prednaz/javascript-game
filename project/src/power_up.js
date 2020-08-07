@@ -5,17 +5,34 @@ import type {Resources} from "./resources.js";
 
 export type PowerUp = "bomb_capacity" | "run_speed" | "bomb_strength" | "life_count";
 
+type Canvas =
+    {
+        foreground: {
+            width: number,
+            height: number,
+            context: any,
+        },
+        background: {
+            width: number,
+            height: number,
+            context: any,
+        },
+        resources: Resources,
+        resources_grid_scale: number,
+        ...
+    };
+
 const draw =
     (
         [position, power_up]: [ColumnRowPosition, PowerUp],
-        canvas: {context: any, resources: Resources,...},
+        canvas: Canvas,
         grid_scale: number
     ): void =>
     {
-        canvas.context.beginPath();
+        canvas.foreground.context.beginPath();
         switch (power_up) {
             case "bomb_capacity": {
-                canvas.context.drawImage(
+                canvas.foreground.context.drawImage(
                     canvas.resources["power_ups/bomb_capacity"],
                     grid_scale * position.column.number + grid_scale * 1,
                     grid_scale * position.row.number + grid_scale * 1,
@@ -25,7 +42,7 @@ const draw =
                 break;
             }
             case "run_speed": {
-                canvas.context.drawImage(
+                canvas.foreground.context.drawImage(
                     canvas.resources["power_ups/run_speed"],
                     grid_scale * position.column.number + grid_scale * 1,
                     grid_scale * position.row.number + grid_scale * 1,
@@ -36,7 +53,7 @@ const draw =
             }
             
             case "bomb_strength":{
-                canvas.context.drawImage(
+                canvas.foreground.context.drawImage(
                     canvas.resources["power_ups/bomb_strength"],
                     grid_scale * position.column.number + grid_scale * 1,
                     grid_scale * position.row.number + grid_scale * 1,
@@ -47,7 +64,7 @@ const draw =
             }
 
             case "life_count":{
-                canvas.context.drawImage(
+                canvas.foreground.context.drawImage(
                     canvas.resources["power_ups/life_count"],
                     grid_scale * position.column.number + grid_scale * 1,
                     grid_scale * position.row.number + grid_scale * 1,

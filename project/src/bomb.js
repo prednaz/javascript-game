@@ -47,15 +47,33 @@ const update_animation =
         }
     };
 
+type Canvas =
+    {
+        foreground: {
+            width: number,
+            height: number,
+            context: any,
+        },
+        background: {
+            width: number,
+            height: number,
+            context: any,
+        },
+        resources: Resources,
+        resources_grid_scale: number,
+        ...
+    };
+
+
 const draw =
     (
         [position, bomb]: [ColumnRowPosition, Bomb],
         color: PlayerId,
-        canvas: {context: any, resources: Resources, resources_grid_scale: number,...},
+        canvas: Canvas,
         grid_scale: number
     ): void =>
     {
-        canvas.context.drawImage(
+        canvas.foreground.context.drawImage(
             canvas.resources["bombs/frame" + bomb.animation_frame.number + "_" + color],
             grid_scale * position.column.number + grid_scale * 1 + (canvas.resources_grid_scale - animation_frame_width) / 2,
             grid_scale * position.row.number + grid_scale * 1 + (canvas.resources_grid_scale - animation_frame_height) / 2,

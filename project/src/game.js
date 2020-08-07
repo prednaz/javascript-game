@@ -235,30 +235,79 @@ const update_animation =
         );
     };
 
+type Canvas =
+    {
+        foreground: {
+            width: number,
+            height: number,
+            context: any,
+        },
+        background: {
+            width: number,
+            height: number,
+            context: any,
+        },
+        resources: Resources,
+        resources_grid_scale: number,
+        ...
+    };
+
 const draw =
     (
         game: Game,
-        canvas: {width: number, height: number, context: any, resources: Resources, resources_grid_scale: number,...}
+        canvas: Canvas
     ): void =>
     {
         // to-do. refactor
         // to-do. seperate background canvas
-        canvas.context.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.foreground.context.clearRect(0, 0, canvas.foreground.width, canvas.foreground.height);
         // to-do. cache these
         const grid_length = {
             x: game.coordinate_maximum.x.number + 3, // two walls + one zero index
             y: game.coordinate_maximum.y.number + 3, // two walls + one zero index
         };
-        const grid_scale = canvas.width / grid_length.x;
-        if (grid_scale !== canvas.height / grid_length.y) {
+        const grid_scale = canvas.foreground.width / grid_length.x;
+        if (grid_scale !== canvas.foreground.height / grid_length.y) {
             throw new RangeError(
                 "The canvas has not got the required aspect ratio of " + grid_length.x + ":" + grid_length.y + "."
             );
         }
+
+        // background image
+        canvas.background.context.drawImage(
+            canvas.resources["background"],
+            0,
+            0,
+            canvas.background.width,
+            canvas.background.height
+        );
+        
+        // life count
+        R.forEachObjIndexed(
+            (player_current: Player, player_id: PlayerId) => {
+                const ctx = canvas.background.context;
+                ctx.font = "10px serif";
+                ctx.fillStyle = "white";
+                if (player_id === "top_left"){
+                    ctx.fillText(player_current.life_count.number.toString(), 63, 126, 20);
+                }
+                else if (player_id === "bottom_right") {
+                    ctx.fillText(player_current.life_count.number.toString(), 63, 190, 20);
+                }
+                else if (player_id === "bottom_left") {
+                    ctx.fillText(player_current.life_count.number.toString(), 63, 254, 20);
+                }
+                else if (player_id === "top_right") {
+                    ctx.fillText(player_current.life_count.number.toString(), 63, 318, 20);
+                }
+            },
+            game.players
+        );
+        
         // inner holes
         for (let x = 2; x < grid_length.x-2; x += 2) {
             for (let y = 2; y < grid_length.y-2; y += 2) {
-                canvas.context.drawImage(
+                canvas.foreground.context.drawImage(
                     canvas.resources["hole"],
                     grid_scale * x,
                     grid_scale * y,
@@ -269,14 +318,14 @@ const draw =
         }
         // outer holes
         for (let x = 0; x < grid_length.x; ++x) {
-            canvas.context.drawImage(
+            canvas.foreground.context.drawImage(
                 canvas.resources["hole"],
                 grid_scale * x,
                 0,
                 grid_scale,
                 grid_scale
             );
-            canvas.context.drawImage(
+            canvas.foreground.context.drawImage(
                 canvas.resources["hole"],
                 grid_scale * x,
                 grid_scale * (grid_length.y-1),
@@ -284,14 +333,14 @@ const draw =
                 grid_scale
             );
         for (let y = 1; y < grid_length.y-1; ++y) {
-            canvas.context.drawImage(
+            canvas.foreground.context.drawImage(
                 canvas.resources["hole"],
                 0,
                 grid_scale * y,
                 grid_scale,
                 grid_scale
             );
-            canvas.context.drawImage(
+            canvas.foreground.context.drawImage(
                 canvas.resources["hole"],
                 grid_scale * (grid_length.x-1),
                 grid_scale * y,

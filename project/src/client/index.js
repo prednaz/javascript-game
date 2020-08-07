@@ -38,14 +38,22 @@ with_resources(resources => {
     let key_pressed_last: string | null = null;
     let game_state: Game;
     const canvas_dom = (document.getElementById("canvas"): any);
+    const canvas_background_dom = (document.getElementById("canvas_background"): any);
     const canvas = {
-        width: canvas_dom.width,
-        height: canvas_dom.height,
-        context: canvas_dom.getContext("2d"), // to-do. Is there a better type for this than any?
+        foreground : {
+            width: canvas_dom.width,
+            height: canvas_dom.height,
+            context: canvas_dom.getContext("2d"), // to-do. Is there a better type for this than any?
+        },
+        background : {
+            width: canvas_background_dom.width,
+            height: canvas_background_dom.height,
+            context: canvas_background_dom.getContext("2d"), // to-do. Is there a better type for this than any?
+        },
         resources: resources,
         resources_grid_scale: resources_grid_scale
     };
-
+  
     const life_count_display = document.getElementById("life_count"); // to-do. remove
     if (life_count_display === null) {
         throw new ReferenceError("Where is the life count display?");

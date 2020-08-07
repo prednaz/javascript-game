@@ -109,6 +109,7 @@ const sources = {
     "player/right/frame2_bottom_right": require("../resources/player/right/frame2_bottom_right.png"),
     "player/right/frame2_bottom_left": require("../resources/player/right/frame2_bottom_left.png"),
     "player/right/frame2_top_right": require("../resources/player/right/frame2_top_right.png"),
+    "background": require("../resources/background.png"),
 };
 
 type ConstImage = () => Image;
