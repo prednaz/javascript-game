@@ -39,21 +39,21 @@ const loop =
 setInterval(loop, 20);
 
 io.on("connect", socket => {socket.on("ready", () => {
-    socket.emit("state", game_state);
     const result = update_and_synchronize(game_state, draft => draft.addPlayer());
     game_state = result[0];
-    const player_id_new = result[1];
-    if (player_id_new === null) {
+    const player_id = result[1];
+    socket.emit("state", [game_state, player_id]);
+    if (player_id === null) {
         return; // to-do. Notify the client of the game being full.
     }
     socket.on("user command", command => {
         game_state = update_and_synchronize(game_state, draft => {
-            draft.update(new UserCommandEvent(player_id_new, command));
+            draft.update(new UserCommandEvent(player_id, command));
         })[0];
     });
     socket.on("disconnect", () => {
         game_state = update_and_synchronize(game_state, draft => {
-            draft.deletePlayer(player_id_new);
+            draft.deletePlayer(player_id);
         })[0];
     });
 });});

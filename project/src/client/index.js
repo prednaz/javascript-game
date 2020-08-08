@@ -37,6 +37,7 @@ with_resources(resources => {
     };
     let key_pressed_last: string | null = null;
     let game_state: Game;
+    let player_id: PlayerId;
     const canvas_dom = (document.getElementById("canvas"): any);
     const canvas_background_dom = (document.getElementById("canvas_background"): any);
     const canvas = {
@@ -82,8 +83,9 @@ with_resources(resources => {
             timestamp_previous = timestamp;
         };
 
-    socket.on("state", state => {
+    socket.on("state", ([state, player_id_new]: [Game, PlayerId]) => {
         game_state = state;
+        player_id = player_id_new;
         requestAnimationFrame((timestamp: number) => {
             timestamp_previous = timestamp;
             requestAnimationFrame(loop);
