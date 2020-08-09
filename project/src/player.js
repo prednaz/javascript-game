@@ -278,7 +278,7 @@ class AlivePlayer {
         this.bomb_capacity = int.successor(this.bomb_capacity);
     }
     power_up_run_speed(): void {
-        this.run_speed *= 1.2;
+        this.run_speed += 0.002;
     }
     power_up_bomb_strength(): void {
         this.bomb_strength = int.successor(this.bomb_strength);

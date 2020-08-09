@@ -35,11 +35,13 @@ class Game {
     constructor(): void {
         this.players = {};
         this.explosions = [];
-        this.obstacles = set_value_indexed.create([]);
-        for (let i = 2; i < 12; i += 2)
-            for (let j = 2; j < 10; j += 2)
-                set_value_indexed.insert(
-                    new ColumnRowPosition(new Int(i), new Int(j)), this.obstacles);
+        this.obstacles = set_value_indexed.create(
+            R.map(
+                ([x, y]: [number, number]): ColumnRowPosition =>
+                    new ColumnRowPosition(new Int(x), new Int(y)),
+                obstacle.map1
+            )
+        );
         this.power_ups = new MapValueIndexed([]);
         this.coordinate_maximum = {x: new Int(12), y: new Int(10)};
     }
@@ -183,12 +185,12 @@ class Game {
                     );
                     const random = Math.random();
                     const power_up = Math.random() * 4;
-                    if (random <= 0.75) {
+                    if (random <= 0.5) {
                         if (power_up < 1.4) {
                             map_value_indexed.insert(
                             scorched_position, "bomb_capacity", this.power_ups);
                         }
-                        else if (power_up < 2) {
+                        else if (power_up < 2.4) {
                             map_value_indexed.insert(
                             scorched_position, "run_speed", this.power_ups);
                         }
