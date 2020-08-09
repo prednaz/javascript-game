@@ -12,7 +12,7 @@ const obstacle = require("./obstacle.js");
 const power_up = require("./power_up.js");
 import type {PowerUp} from "./power_up.js";
 const {Int} = require("./int.js");
-const {ColumnRowPosition} = require("./game_types.js");
+const {ColumnRowPosition, player_id_range} = require("./game_types.js");
 import type {Event, PlayerId} from "./game_types.js";
 const map_value_indexed = require("./map_value_indexed.js");
 const MapValueIndexed = map_value_indexed.MapValueIndexed;
@@ -157,8 +157,6 @@ class Game {
         }
     }
     addPlayer(): PlayerId | null {
-        const player_id_range: $ReadOnlyArray<PlayerId> =
-            ["top_left", "bottom_right", "bottom_left", "top_right"];
         const player_id_new =
             R.find(player_id => !(player_id in this.players), player_id_range);
         if (player_id_new === null || player_id_new === undefined) {

@@ -74,7 +74,7 @@ const draw =
     ): void =>
     {
         canvas.foreground.context.drawImage(
-            canvas.resources["bombs/frame" + bomb.animation_frame.number + "_" + color],
+            canvas.resources["bomb/frame" + bomb.animation_frame.number + "_" + color],
             grid_scale * position.column.number + grid_scale * 1 + (canvas.resources_grid_scale - animation_frame_width) / 2,
             grid_scale * position.row.number + grid_scale * 1 + (canvas.resources_grid_scale - animation_frame_height) / 2,
             grid_scale * animation_frame_width / canvas.resources_grid_scale,

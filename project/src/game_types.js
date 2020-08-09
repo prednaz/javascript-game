@@ -68,5 +68,15 @@ class UserCommandEvent {
 export type Event = Tick | UserCommandEvent;
 
 export type PlayerId = "top_left" | "bottom_right" | "bottom_left" | "top_right";
+const player_id_range: $ReadOnlyArray<PlayerId> =
+    ["top_left", "bottom_right", "bottom_left", "top_right"];
 
-module.exports = {ColumnRowPosition, Accelerate, Decelerate, PlantBomb, Tick, UserCommandEvent};
+module.exports = {
+    ColumnRowPosition,
+    Accelerate,
+    Decelerate,
+    PlantBomb,
+    Tick,
+    UserCommandEvent,
+    player_id_range
+};

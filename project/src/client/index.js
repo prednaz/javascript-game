@@ -130,18 +130,10 @@ type Canvas =
 const draw_user_interface =
     (game: Game, player_id: PlayerId, canvas: Canvas): void =>
     {
-        // background image
-        canvas.background.context.drawImage(
-            canvas.resources["background"],
-            0,
-            0,
-            canvas.background.width,
-            canvas.background.height
-        );
-        
-
         const ctx = canvas.background.context;
         
+        ctx.clearRect(0, 0, canvas.background.width, canvas.background.height);
+
         // Rahmen
         if (player_id === "top_left") {
             ctx.strokeStyle = "#2E9AFE";
