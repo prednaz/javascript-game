@@ -168,8 +168,8 @@ class Game {
                     );
                     const random = Math.random();
                     const power_up = Math.random() * 4;
-                    if (random <= 0.5) {
-                        if (power_up < 1) {
+                    if (random <= 0.75) {
+                        if (power_up < 1.4) {
                             map_value_indexed.insert(
                             scorched_position, "bomb_capacity", this.power_ups);
                         }
@@ -177,7 +177,7 @@ class Game {
                             map_value_indexed.insert(
                             scorched_position, "run_speed", this.power_ups);
                         }
-                        else if (power_up < 3) {
+                        else if (power_up < 3.4) {
                             map_value_indexed.insert(
                             scorched_position, "bomb_strength", this.power_ups);
                         }
@@ -273,36 +273,7 @@ const draw =
             );
         }
 
-        // background image
-        canvas.background.context.drawImage(
-            canvas.resources["background"],
-            0,
-            0,
-            canvas.background.width,
-            canvas.background.height
-        );
-        
-        // life count
-        R.forEachObjIndexed(
-            (player_current: Player, player_id: PlayerId) => {
-                const ctx = canvas.background.context;
-                ctx.font = "10px serif";
-                ctx.fillStyle = "white";
-                if (player_id === "top_left"){
-                    ctx.fillText(player_current.life_count.number.toString(), 63, 126, 20);
-                }
-                else if (player_id === "bottom_right") {
-                    ctx.fillText(player_current.life_count.number.toString(), 63, 190, 20);
-                }
-                else if (player_id === "bottom_left") {
-                    ctx.fillText(player_current.life_count.number.toString(), 63, 254, 20);
-                }
-                else if (player_id === "top_right") {
-                    ctx.fillText(player_current.life_count.number.toString(), 63, 318, 20);
-                }
-            },
-            game.players
-        );
+       
         
         // inner holes
         for (let x = 2; x < grid_length.x-2; x += 2) {

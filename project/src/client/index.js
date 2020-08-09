@@ -7,6 +7,7 @@ const {Accelerate, Decelerate, PlantBomb} = require("../game_types.js");
 import type {PlayerId} from "../game_types.js";
 const {with_resources, resources_grid_scale, generate_sources_fields} =
     require("../resources.js");
+import type {Resources} from "../resources.js";
 const R = require("ramda");
 const immer = require("immer");
 immer.enablePatches();
@@ -55,10 +56,10 @@ with_resources(resources => {
         resources_grid_scale: resources_grid_scale
     };
   
-    const life_count_display = document.getElementById("life_count"); // to-do. remove
+    /*const life_count_display = document.getElementById("life_count"); // to-do. remove
     if (life_count_display === null) {
         throw new ReferenceError("Where is the life count display?");
-    }
+    }*/
     let timestamp_previous: number;
     const loop =
         (timestamp: number): void =>
@@ -69,8 +70,9 @@ with_resources(resources => {
                     (draft: Game) =>
                         update_animation(draft, timestamp - timestamp_previous)
                 );
+            draw_user_interface(game_state, player_id, canvas);
             draw(game_state, canvas);
-            life_count_display.textContent =
+            /*life_count_display.textContent =
                 R.join(
                     "",
                     R.map(
@@ -78,7 +80,7 @@ with_resources(resources => {
                             player_id + ": " + player.life_count.number + "\n",
                         to_list(game_state.players)
                     )
-                );
+                );*/
             requestAnimationFrame(loop);
             timestamp_previous = timestamp;
         };
@@ -117,6 +119,99 @@ with_resources(resources => {
         }
     );
 });
+
+type Canvas =
+    {
+        foreground: {
+            width: number,
+            height: number,
+            context: any,
+        },
+        background: {
+            width: number,
+            height: number,
+            context: any,
+        },
+        resources: Resources,
+        resources_grid_scale: number,
+        ...
+    };
+
+const draw_user_interface =
+    (game: Game, player_id: PlayerId, canvas: Canvas): void =>
+    {
+        // background image
+        canvas.background.context.drawImage(
+            canvas.resources["background"],
+            0,
+            0,
+            canvas.background.width,
+            canvas.background.height
+        );
+        
+
+        const ctx = canvas.background.context;
+        
+        // Rahmen
+        if (player_id === "top_left") {
+            ctx.strokeStyle = "#2E9AFE";
+            ctx.strokeRect(
+                8,
+                70,
+                76,
+                64
+            )
+        }
+        else if (player_id === "bottom_right") {
+            ctx.strokeStyle = "#DF0101";
+            ctx.strokeRect(
+                8,
+                133,
+                76,
+                64
+            )
+        }
+        else if (player_id === "bottom_left") {
+            ctx.strokeStyle = "#9A2EFE";
+            ctx.strokeRect(
+                8,
+                197,
+                76,
+                64
+            )
+        }
+        else if (player_id === "top_right") {
+            ctx.strokeStyle = "#58FA58";
+            ctx.strokeRect(
+                8,
+                261,
+                76,
+                64
+            )
+        }
+
+
+        // life count
+        R.forEachObjIndexed(
+            (player_current: Player, player_id_current: PlayerId) => {
+                ctx.font = "10px serif";
+                ctx.fillStyle = "white";
+                if (player_id_current === "top_left"){
+                    ctx.fillText(player_current.life_count.number.toString(), 63, 126, 20);
+                }
+                else if (player_id_current === "bottom_right") {
+                    ctx.fillText(player_current.life_count.number.toString(), 63, 190, 20);
+                }
+                else if (player_id_current === "bottom_left") {
+                    ctx.fillText(player_current.life_count.number.toString(), 63, 254, 20);
+                }
+                else if (player_id_current === "top_right") {
+                    ctx.fillText(player_current.life_count.number.toString(), 63, 318, 20);
+                }
+            },
+            game.players
+        );
+    };
 
 const to_list =
     <Key, Value>(object: {[Key]: Value}): Array<[Key, Value]> =>
