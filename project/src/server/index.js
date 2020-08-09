@@ -86,11 +86,17 @@ const update_and_synchronize =
             patches
         );
         if (patches.length !== 0) {
-            io.emit(socket_events.update, (patches: UpdatePayload));
+            if (R.all((patch: Patch) => path_match([[0, "players"], [2, "position"], [3, "continuous_coordinate"]], patch), patches)) {
+                // $FlowFixMe
+                io.volatile.emit(socket_events.update, (patches: UpdatePayload));
+            }
+            else {
+                io.emit(socket_events.update, (patches: UpdatePayload));
+            }
         }
         return [game_state_new, ((result: any): T)];
     };
 
 const path_match =
-    (pattern: $ReadOnlyArray<[number, string | number]>, patch: Patch) =>
+    (pattern: $ReadOnlyArray<[number, string | number]>, patch: Patch): boolean =>
     R.all(segment => patch.path[segment[0]] === segment[1], pattern);
