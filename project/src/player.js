@@ -95,16 +95,22 @@ class AlivePlayer {
                 break;
             }
             case "PlantBomb": {
-                const position = this.position; // I do as Flow guides.
-                if (int.less(map_value_indexed.size(this.bombs), this.bomb_capacity)) {
-                    map_value_indexed.insert(
-                        position.type === "RowPosition"
-                            ? new ColumnRowPosition(int.round(x_get(position)), row_get(position))
-                            : new ColumnRowPosition(column_get(position), int.round(y_get(position))),
-                        new Bomb(),
-                        this.bombs
-                    );
+                if (!int.less(map_value_indexed.size(this.bombs), this.bomb_capacity)) {
+                    break;
                 }
+                const position = this.position; // I do as Flow guides.
+                const position_bomb = 
+                    position.type === "RowPosition"
+                        ? new ColumnRowPosition(int.round(x_get(position)), row_get(position))
+                        : new ColumnRowPosition(column_get(position), int.round(y_get(position)));
+                if (map_value_indexed.member(position_bomb, this.bombs)) {
+                    break;
+                }
+                map_value_indexed.insert(
+                    position_bomb,
+                    new Bomb(),
+                    this.bombs
+                );
                 break;
             }
         }
