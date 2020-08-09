@@ -38,7 +38,7 @@ const loop =
 
 setInterval(loop, 20);
 
-io.on("connect", socket => {socket.on("ready", () => {
+io.on("connect", socket => {socket.on("ready", () => {  // ensure, the state event is not triggered before its listener is added
     const result = update_and_synchronize(game_state, draft => draft.addPlayer());
     game_state = result[0];
     const player_id = result[1];

@@ -83,25 +83,28 @@ with_resources(resources => {
             game_state = immer.applyPatches(game_state, patches);
         });
     });
-    socket.emit("ready");
+    socket.emit("ready"); // ensure, the state event is not triggered before its listener is added
 
     document.addEventListener(
         "keydown",
         (event: KeyboardEvent) => {
-            if (event.key === key_pressed_last)
+            const key = event.key.toLowerCase();
+            if (key === key_pressed_last) {
                 return;
-            key_pressed_last = event.key;
-            if (event.key in controls.down) {
-                socket.emit("user command", controls.down[event.key]);
+            }
+            key_pressed_last = key;
+            if (key in controls.down) {
+                socket.emit("user command", controls.down[key]);
             }
         }
     );
     document.addEventListener(
         "keyup",
         (event: KeyboardEvent) => {
+            const key = event.key.toLowerCase();
             key_pressed_last = null;
-            if (event.key in controls.up) {
-                socket.emit("user command", controls.up[event.key]);
+            if (key in controls.up) {
+                socket.emit("user command", controls.up[key]);
             }
         }
     );
