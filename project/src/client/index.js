@@ -8,6 +8,8 @@ import type {PlayerId} from "../game_types.js";
 const {with_resources, resources_grid_scale, generate_sources_fields} =
     require("../resources.js");
 import type {Resources} from "../resources.js";
+const socket_events = require("../socket_events.js");
+import type {StatePayload, UpdatePayload, UserCommandPayload} from "../socket_events.js";
 const R = require("ramda");
 const immer = require("immer");
 immer.enablePatches();
@@ -38,7 +40,7 @@ with_resources(resources => {
     };
     let key_pressed_last: string | null = null;
     let game_state: Game;
-    let player_id: PlayerId;
+    let player_id: PlayerId | null;
     const canvas_foreground_dom = (document.getElementById("canvas_foreground"): any);
     const canvas_background_dom = (document.getElementById("canvas_background"): any);
     const canvas = {
@@ -72,18 +74,18 @@ with_resources(resources => {
             timestamp_previous = timestamp;
         };
 
-    socket.on("state", ([state, player_id_new]: [Game, PlayerId]) => {
+    socket.on(socket_events.state, ([state, player_id_new]: StatePayload) => {
         game_state = state;
         player_id = player_id_new;
         requestAnimationFrame((timestamp: number) => {
             timestamp_previous = timestamp;
             requestAnimationFrame(loop);
         });
-        socket.on("update", patches => {
+        socket.on(socket_events.update, (patches: UpdatePayload) => {
             game_state = immer.applyPatches(game_state, patches);
         });
     });
-    socket.emit("ready"); // ensure, the state event is not triggered before its listener is added
+    socket.emit(socket_events.ready); // ensure, the state event is not triggered before its listener is added
 
     document.addEventListener(
         "keydown",
@@ -94,7 +96,7 @@ with_resources(resources => {
             }
             key_pressed_last = key;
             if (key in controls.down) {
-                socket.emit("user command", controls.down[key]);
+                socket.emit(socket_events.user_command, (controls.down[key]: UserCommandPayload));
             }
         }
     );
@@ -104,7 +106,7 @@ with_resources(resources => {
             const key = event.key.toLowerCase();
             key_pressed_last = null;
             if (key in controls.up) {
-                socket.emit("user command", controls.up[key]);
+                socket.emit(socket_events.user_command, (controls.up[key]: UserCommandPayload));
             }
         }
     );
@@ -128,7 +130,7 @@ type Canvas =
     };
 
 const draw_user_interface =
-    (game: Game, player_id: PlayerId, canvas: Canvas): void =>
+    (game: Game, player_id: PlayerId | null, canvas: Canvas): void =>
     {
         const ctx = canvas.background.context;
         

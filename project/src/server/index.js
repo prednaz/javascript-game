@@ -4,6 +4,8 @@ const {Game} = require("../game.js");
 const {UserCommandEvent, Tick} = require("../game_types.js");
 import type {PlayerId} from "../game_types.js";
 const {performance} = require('perf_hooks');
+const socket_events = require("../socket_events.js");
+import type {StatePayload, UpdatePayload, UserCommandPayload} from "../socket_events.js";
 const R = require("ramda");
 const immer = require("immer");
 immer.enablePatches();
@@ -38,15 +40,15 @@ const loop =
 
 setInterval(loop, 20);
 
-io.on("connect", socket => {socket.on("ready", () => {  // ensure, the state event is not triggered before its listener is added
+io.on("connect", socket => {socket.on(socket_events.ready, () => {  // ensure, the state event is not triggered before its listener is added
     const result = update_and_synchronize(game_state, draft => draft.addPlayer());
     game_state = result[0];
     const player_id = result[1];
-    socket.emit("state", [game_state, player_id]);
+    socket.emit(socket_events.state, ([game_state, player_id]: StatePayload));
     if (player_id === null) {
         return; // to-do. Notify the client of the game being full.
     }
-    socket.on("user command", command => {
+    socket.on(socket_events.user_command, (command: UserCommandPayload) => {
         game_state = update_and_synchronize(game_state, draft => {
             draft.update(new UserCommandEvent(player_id, command));
         })[0];
