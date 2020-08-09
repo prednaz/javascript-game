@@ -10,6 +10,8 @@ const resources_grid_scale = 30;
 const sources = {
     "hole": require("../resources/hole.png"),
     "obstacle": require("../resources/obstacle.png"),
+    "not_joined": require("../resources/not_joined.png"),
+    "is_dead": require("../resources/is_dead.png"),
     "player/up/frame0_top_left": require("../resources/player/up/frame0_top_left.png"),
     "player/up/frame0_bottom_right": require("../resources/player/up/frame0_bottom_right.png"),
     "player/up/frame0_bottom_left": require("../resources/player/up/frame0_bottom_left.png"),

@@ -133,6 +133,82 @@ const draw_user_interface =
         const ctx = canvas.background.context;
         
         ctx.clearRect(0, 0, canvas.background.width, canvas.background.height);
+        // not_joined images
+        if (!("top_left" in game.players)) {
+            canvas.background.context.drawImage(
+                canvas.resources["not_joined"],
+                18,
+                77,
+                57,
+                32
+            );
+        }
+
+        else if (game.players["top_left"].type === "DeadPlayer") {
+            canvas.background.context.drawImage(
+                canvas.resources["is_dead"],
+                15,
+                75,
+                63,
+                38
+            );
+        }
+        if (!("bottom_right" in game.players)) {
+            canvas.background.context.drawImage(
+                canvas.resources["not_joined"],
+                18,
+                143,
+                57,
+                32
+            );
+        }
+        else if (game.players["bottom_right"].type === "DeadPlayer") {
+            canvas.background.context.drawImage(
+                canvas.resources["is_dead"],
+                15,
+                139,
+                63,
+                38
+            );
+        }
+        if (!("bottom_left" in game.players)) {
+            canvas.background.context.drawImage(
+                canvas.resources["not_joined"],
+                18,
+                207,
+                57,
+                32
+            );
+        }
+
+        else if (game.players["bottom_left"].type === "DeadPlayer") {
+            canvas.background.context.drawImage(
+                canvas.resources["is_dead"],
+                15,
+                203,
+                63,
+                38
+            );
+        }
+
+        if (!("top_right" in game.players)) {
+            canvas.background.context.drawImage(
+                canvas.resources["not_joined"],
+                18,
+                271,
+                57,
+                32
+            );
+        }
+        else if (game.players["top_right"].type === "DeadPlayer") {
+            canvas.background.context.drawImage(
+                canvas.resources["is_dead"],
+                15,
+                267,
+                63,
+                38
+            );
+        }
 
         // Rahmen
         if (player_id === "top_left") {
