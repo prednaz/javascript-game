@@ -56,10 +56,6 @@ with_resources(resources => {
         resources_grid_scale: resources_grid_scale
     };
   
-    /*const life_count_display = document.getElementById("life_count"); // to-do. remove
-    if (life_count_display === null) {
-        throw new ReferenceError("Where is the life count display?");
-    }*/
     let timestamp_previous: number;
     const loop =
         (timestamp: number): void =>
@@ -72,15 +68,6 @@ with_resources(resources => {
                 );
             draw_user_interface(game_state, player_id, canvas);
             draw(game_state, canvas);
-            /*life_count_display.textContent =
-                R.join(
-                    "",
-                    R.map(
-                        ([player_id, player]: [PlayerId, Player]): string =>
-                            player_id + ": " + player.life_count.number + "\n",
-                        to_list(game_state.players)
-                    )
-                );*/
             requestAnimationFrame(loop);
             timestamp_previous = timestamp;
         };
@@ -189,7 +176,6 @@ const draw_user_interface =
                 64
             )
         }
-
 
         // life count
         R.forEachObjIndexed(
