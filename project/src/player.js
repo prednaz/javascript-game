@@ -58,7 +58,7 @@ const y_get = (position: ColumnPosition): number => position.continuous_coordina
 const y_set = (y: number, position: ColumnPosition): void => {position.continuous_coordinate = y;};
 
 class AlivePlayer {
-    +direction_command: {[Direction]: null};
+    +direction_commands: {[Direction]: null};
     direction_face: Direction;
     position: RowPosition | ColumnPosition;
     life_count: Int;
@@ -71,7 +71,7 @@ class AlivePlayer {
     time_since_animation_frame: number;
     +type: "AlivePlayer";
     constructor(position: RowPosition | ColumnPosition): void {
-        this.direction_command = {};
+        this.direction_commands = {};
         this.direction_face = "down";
         this.position = position;
         this.life_count = new Int(5);
@@ -87,11 +87,11 @@ class AlivePlayer {
     user_command(command: UserCommand): void {
         switch (command.type) {
             case "Accelerate": {
-                this.direction_command[command.direction] = null;
+                this.direction_commands[command.direction] = null;
                 break;
             }
             case "Decelerate": {
-                delete this.direction_command[command.direction];
+                delete this.direction_commands[command.direction];
                 break;
             }
             case "PlantBomb": {
@@ -141,14 +141,8 @@ class AlivePlayer {
         step_distance: number,
         free_position: ColumnRowPosition => boolean
     ): void {
-        const vertical_command: "up" | "down" | null =
-            "up" in this.direction_command && !("down" in this.direction_command) ? "up" :
-            !("up" in this.direction_command) && "down" in this.direction_command ? "down" :
-            null;
-        const horizontal_command: "left" | "right" | null =
-            "left" in this.direction_command && !("right" in this.direction_command) ? "left" :
-            !("left" in this.direction_command) && "right" in this.direction_command ? "right" :
-            null;
+        const vertical_command = to_vertical_command(this.direction_commands);
+        const horizontal_command = to_horizontal_command(this.direction_commands);
         if (vertical_command === null && horizontal_command === null) {
             return;
         }
@@ -290,6 +284,20 @@ class AlivePlayer {
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
 AlivePlayer[immerable] = true;
 
+const to_vertical_command =
+    (direction_commands: {[Direction]: null}): "up" | "down" | null =>
+    (
+        "up" in direction_commands && !("down" in direction_commands) ? "up" :
+        !("up" in direction_commands) && "down" in direction_commands ? "down" :
+        null
+    );
+const to_horizontal_command =
+    (direction_commands: {[Direction]: null}): "left" | "right" | null =>
+    (
+        "left" in direction_commands && !("right" in direction_commands) ? "left" :
+        !("left" in direction_commands) && "right" in direction_commands ? "right" :
+        null
+    );
 const direction_sign =
     (direction: Direction): -1 | 1 =>
     direction === "up" || direction === "left"
@@ -370,7 +378,7 @@ const draw =
             return;
         }
 
-        if (Object.keys(player.direction_command).length !== 0){
+        if (to_vertical_command(player.direction_commands) !== null || to_horizontal_command(player.direction_commands) !== null){
         canvas.foreground.context.drawImage(
             canvas.resources["player/" + player.direction_face + "/frame" + frames[player.animation_frame.number] + "_" + color],
             player.position.type === "RowPosition"
