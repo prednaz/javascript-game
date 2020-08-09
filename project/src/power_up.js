@@ -29,7 +29,14 @@ const draw =
         grid_scale: number
     ): void =>
     {
+        canvas.foreground.context.fillStyle = "#53f5ff33";
         canvas.foreground.context.beginPath();
+        canvas.foreground.context.fillRect(
+            grid_scale * position.column.number + grid_scale * 1,
+            grid_scale * position.row.number + grid_scale * 1,
+            grid_scale,
+            grid_scale
+        );
         switch (power_up) {
             case "bomb_capacity": {
                 canvas.foreground.context.drawImage(
