@@ -72,7 +72,7 @@ const update_and_synchronize =
     <T>(game_state_parameter: Game, update: (draft: Game) => T): [Game, T] =>
     {
         let result: T;
-        let [game_state_new, patches]: [Game, $ReadOnlyArray<Patch>] =
+        let [game_state_new, patches]: [Game, Array<Patch>] =
             // $FlowFixMe https://github.com/immerjs/immer/pull/632
             immer.produceWithPatches(game_state_parameter, (draft: Game) => {result = update(draft);});
         patches = R.filter(
@@ -86,7 +86,7 @@ const update_and_synchronize =
             patches
         );
         if (patches.length !== 0) {
-            io.emit("update", patches);
+            io.emit(socket_events.update, (patches: UpdatePayload));
         }
         return [game_state_new, ((result: any): T)];
     };
