@@ -270,10 +270,7 @@ type Canvas =
     };
 
 const draw =
-    (
-        game: Game,
-        canvas: Canvas
-    ): void =>
+    (game: Game, canvas: Canvas): void =>
     {
         // to-do. refactor
         // to-do. seperate background canvas
@@ -289,8 +286,6 @@ const draw =
                 "The canvas has not got the required aspect ratio of " + grid_length.x + ":" + grid_length.y + "."
             );
         }
-
-       
         
         // inner holes
         for (let x = 2; x < grid_length.x-2; x += 2) {

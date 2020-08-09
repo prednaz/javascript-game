@@ -39,13 +39,13 @@ with_resources(resources => {
     let key_pressed_last: string | null = null;
     let game_state: Game;
     let player_id: PlayerId;
-    const canvas_dom = (document.getElementById("canvas"): any);
+    const canvas_foreground_dom = (document.getElementById("canvas_foreground"): any);
     const canvas_background_dom = (document.getElementById("canvas_background"): any);
     const canvas = {
         foreground : {
-            width: canvas_dom.width,
-            height: canvas_dom.height,
-            context: canvas_dom.getContext("2d"), // to-do. Is there a better type for this than any?
+            width: canvas_foreground_dom.width,
+            height: canvas_foreground_dom.height,
+            context: canvas_foreground_dom.getContext("2d"), // to-do. Is there a better type for this than any?
         },
         background : {
             width: canvas_background_dom.width,

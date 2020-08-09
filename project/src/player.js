@@ -69,7 +69,8 @@ class AlivePlayer {
     bomb_capacity: Int;
     animation_frame: Int;
     time_since_animation_frame: number;
-    constructor(position: RowPosition | ColumnPosition) {
+    +type: "AlivePlayer";
+    constructor(position: RowPosition | ColumnPosition): void {
         this.direction_command = {};
         this.direction_face = "down";
         this.position = position;
@@ -213,7 +214,7 @@ class AlivePlayer {
                     direction_sign(parallel_command) * step_distance;
                 this.direction_face = parallel_command;
             }
-            else if (new_discrete_distance !== 1 && free_position(target_position)) {
+            else if (new_discrete_distance < 1 && free_position(target_position)) {
                 // one intersection is closer than the other and it is free,
                 // so glide towards it
                 this.position.continuous_coordinate +=
@@ -237,7 +238,7 @@ class AlivePlayer {
             this.direction_face = parallel_command;
         }
     }
-    take_damage(explosions: $ReadOnlyArray<Explosion>) {
+    take_damage(explosions: $ReadOnlyArray<Explosion>): void {
         if (this.time_since_damage <= protection_duration) {
             return;
         }
@@ -363,12 +364,7 @@ type Canvas =
 
 
 const draw =
-    (
-        player: Player,
-        color: PlayerId,
-        canvas: Canvas,
-        grid_scale: number
-    ): void =>
+    (player: Player, color: PlayerId, canvas: Canvas, grid_scale: number): void =>
     {
         if (player.type === "DeadPlayer") {
             return;

@@ -24,7 +24,7 @@ export type Direction = "up" | "left" | "down" | "right";
 class Accelerate {
     +direction: Direction;
     +type: "Accelerate";
-    constructor(direction: Direction) {
+    constructor(direction: Direction): void {
         this.direction = direction;
         this.type = "Accelerate";
     }
@@ -33,7 +33,7 @@ class Accelerate {
 class Decelerate {
     +direction: Direction;
     +type: "Decelerate";
-    constructor(direction: Direction) {
+    constructor(direction: Direction): void {
         this.direction = direction;
         this.type = "Decelerate";
     }
@@ -41,7 +41,7 @@ class Decelerate {
 
 class PlantBomb {
     +type: "PlantBomb";
-    constructor() {
+    constructor(): void {
         this.type = "PlantBomb";
     }
 }
@@ -58,7 +58,7 @@ class UserCommandEvent {
     +player_id: PlayerId;
     +command: UserCommand;
     +type: "UserCommandEvent";
-    constructor(player_id: PlayerId, command: UserCommand) {
+    constructor(player_id: PlayerId, command: UserCommand): void {
         this.player_id = player_id;
         this.command = command;
         this.type = "UserCommandEvent";

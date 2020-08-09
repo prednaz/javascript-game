@@ -1,7 +1,7 @@
 // @flow
 
 const {ColumnRowPosition} = require("./game_types.js");
-import type {Tick, PlayerId} from "./game_types.js";
+import type {Event, PlayerId} from "./game_types.js";
 const set_value_indexed = require("./set_value_indexed.js");
 import type {SetValueIndexed} from "./set_value_indexed.js";
 const int = require("./int.js");
@@ -117,8 +117,12 @@ class Explosion {
                     ).row
                 );
     }
-    update(event: Tick): "faded" | "present" {
-        this.progress -= event.time;
+    update(event: Event): "faded" | "present" {
+        switch (event.type) {
+            case "Tick": {
+                this.progress -= event.time;
+            }
+        }
         return this.progress <= 0 ? "faded" : "present";
     }
     scorched_positions(): SetValueIndexed<ColumnRowPosition> {
@@ -185,11 +189,7 @@ type Canvas =
 
 
 const draw =
-    (
-        explosion: Explosion,
-        canvas: Canvas,
-        grid_scale: number
-    ): void =>
+    (explosion: Explosion, canvas: Canvas, grid_scale: number): void =>
     {
         const row_rectangle = explosion.row_rectangle;
         const column_rectangle = explosion.column_rectangle;

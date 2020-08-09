@@ -21,11 +21,7 @@ type Canvas =
     };
 
 const draw =
-    (
-        position: ColumnRowPosition,
-        canvas: Canvas,
-        grid_scale: number
-    ): void =>
+    (position: ColumnRowPosition, canvas: Canvas, grid_scale: number): void =>
     {
         canvas.foreground.context.drawImage(
                 canvas.resources["obstacle"],
