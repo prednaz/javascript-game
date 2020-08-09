@@ -57,7 +57,7 @@ const column_get = (position: ColumnPosition): Int => position.discrete_coordina
 const y_get = (position: ColumnPosition): number => position.continuous_coordinate;
 const y_set = (y: number, position: ColumnPosition): void => {position.continuous_coordinate = y;};
 
-class Player {
+class AlivePlayer {
     +direction_command: {[Direction]: null};
     direction_face: Direction;
     position: RowPosition | ColumnPosition;
@@ -81,6 +81,7 @@ class Player {
         this.bomb_capacity = new Int(1);
         this.animation_frame = new Int(0);
         this.time_since_animation_frame = 0;
+        this.type = "AlivePlayer";
     }
     user_command(command: UserCommand): void {
         switch (command.type) {
@@ -281,7 +282,7 @@ class Player {
     }
 }
 // $FlowFixMe https://github.com/facebook/flow/issues/3258
-Player[immerable] = true;
+AlivePlayer[immerable] = true;
 
 const direction_sign =
     (direction: Direction): -1 | 1 =>
@@ -289,12 +290,40 @@ const direction_sign =
         ? -1
         : 1;
 
+class DeadPlayer {
+    +life_count: Int;
+    +bomb_strength: Int;
+    +bombs: MapValueIndexed<ColumnRowPosition, Bomb>;
+    +type: "DeadPlayer";
+    constructor(): void {
+        this.life_count = new Int(0);
+        this.bomb_strength = new Int(0); // will never be relevant because bombs is always empty
+        this.bombs = new MapValueIndexed([]);
+        this.type = "DeadPlayer";
+    }
+    user_command(...parameters: $ReadOnlyArray<mixed>): void {}
+    update(...parameters: $ReadOnlyArray<mixed>): void {}
+    take_damage(...parameters: $ReadOnlyArray<mixed>): void {}
+    power_up_bomb_capacity(): void {}
+    power_up_run_speed(): void {}
+    power_up_bomb_strength(): void {}
+    power_up_life_count(): void {}
+}
+// $FlowFixMe https://github.com/facebook/flow/issues/3258
+DeadPlayer[immerable] = true;
+
+export type Player = AlivePlayer | DeadPlayer;
+
 const update_animation =
     (
         player: Player,
         time: number
     ): void =>
     {
+        if (player.type === "DeadPlayer") {
+            return;
+        }
+
         player.time_since_animation_frame += time;
         while (player.time_since_animation_frame >= animation_frame_duration) {
             player.animation_frame =
@@ -336,9 +365,10 @@ const draw =
         grid_scale: number
     ): void =>
     {
-        //canvas.context.beginPath();
-        //canvas.context.fillStyle = "green";
-        //canvas.context.fillRect(
+        if (player.type === "DeadPlayer") {
+            return;
+        }
+
         if (Object.keys(player.direction_command).length !== 0){
         canvas.foreground.context.drawImage(
             canvas.resources["player/" + player.direction_face + "/frame" + frames[player.animation_frame.number] + "_" + color],
@@ -372,4 +402,4 @@ const draw =
     };
 
 
-module.exports = {Player, update_animation, draw, RowPosition, ColumnPosition};
+module.exports = {AlivePlayer, DeadPlayer, update_animation, draw, RowPosition, ColumnPosition};

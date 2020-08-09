@@ -1,7 +1,9 @@
 // @flow
 
 const player = require("./player.js");
-const Player = player.Player;
+const AlivePlayer = player.AlivePlayer;
+const DeadPlayer = player.DeadPlayer;
+import type {Player} from "./player.js";
 const bomb = require("./bomb.js");
 import type {Bomb} from "./bomb.js";
 const explosion = require("./explosion.js");
@@ -58,6 +60,10 @@ class Game {
             // power up players
             R.forEachObjIndexed(
                 (player_current: Player) => {
+                    if (player_current.type === "DeadPlayer") {
+                        return;
+                    }
+
                     R.forEach(
                         (position: ColumnRowPosition) => {
                             const power_up_maybe =
@@ -94,6 +100,15 @@ class Game {
             R.forEachObjIndexed(
                 (player_current: Player) => player_current.take_damage(this.explosions),
                 this.players
+            );
+            // kill players having no lives left
+            R.forEach(
+                (player_id: PlayerId) => {
+                    if (int.less_or_equals(this.players[player_id].life_count, zero)) {
+                        this.players[player_id] = new DeadPlayer();
+                    }
+                },
+                Object.keys(this.players)
             );
             // remove faded explosions
             const faded_explosions: Array<number> = [];
@@ -152,11 +167,13 @@ class Game {
         const [y_word, x_word] = player_id_new.split("_");
         const y = y_word === "top" ? new Int(0) : this.coordinate_maximum.y;
         const x = x_word === "left" ? 0 : this.coordinate_maximum.x.number;
-        this.players[player_id_new] = new Player(new player.RowPosition(y, x));
+        this.players[player_id_new] = new AlivePlayer(new player.RowPosition(y, x));
         return player_id_new;
     }
-    deletePlayer(player_id: PlayerId) {
-        delete this.players[player_id];
+    deleteAlivePlayer(player_id: PlayerId) {
+        if (this.players[player_id].type === "AlivePlayer") {
+            delete this.players[player_id];
+        }
     }
     explode_obstacles(explosion_new: Explosion): void {
         set_value_indexed.forEach(

@@ -53,7 +53,7 @@ io.on("connect", socket => {socket.on("ready", () => {
     });
     socket.on("disconnect", () => {
         game_state = update_and_synchronize(game_state, draft => {
-            draft.deletePlayer(player_id);
+            draft.deleteAlivePlayer(player_id);
         })[0];
     });
 });});
