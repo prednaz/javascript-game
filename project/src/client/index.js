@@ -140,17 +140,16 @@ const draw_user_interface =
             canvas.background.context.drawImage(
                 canvas.resources["not_joined"],
                 18,
-                77,
+                79,
                 57,
                 32
             );
         }
-
         else if (game.players["top_left"].type === "DeadPlayer") {
             canvas.background.context.drawImage(
                 canvas.resources["is_dead"],
                 15,
-                75,
+                76,
                 63,
                 38
             );
@@ -168,7 +167,7 @@ const draw_user_interface =
             canvas.background.context.drawImage(
                 canvas.resources["is_dead"],
                 15,
-                139,
+                140,
                 63,
                 38
             );
@@ -187,7 +186,7 @@ const draw_user_interface =
             canvas.background.context.drawImage(
                 canvas.resources["is_dead"],
                 15,
-                203,
+                204,
                 63,
                 38
             );
@@ -206,7 +205,7 @@ const draw_user_interface =
             canvas.background.context.drawImage(
                 canvas.resources["is_dead"],
                 15,
-                267,
+                268,
                 63,
                 38
             );
