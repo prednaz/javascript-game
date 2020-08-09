@@ -17,10 +17,12 @@ const app = express();
 const http = require("http").createServer(app);
 const io = require("socket.io")(http, {serveClient: false, perMessageDeflate: false});
 
+const frame_period = 16;
+
 let game_state: Game = new Game();
 let timestamp_previous: number = performance.now();
 
-let step_count: number = 0; // to-do. remove
+let step_count: number = 0; // to-do. just for logging
 const loop =
     (): void =>
     {
@@ -28,17 +30,17 @@ const loop =
         game_state = update_and_synchronize(game_state, draft => {
             draft.update(new Tick(timestamp - timestamp_previous));
         })[0];
-        if (step_count % 1000 === 0) {
+        if (Math.abs(timestamp - timestamp_previous - frame_period) > 5) {
+            console.log("outlier. " + (timestamp - timestamp_previous));
+        }
+        else if (step_count % 1000 === 0) {
             console.log(timestamp - timestamp_previous);
         }
-        timestamp_previous = timestamp;
-        
-        // if (step_count % 100 === 0)
-        //     console.log(keys_pressed);
         ++step_count;
+        timestamp_previous = timestamp;
     };
 
-setInterval(loop, 20);
+setInterval(loop, frame_period);
 
 io.on("connect", socket => {socket.on(socket_events.ready, () => {  // ensure, the state event is not triggered before its listener is added
     const result = update_and_synchronize(game_state, draft => draft.addPlayer());
