@@ -223,6 +223,11 @@ class AlivePlayer {
                         ? new_discrete_direction === -1 ? "left" : "right"
                         : new_discrete_direction === -1 ? "up" : "down";
             }
+            else {
+                // there is either no closest or no free intersection,
+                // so do not move but face in the command direction
+                this.direction_face = orthogonal_command;
+            }
         }
         else if (parallel_command !== null) {
             // only a parallel command,
