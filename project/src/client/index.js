@@ -70,8 +70,8 @@ with_resources(resources => {
                 );
             draw_user_interface(game_state, player_id, canvas);
             draw(game_state, canvas);
-            requestAnimationFrame(loop);
             timestamp_previous = timestamp;
+            requestAnimationFrame(loop);
         };
 
     socket.on(socket_events.state, ([state, player_id_new]: StatePayload) => {
@@ -270,7 +270,3 @@ const draw_user_interface =
             game.players
         );
     };
-
-const to_list =
-    <Key, Value>(object: {[Key]: Value}): Array<[Key, Value]> =>
-    (Object.entries(object): any);

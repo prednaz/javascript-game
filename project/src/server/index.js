@@ -22,7 +22,7 @@ const frame_period = 16;
 let game_state: Game = new Game();
 let timestamp_previous: number = performance.now();
 
-let step_count: number = 0; // to-do. just for logging
+let step_count: number = 0; // just for logging
 const loop =
     (): void =>
     {
@@ -48,7 +48,7 @@ io.on("connect", socket => {socket.on(socket_events.ready, () => {  // ensure, t
     const player_id = result[1];
     socket.emit(socket_events.state, ([game_state, player_id]: StatePayload));
     if (player_id === null) {
-        return; // to-do. Notify the client of the game being full.
+        return;
     }
     socket.on(socket_events.user_command, (command: UserCommandPayload) => {
         game_state = update_and_synchronize(game_state, draft => {
